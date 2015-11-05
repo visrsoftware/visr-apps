@@ -1,0 +1,67 @@
+{
+    "label": "Principal Component Analysis",
+    "info": "Principal Component Analysis",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Input columns for the principal components analysis",
+            "variables": {
+                "input_columns": {
+                    "label": "variables",
+                    "info": "variables selected for the analysis",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_cor": {
+                    "label": "correlation matrix? (or covariance matrix)",
+                    "info": "a logical value indicating whether the calculation should use the correlation matrix or the covariance matrix. (The correlation matrix can only be used if there are no constant variables.)",
+                    "type": "boolean",
+                    "default": true
+                },
+				"input_scores": {
+                    "label": "scores",
+                    "info": "a logical value indicating whether the score on each principal component should be calculated.)",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_choiceofplot": {
+                    "label": "choice of plot",
+                    "info": "Which plot do you want to view?",
+                    "type": "string",
+                    "default": "screeplot",
+                    "items": [
+                        "screeplot",
+                        "biplot"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output Column Names",
+            "info": "Outputs columns of the principal components",
+            "collapsed": false,
+            "variables": {
+                "data.matrix(ouput_scores[,1])": {
+                    "label": "Comp.1",
+                    "info": "1st principal component",
+                    "type": "output-column"
+                },
+                "data.matrix(ouput_scores[,2])": {
+                    "label": "Comp.2",
+                    "info": "2nd principal component",
+                    "type": "output-column"
+                },
+                "data.matrix(ouput_scores[,3])": {
+                    "label": "Comp.3",
+                    "info": "3rd principal component",
+                    "type": "output-column"
+                },
+                "data.matrix(ouput_scores[,4])": {
+                    "label": "Comp.4",
+                    "info": "4th principal component",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

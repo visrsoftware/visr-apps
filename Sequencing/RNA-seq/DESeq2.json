@@ -1,0 +1,177 @@
+{
+    "label": "DESeq2",
+    "info": "DESeq2 - Differential gene expression analysis based on the negative binomial distribution",
+    "categories": [
+        {
+            "label": "DEseq2 - basic",
+            "info": "Controls to specify the parameters",
+            "variables": {
+                "input_group1": {
+                    "label": "group1",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_group2": {
+                    "label": "group2",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                }
+            }
+        },
+        {
+            "label": "DEseq2 - advanced",
+            "info": "Controls to specify the parameters",
+            "collapsed": true,
+            "variables": {
+                "input_advanced": {
+                    "label": "Use advanced analysis?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_columns": {
+                    "label": "samples",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_prefactor1": {
+                    "label": "factor 1",
+                    "info": "treatment conditions",
+                    "type": "string"
+                },
+                "input_prefactor2": {
+                    "label": "factor 2",
+                    "info": " factor to control - ignore if only have a single factor analysis",
+                    "type": "string",
+                    "default": ""
+                },
+                "input_interaction": {
+                    "label": "include interaction terms",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_ruvseq": {
+                    "label": "remove umwanted variation",
+                    "info": "Remove Unwanted Variation from RNA-Seq Data Using RUVSeq package",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_ruvn": {
+                    "label": "number of significantly DE genes",
+                    "info": "all but these top DE genes are used as control",
+                    "type": "int",
+                    "default": 5000
+                }
+            }
+        },
+        {
+            "label": "Parameters and Plot Options",
+            "info": "",
+            "collapsed": false,
+            "variables": {
+                "input_contrast": {
+                    "label": "contrast",
+                    "info": "a numeric contrast vector with one element for each element in the terms in the design",
+                    "type": "string",
+                    "default": ""
+                },
+                "input_fdr": {
+                    "label": "FDR threshold",
+                    "info": "false discovery rate threshold",
+                    "type": "double",
+                    "default": 0.1,
+                    "min": 0,
+                    "max": 1
+                },
+                "input_n": {
+                    "label": "n",
+                    "info": "show the n most significantly differentially expressed genes, the most strongly down-regulated of the significant genes, the most strongly up-regulated ones and etc.",
+                    "type": "int",
+                    "default": 10
+                },
+                "input_trans": {
+                    "label": "transformation",
+                    "info": "transform data for visualization",
+                    "type": "string",
+                    "items": [
+                        "Variance stabilizing transformation",
+                        "Regularized log transformation"
+                    ],
+                    "default": "Variance stabilizing transformation"
+                },
+                "input_plot": {
+                    "label": "optional plots",
+                    "type": "string",
+                    "default": "",
+                    "items": [
+                        "",
+                        "heatmap for the 30 most highly expressed genes",
+                        "Heatmap of the sample-to-sample distances",
+                        "Principal component plot of the samples"
+                    ]
+                },
+                "input_cores": {
+                    "label": "cores",
+                    "info": "more cores will speed up the analysis with many samples (eg. 100 samples).",
+                    "type": "int",
+                    "default": 1
+                },
+                "input_test": {
+                    "label": "test",
+                    "info": "use either Wald significance tests, or the likelihood ratio test on the difference in deviance between a full and reduced model formula",
+                    "type": "string",
+                    "default": "Wald",
+                    "items": [
+                        "Wald",
+                        "LRT"
+                    ]
+                },
+                "input_fitType": {
+                    "label": "fit type",
+                    "info": "use either parametric, local, or mean for the type of fitting of dispersions to the mean intensity.",
+                    "type": "string",
+                    "default": "local",
+                    "items": [
+                        "parametric",
+                        "local",
+                        "mean"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output Column Names",
+            "collapsed": false,
+            "variables": {
+                "output_baseMean": {
+                    "label": "baseMean",
+                    "info": "mean of normalized counts for all samples",
+                    "type": "output-column"
+                },
+                "output_log2FoldChange": {
+                    "label": "log2 Fold Change",
+                    "type": "output-column"
+                },
+                "output_lfcSE": {
+                    "label": "standard error",
+                    "type": "output-column"
+                },
+                "output_stat": {
+                    "label": "Wald statistics",
+                    "type": "output-column"
+                },
+                "output_pvalue": {
+                    "label": "Wald test p values",
+                    "type": "output-column"
+                },
+                "output_padj": {
+                    "label": "BH adjusted p values",
+                    "type": "output-column"
+                },
+                "output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

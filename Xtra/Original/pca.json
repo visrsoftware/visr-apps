@@ -1,0 +1,51 @@
+{
+   "label":"PCA",
+   "info":"Principal Component Analysis",
+   "categories":[
+      {
+         "label":"PCA Input",
+         "info":"Input columns for the principal components analysis",
+         "variables":{
+            "pca_input":{
+               "label":"columns",
+               "info":"input column(s) for the PCA",
+               "type":"multi-column-numerical",
+               "min":1
+            },
+            "pca_cor":{
+               "label":"correlation matrix? (or covariance matrix)",
+               "info":"Should the calculation use the correlation matrix or the covariance matrix.",
+               "type":"boolean",
+               "default":true
+            }
+         }
+      },
+      {
+         "label":"Output Column Names",
+         "info":"Outputs columns of the principal components",
+         "collapsed":false,
+         "variables":{
+            "data.matrix(pca_out$scores[,1])":{
+               "label":"Comp.1",
+               "info":"1st principal component",
+               "type":"output-column"
+            },
+            "data.matrix(pca_out$scores[,2])":{
+               "label":"Comp.2",
+               "info":"2nd principal component",
+               "type":"output-column"
+            },
+            "data.matrix(pca_out$scores[,3])":{
+               "label":"Comp.3",
+               "info":"3rd principal component",
+               "type":"output-column"
+            },
+            "data.matrix(pca_out$scores[,4])":{
+               "label":"Comp.4",
+               "info":"4th principal component",
+               "type":"output-column"
+            }
+         }
+      }
+   ]
+}

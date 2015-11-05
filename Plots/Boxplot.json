@@ -1,0 +1,109 @@
+{
+    "label": "Boxplot",
+    "info": "Produce box-and-whisker plot(s) of the given (grouped) value",
+    "libraries": "car",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the boxplot",
+            "collapsed": false,
+            "variables": {
+                "input_var": {
+                    "label": "variable",
+                    "info": "A numeric variable for which the boxplot is to be constructed",
+                    "type": "multi-column-numerical"
+                },
+                "input_group": {
+                    "label": "grouping variable",
+                    "info": "a grouping variable, usually a factor, for constructing parallel boxplots",
+                    "type": "column"
+                },
+                "input_outline": {
+                    "label": "show outliers",
+                    "info": "if true, the outliers are drawn",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "boxplot"
+                },
+                "input_xlab": {
+                    "label": "X-axis label",
+                    "info": "text label for the horizontal (x) axis",
+                    "default": " "
+                },
+                "input_ylab": {
+                    "label": "Y-axis label",
+                    "info": "text label for the vertical (y) axis",
+                    "default": " "
+                },
+                "input_log": {
+                    "label": "log scale",
+                    "info": "character indicating if x or y or both coordinates should be plotted in log scale.",
+                    "type": "string",
+                    "default": "",
+                    "items": ["","x","y","xy"]
+                },
+                "input_range": {
+                    "label": "range",
+                    "info": "how far the plot whiskers extend out from the box. If range is positive, the whiskers extend to the most extreme data point which is no more than range times the interquartile range from the box. A value of zero causes the whiskers to extend to the data extremes.",
+                    "type": "double",
+                    "default": 1.5
+                },
+                "input_col": {
+                    "label": "colour (s)",
+                    "info": "colour(s) for the bodies of the box plots.<br>Use , to separate multiple colors.<br>Colours in HEX format can be chosen on http://colorbrewer2.org/",
+                    "type": "multi-color",
+                    "default": "Red-Yellow-Blue 7"
+                },
+                "input_notch": {
+                    "label": "notch",
+                    "info": "if true a notch is drawn in each side of the boxes. If the notches of two plots do not overlap this is ‘strong evidence’ that the two medians differ",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_horizontal": {
+                    "label": "horizontal orientation",
+                    "info": "if true,the boxes are horizontal",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_sort": {
+                    "label": "sort",
+                    "info": "if true, boxes are sorted descending",
+                    "type": "boolean",
+                    "default": false
+                },
+                  "input_cexAxislabel": {
+                    "label": "Axis label size",
+                    "type": "int",
+                    "default": 14
+                },
+                "input_cexAxis": {
+                    "label": "Axis font size",
+                    "type": "int",
+                    "default": 12
+                },
+                "input_cexTitle": {
+                    "label": "Title font size",
+                    "type": "int",
+                    "default": 14
+                },    
+                "input_cexMarginBottom": {
+                    "label": "Margin (bottom)",
+                    "type": "int",
+                    "default": 5
+                }              
+            }
+        }
+    ]
+}

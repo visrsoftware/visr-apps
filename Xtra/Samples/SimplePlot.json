@@ -1,0 +1,11 @@
+{ "label":"SimplePlot", "categories":[
+   {"label":"input", "variables":{
+      "input_x": { "type":"column-numerical" },
+      "input_y": { "type":"column-numerical" }
+   }},
+   {"label":"plot", "variables":{
+      "input_color": { "type":"column" },
+      "input_log": {"items":["", "x", "y", "xy"]},
+      "input_title": {}
+   }}
+]}

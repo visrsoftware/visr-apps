@@ -1,0 +1,11 @@
+{ "label":"Pie Chart", "categories":[
+   {"label":"input", "variables":{
+      "input_column": { "type":"column" },
+      "input_show_percentage": { "type":"boolean" },
+      "input_title":{},
+      "input_title_size": { "type":"int", "default":20},
+      "input_label_size": { "type":"int", "default":10},
+      "input_rainbow_color": { "type":"boolean"}
+   }}
+]}
+

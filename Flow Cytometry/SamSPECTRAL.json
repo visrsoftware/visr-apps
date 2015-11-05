@@ -1,0 +1,141 @@
+{
+    "label": "SamSPECTRAL",
+    "categories": [
+        {
+            "label": "SamSPECTRAL - basic",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable",
+                    "info": "Columns selected to perform the analysis",
+                    "type": "multi-column-numerical"
+                },
+                "input_normal_sigma": {
+                    "label": "normal sigma",
+                    "info": "A value specifying the resolution in the spectral clustering stage. By increasing it, more spectral clusters are identified. This can be useful when small population are aimed",
+                    "type": "double",
+                    "default": 10
+                },                    
+                "input_separation_factor": {
+                    "label": "separation factor",
+                    "info": "This threshold controls to what extend clusters should be combined or kept separate.Normally, an appropriate value will fall in range 0.3-2",
+                    "type": "double",
+                    "default": "0.2"
+                },
+                "input_scale": {
+                    "label": "scale (ex: 1,1,1,...)",
+                    "info": "A vector the length of which is equal to the number of dimensions. The coordinates in each dimension are multiplied by the corresponding scaling factor. So, the bigger this factor is for a dimension, SamSPECTRAL will consider that dimension to be more significant and consequently, that dimension will be more effective in clustering. By default, all columns are equally significant",
+                    "type": "string"
+                },
+                "input_precision": {
+                    "label": "precision",
+                    "info": "An integer determining the precision of computations. Setting it to 6 will work and increasing it does not improve results",
+                    "type": "int",
+                    "default": "6",
+                    "min": 1
+                }
+           }
+       },
+       {
+          "label": "SamSPECTRAL - advanced",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": true,
+            "variables": {
+                "is_number_of_clusters_NA": {
+                    "label": "estimate number of spectral clusters",
+                    "info": "If TRUE, the number of spectral clusters is automatically computed",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_number_of_clusters"
+                    ]
+                },
+                "input_number_of_clusters": {
+                    "label": "number of clusters (if above unselected)",
+                    "info": "This integer is the number of spectral clusters",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "active": false
+                },
+                "input_do_sampling": {
+                    "label": "do sampling",
+                    "info": "If FALSE, the sampling stage will be ignored by picking up all the data points",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "input_beta": {
+                    "label": "beta",
+                    "info": "A parameter with default value which must NOT be changed except for huge samples with more than 100,000 data points or for developmental purposes. Setting beta to zero will reduce computational time by applying the following approximation to the conductance calculation step. For each two community, the conductance will be the conductance between their representatives times their sizes",
+                    "type": "int",
+                    "default": "4"
+                },
+                "input_stabilizer": {
+                    "label": "stabilizer",
+                    "info": "The larger this integer is, the final results will be more stable. The underlying kmeans will restart many more times",
+                    "type": "int",
+                    "default": "100"
+                },
+                "is_k_for_kmeans_NA": {
+                    "label": "estimate number of clusters for kmeans",
+                    "info": "If TRUE, automatic estimation number of clusters for running kmeans algorithm based on eigen values curve",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_k_for_kmeans"
+                    ]
+                },
+                "input_k_for_kmeans": {
+                    "label": "k for kmeans (if above unselected)",
+                    "info": "The number of clusters for running kmeans algorithm in spectral clustering",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "active": false
+                },
+                "input_m": {
+                    "label": "m",
+                    "info": "An integer specifying upper and lower bounds on the final number of sample points. (range: 0.95*m/2 and 2 1.1*m)",
+                    "type": "int",
+                    "default": 3000,
+                    "min" : 1
+                },
+                "is_min_eigenvalue_NA": {
+                    "label": "don't associate the number of spectral clusters with eigenvalues",
+                    "info": "If TRUE, eigenvalues will not be used to determine the number of spectral clusters",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_min_eigenvalue"
+                    ]
+                },
+                "input_min_eigenvalue": {
+                    "label": "min eigenvalue (if above unselected)",
+                    "info": "The number of spectral clusters is determined such that corresponding eigenvalues are larger than this threshold",
+                    "type": "int",
+                    "default": "0",
+                    "active": false
+                },
+                "input_minimum_degree": {
+                    "label": "min degree",
+                    "info": "If a node in the graph has total edge sum less than this threshold, it will be considered as an isolated community",
+                    "type": "double",
+                    "default": 0
+                }
+            }
+        },
+        {
+            "label": "Output",
+            "info": "Outputs column of the clustering",
+            "collapsed": false,
+            "variables": {
+                "output_column": {
+                    "label": "Cluster IDs",
+                    "type": "output-column",
+                    "default": "SamSPECTRAL_cluster ID"
+                }
+            }
+        }
+    ]
+}

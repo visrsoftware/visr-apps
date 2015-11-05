@@ -1,0 +1,62 @@
+{
+    "label": "Mosaic Plot",
+    "info": "Plots (extended) mosaic displays",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the input",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable(s)",
+                    "info": "variable(s) selected for plotting",
+                    "type": "multi-column"
+                },
+                "input_convars": {
+                    "label": " conditioning variable(s)",
+                    "info": " The table will be permuted to order them first.",
+                    "type": "multi-column"
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": " Controls to spefify plotting parameter",
+            "collapsed": false,
+            "variables": {
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Mosaic plot"
+                },
+                "input_sub": {
+                    "label": "subtitle",
+                    "type": "string"
+                },
+                "input_shade": {
+                    "label": "shade",
+                    "info": "if TRUE, a corresponding conditional independence model if a conditioning variable is specified, and else the total independence model",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_legend": {
+                    "label": "legend",
+                    "info": "displays a legend for the Pearson residuals",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        {
+            "label": "Output",
+            "info": " Controls to spefify plotting parameter",
+            "collapsed": false,
+            "variables": {
+                "output_freq": {
+                    "label": "frequency table",
+                    "type": "output-table"
+                }
+            }
+        }
+    ]
+}

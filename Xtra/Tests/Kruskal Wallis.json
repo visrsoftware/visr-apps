@@ -1,0 +1,23 @@
+{
+    "label": "Kruskal-Wallis Rank Sum Test",
+    "info": "Performs a Kruskal-Wallis rank sum test",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the test",
+            "collapsed": false,
+            "variables": {
+                "input_x": {
+                    "label": "variable",
+                    "info": "Column selected to perform the test",
+                    "type": "column-numerical"
+                },
+                "input_g": {
+                    "label": "grouping variable",
+                    "info": "Optional column selected to perform the test",
+                    "type": "column"
+                }
+            }
+        }
+    ]
+}

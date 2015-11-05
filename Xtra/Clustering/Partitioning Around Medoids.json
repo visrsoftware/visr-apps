@@ -1,0 +1,101 @@
+{
+    "label": "Partitioning Around Medoids",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable",
+                    "info": "Columns selected to perform the analysis",
+                    "type": "multi-column-numerical"
+                },
+                "input_k": {
+                    "label": "k",
+                    "info": "positive integer specifying the number of clusters, less than the number of observations.",
+                    "type": "int",
+                    "default": 5,
+                    "min": 1
+                },
+                "input_metric": {
+                    "label": "metric",
+                    "info": "character string specifying the metric to be used for calculating dissimilarities between observations.",
+                    "type": "string",
+                    "default": "euclidean",
+                    "items": [
+                        "euclidean",
+                        "manhattan"
+                    ]
+                },
+                "input_stand": {
+                    "label": "standardize",
+                    "info": "if TRUE, then the measurements in x are standardized before calculating the dissimilarities",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_clusteronly": {
+                    "label": "cluster only",
+                    "info": " if true, only the clustering will be computed and returned",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_tracelev": {
+                    "label": "trace level",
+                    "info": "integer specifying a trace level for printing diagnostics during the build and swap phase of the algorithm. Default 0 does not print anything; higher values print increasingly more.",
+                    "type": "int",
+                    "default": 0
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_whichplot": {
+                    "label": " choice of plot",
+                    "info": "Which plot do you want to view?",
+                    "type": "string",
+                    "default": "clusters",
+                    "items": [
+                        "clusters",
+                        "clusplot",
+                        "silhouette plot"
+                    ]
+                },
+                "input_main": {
+                    "label": "title",
+                    "type": "string"
+                },
+                "input_sub": {
+                    "label": "subtitle",
+                    "type": "string"
+                },
+                "input_nmaxlab": {
+                    "label": "max number of labels",
+                    "info": "integer indicating the number of labels which is considered too large for single-name labelling the silhouette plot",
+                    "type": "int",
+                    "default": 40
+                },
+                "input_maxstrlen": {
+                    "label": "label length",
+                    "info": "positive integer giving the length to which strings are truncated in silhouette plot labelling",
+                    "type": "int",
+                    "default": 5
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs column of the clustering",
+            "collapsed": false,
+            "variables": {
+                "output_clusterid": {
+                    "label": "cluster ID",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

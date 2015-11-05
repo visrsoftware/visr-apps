@@ -1,0 +1,91 @@
+{
+    "label": "Generalized Linear Models",
+    "info": "Fit generalized linear models",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_y": {
+                    "label": "response variable",
+                    "info": "response variable selected in the model",
+                    "type": "column",
+                    "min": 1
+                },
+                "input_columns": {
+                    "label": "explanatory variable(s)",
+                    "info": "explanatory variables selected in the model",
+                    "type": "multi-column",
+					"min": 1
+                },
+                "input_weights": {
+                    "label": "weights",
+                    "info": "if true, weighted least squares is used with weights weights (that is, minimizing sum(w*e^2))",
+                    "type": "column-numerical"
+                },
+                "input_family": {
+                    "label": "family",
+                    "info": "if true, weighted least squares is used with weights weights (that is, minimizing sum(w*e^2))",
+                    "type": "string",
+                    "default": "binomial",
+                    "items": [
+                        "binomial",
+                        "gaussian",
+                        "Gamma",
+                        "inverse.gaussian",
+                        "poisson",
+                        "quasi",
+                        "quasibinomial",
+                        "quasipoisson"
+                    ]
+                },
+                "input_link": {
+                    "label": "link",
+                    "info": "The gaussian family accepts the links (as names) identity, log and inverse; the binomial family the links logit, probit, cauchit, (corresponding to logistic, normal and Cauchy CDFs respectively) log and cloglog (complementary log-log); the Gamma family the links inverse, identity and log; the poisson family the links log, identity, and sqrt and the inverse.gaussian family the links 1/mu^2, inverse, identity and log.The quasi family accepts the links logit, probit, cloglog, identity, inverse, log, 1/mu^2 and sqrt.",
+                    "type": "string",
+                    "default": "logit",
+                    "items": [
+                        "logit",
+                        "identity",
+                        "inverse",
+                        "1/mu^2",
+                        "log",
+                        "probit",
+                        "cauchit",
+                        "cloglog",
+                        "sqrt"
+                    ]
+                },
+                "input_variance": {
+                    "label": "weights",
+                    "info": "for all families other than quasi, the variance function is determined by the family. The quasi family will accept the literal character string (or unquoted as a name/expression) specifications constant, mu(1-mu), mu, mu^2 and mu^3",
+                    "type": "string",
+                    "default": "constant",
+                    "items": [
+                        "constant",
+                        "mu(1-mu)",
+                        "mu",
+                        "mu^2",
+                        "mu^3"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs the selected results",
+            "collapsed": false,
+            "variables": {
+                "output_residuals": {
+                    "label": "residuals",
+                    "type": "output-column"
+                },
+                "output_fittedvalues": {
+                    "label": "fitted.values",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

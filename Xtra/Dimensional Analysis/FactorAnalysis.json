@@ -1,0 +1,144 @@
+{
+    "label": "Factor Analysis",
+    "info": "Factor Analysis",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Input columns for the factor analysis",
+            "variables": {
+                "input_columns": {
+                    "label": "variables",
+                    "info": "variables selected for the analysis",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_nfactors": {
+                    "label": "factors",
+                    "info": "Number of factors to extract",
+                    "type": "int",
+                    "default": 2
+                },
+                "input_niter": {
+                    "label": "bootstrp interations",
+                    "info": "Number of bootstrap interations",
+                    "type": "int",
+                    "default": 1
+                },
+                "input_rotate": {
+                    "label": "rotate",
+                    "info": " possible oblique transformations of the solution",
+                    "type": "string",
+                    "default": "oblimin",
+                    "items": [
+                        "none",
+                        "varimax",
+                        "quartimax",
+                        "bentlerT",
+                        "equamax",
+                        "varimin",
+                        "geominT",
+                        "bifactor",
+                        "promax",
+                        "oblimin",
+                        "simplimax",
+                        "bentlerQ",
+                        "geominQ",
+                        "biquartimin",
+                        "cluster"
+                    ]
+                },
+                "input_scores": {
+                    "label": "scores",
+                    "info": "methods used to finds factor scores",
+                    "type": "string",
+                    "default": "regression",
+                    "items": [
+                        "regression",
+                        "Thurstone",
+                        "tenBerge",
+                        "Anderson",
+                        "Bartlett"
+                    ]
+                },
+                "input_smc": {
+                    "label": "SMC",
+                    "info": "Use squared multiple correlations (SMC=TRUE) or use 1 as initial communality estimate",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_covar": {
+                    "label": "covariance matrix",
+                    "info": "if covar is TRUE, factor the covariance matrix, otherwise factor the correlation matrix",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_residuals": {
+                    "label": "residuals",
+                    "info": "Should the residual matrix be shown",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_missing": {
+                    "label": "missing values",
+                    "info": "impute missing values using either the median or the mean",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_impute": {
+                    "label": "impute",
+                    "info": "values are used to replace missing values",
+                    "type": "string",
+                    "default": "median",
+                    "items": [
+                        "median",
+                        "mean"
+                    ]
+                },
+                "input_minerr": {
+                    "label": "minimum iteration",
+                    "info": "Maximum number of iterations for convergence",
+                    "type": "double",
+                    "default": 0.001
+                },
+                "input_warnings": {
+                    "label": "missing values",
+                    "info": "warn if number of factors is too many",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_fm": {
+                    "label": "factoring method",
+                    "info": "factoring method minres will do a minimum residual (OLS), wls will do a weighted least squares (WLS) solution, gls does a generalized weighted least squares (GLS), pa will do the principal factor solution, ml will do a maximum likelihood factor analysis. minchi will minimize the sample size weighted chi square when treating pairwise correlations with different number of subjects per pair.",
+                    "type": "string",
+                    "default": "minres",
+                    "items": [
+                        "minres",
+                        "wls",
+                        "gls",
+                        "pa",
+                        "ml",
+                        "minchi"
+                    ]
+                },
+                "input_alpha": {
+                    "label": "alpha level",
+                    "info": "alpha level for the confidence intervals for RMSEA",
+                    "type": "double",
+                    "default": 0.1
+                },
+                "input_p": {
+                    "label": "probability",
+                    "info": "what probability values should be found for the confidence intervals",
+                    "type": "double",
+                    "default": 0.05
+                },
+                "input_obliquescores": {
+                    "label": "oblique scores",
+                    "info": " When factor scores are found, should they be based on the pattern matrix (false) or the structure matrix (true)",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        }
+    ]
+}

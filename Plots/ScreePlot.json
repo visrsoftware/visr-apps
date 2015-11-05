@@ -1,0 +1,49 @@
+{
+    "label": "ScreePlot",
+    "info": "Displays the eigenvalues associated with a component or factor in descending order versus the number of the component or factor",
+	"libraries": "psych",
+    "categories": [
+        {
+            "label": "input",
+            "info": "Controls to specify parameters of the scree plot",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variables",
+                    "info": "Two or more columns selected to product the scree plot. Note correlations are found using pairwise deletions",
+                    "type": "multi-column-numerical"
+                },
+                "input_factors": {
+                    "label": "factors",
+                    "info": "Draw the scree for factors",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_pc": {
+                    "label": "components",
+                    "info": "Draw the scree for components",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_hline": {
+                    "label": "horizontal line",
+                    "info": "Draw a horizontal line (make negative to not draw it)",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Scree plot"
+                }
+            }
+        }
+    ]
+}

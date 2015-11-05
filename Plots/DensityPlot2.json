@@ -1,0 +1,98 @@
+{
+    "label": "Density Plot",
+    "info": "densityPlot contructs and graphs nonparametric density estimates, possibly conditioned on a factor.",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the Kernel density estimation",
+            "collapsed": false,
+            "variables": {
+                "input_column": {
+                    "label": "variable",
+                    "info": "Column selected to produce the numerical summary",
+                    "type": "column-numerical"
+                },
+                "input_group": {
+                    "label": "grouping variable",
+                    "info": "Column selected as the grouping variable",
+                    "type": "column"
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_kernel": {
+                    "label": "kernel",
+                    "info": "a character string giving the smoothing kernel to be used. ",
+                    "type": "string",
+                    "default": "gaussian",
+                    "items": [
+                        "gaussian",
+                        "epanechnikov",
+                        "rectangular",
+                        "triangular",
+                        "biweight",
+                        "cosine",
+                        "optcosine"
+                    ]
+                },
+                "input_grid": {
+                    "label": "grid lines",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_showbw": {
+                    "label": " show bandwidth",
+                    "info": "if TRUE, show the bandwidth(s) in the horizontal-axis label or (for multiple groups) the legend",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_rug": {
+                    "label": "rug plot",
+                    "info": "if TRUE (the default), draw a rug plot (one-dimentional scatterplot) at the bottom of the density estimate.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_legendlocation": {
+                    "label": "legend location",
+                    "info": "location for the legend when densities are plotted for several groups",
+                    "type": "string",
+                    "default": "topright",
+                    "items": [
+                        "bottomright",
+                        "bottom",
+                        "bottomleft",
+                        "left",
+                        "topleft",
+                        "top",
+                        "topright",
+                        "right",
+                        "center"
+                    ]
+                },
+                "input_legendtitle": {
+                    "label": "legend title",
+                    "info": "label for the legend, which is drawn if densities are plotted by groups",
+                    "type": "string"
+                },
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Density plot"
+                },
+                "input_xlab": {
+                    "label": "x axis",
+                    "type": "string"
+                },
+                "input_ylab": {
+                    "label": "y axis",
+                    "type": "string",
+                    "default": "Density"
+                }
+            }
+        }
+    ]
+}

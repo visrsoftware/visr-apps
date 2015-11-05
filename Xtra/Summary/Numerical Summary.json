@@ -1,0 +1,91 @@
+{
+    "label": "Numerical Summary",
+    "info": "Creates tables of means, standard deviations, coefficients of variation, skewness, kurtosis, and quantiles of numeric variables",
+    "libraries": "RcmdrMisc",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the numerical summary",
+            "collapsed": false,
+            "variables": 
+			{
+                "input_columns": {
+                    "label": "variable(s)",
+                    "info": "Columns selected to produce the numerical summary",
+                    "type": "multi-column-numerical"
+                },
+                "input_groups": {
+                    "labels": "summarize by groups",
+                    "info": "optional variable, used to partition the data",
+                    "type": "column"
+                }
+			}
+		},
+        {
+            "label": "Statistics",
+            "info": "",
+            "collapsed": false,
+            "variables":
+			{
+                "input_mean": {
+                    "label": "mean",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_sd": {
+                    "label": "standard deviation",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_se": {
+                    "label": "standard error of mean",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_IQR": {
+                    "label": "interquantile range",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_quantiles": {
+                    "labels": "quantiles",
+                    "info": "quantiles",
+                    "type": "boolean",
+                    "default": true
+                },
+				"input_quantiles2": {
+                    "labels": "quantile values",
+                    "info": "quantiles to report",
+                    "type": "string",
+                    "default": "0, 0.25, 0.5, 0.75, 1"
+                },
+                "input_cv": {
+                    "label": "coefficient of variation",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_skewness": {
+                    "label": "skewness",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_kurtosis": {
+                    "label": "kurtosis",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_type": {
+                    "label": "type",
+                    "info": "definition to use in computing skewness and kurtosis",
+                    "type": "string",
+                    "default": "2",
+                    "items": [
+                        "2",
+                        "1",
+                        "3"
+                    ]
+                }
+            }
+        }
+    ]
+}

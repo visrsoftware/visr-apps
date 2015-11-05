@@ -1,0 +1,110 @@
+{
+    "label": "Density Plot",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the Kernel density estimation",
+            "collapsed": false,
+            "variables": {
+                "input_column": {
+                    "label": "variable",
+                    "info": "Column selected to produce the numerical summary",
+                    "type": "column-numerical"
+                },
+                "input_bw": {
+                    "label": "bandwidth",
+                    "info": "The smoothing bandwidth to be used. The kernels are scaled such that this is the standard deviation of the smoothing kernel. It can also be a character string giving a rule to choose the bandwidth.",
+                    "type": "string",
+                    "default": "nrd0",
+                    "items": [
+                        "nrd0",
+                        "nrd",
+                        "ucv",
+                        "bcv",
+                        "SJ-ste",
+                        "SJ-dpi"
+                    ]
+                },
+                "input_adjust": {
+                    "label": "adjust",
+                    "info": "the bandwidth used is actually adjust*bandwidth",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_kernel": {
+                    "label": "kernel",
+                    "info": "a character string giving the smoothing kernel to be used. ",
+                    "type": "string",
+                    "default": "gaussian",
+                    "items": [
+                        "gaussian",
+                        "epanechnikov",
+                        "rectangular",
+                        "triangular",
+                        "biweight",
+                        "cosine",
+                        "optcosine"
+                    ]
+                },
+                "input_window": {
+                    "label": "window",
+                    "type": "string",
+                    "default": "gaussian",
+                    "items": [
+                        "gaussian",
+                        "epanechnikov",
+                        "rectangular",
+                        "triangular",
+                        "biweight",
+                        "cosine",
+                        "optcosine"
+                    ]
+                },
+                "input_giverkern": {
+                    "label": "canonical bandwidth of the kernel",
+                    "info": "if true, no density is estimated, and the ‘canonical bandwidth’ of the chosen kernel is returned instead.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_n": {
+                    "label": "n",
+                    "info": "the number of equally spaced points at which the density is to be estimated.",
+                    "type": "int",
+                    "default": 512
+                },
+                "input_cut": {
+                    "label": "cut",
+                    "info": "by default, the values of from and to are cut bandwidths beyond the extremes of the data. This allows the estimated density to drop to approximately zero at the extremes.",
+                    "type": "double",
+                    "default": 3
+                },
+                "input_from": {
+                    "label": "from",
+                    "info": "the left most points of the grid at which the density is to be estimated; the defaults are cut*bandwidth outside of the range.",
+                    "type": "double"
+                },
+                "input_to": {
+                    "label": "to",
+                    "info": "the right most points of the grid at which the density is to be estimated; the defaults are cut*bandwidth outside of the range.",
+                    "type": "double"
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Density plot"
+                },
+                "input_sub": {
+                    "label": "subtitle",
+                    "type": "string"
+                }
+            }
+        }
+    ]
+}

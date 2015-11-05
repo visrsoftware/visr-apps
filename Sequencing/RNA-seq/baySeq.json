@@ -1,0 +1,131 @@
+{
+    "label": "baySeq",
+    "info": "baySeq - Empirical Bayesian analysis of patterns of differential expression in count data",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "samples",
+                    "info": "ignore this input for paired data",
+                    "type": "multi-column-numerical"
+                },
+                "input_paired": {
+                    "label": "paired data analysis",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_columns1": {
+                    "label": "samples1 - paired",
+                    "type": "multi-column-numerical"
+                },
+                "input_columns2": {
+                    "label": "samples2 - paired",
+                    "type": "multi-column-numerical"
+                },
+                "input_groups0": {
+                    "label": "NDE",
+                    "info": "a simple model describing the patterns of data expected to see at least some tags correspond to",
+                    "type": "string"
+                },
+                "input_groups": {
+                    "label": "DE",
+                    "info": "a more complex model describing some tags with differential expression between the libraries",
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "label": "Parameters and Plot Options",
+            "info": "",
+            "collapsed": false,
+            "variables": {
+                "input_normaliseData": {
+                    "label": "normalize data",
+                    "info": "Should the data be normalised by library size before computing log-ratios?",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_samplesize": {
+                    "label": "sample size",
+                    "info": "How large a sample should be taken in estimating the priors?",
+                    "type": "int",
+                    "default": 10000
+                },
+                "input_equalDispersions": {
+                    "label": "equal dispersions",
+                    "info": "Should we assume equal dispersions of data across all groups?",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_estimation": {
+                    "label": "estimation",
+                    "info": "QL - quasi-likelihood estimation of priors; ML - a maximum-likelihood method; and edgeR - the moderated dispersion estimates produced by the edgeR package.",
+                    "type": "string",
+                    "items": [
+                        "QL",
+                        "ML",
+                        "edgeR"
+                    ],
+                    "default": "QL"
+                },
+                "input_consensus": {
+                    "label": "consensus",
+                    "info": "If TRUE, creates a consensus distribution rather than a separate distribution for each member of the groups structure",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_pET": {
+                    "label": "prior re-estimation",
+                    "info": "What type of prior re-estimation should be attempted?",
+                    "type": "string",
+                    "default": "BIC",
+                    "items": [
+                        "BIC",
+                        "none",
+                        "iteratively"
+                    ]
+                },
+                "input_number": {
+                    "label": "number",
+                    "info": "the number of the top candidates for differential expression shown",
+                    "type": "int",
+                    "default": 10
+                }
+            }
+        },
+        {
+            "label": "Output Column Names",
+            "collapsed": false,
+            "variables": {
+                "output_posterior1": {
+                    "label": "NDE posterior likelihoods",
+                    "info": "the log posterior likelihoods that each count belongs to NDE defined by the @group slot of the input object",
+                    "type": "output-column"
+                },
+				"output_posterior2": {
+                    "label": "DE posterior likelihoods",
+                    "info": "the log posterior likelihoods that each count belongs to DE defined by the @group slot of the input object",
+                    "type": "output-column"
+                },
+                "output_table": {
+                    "label": "ordered posterior likelihoods",
+                    "info": "Takes posterior likelihoods and order the counts from highest to lowest likelihood of association",
+                    "type": "output-table"
+                },
+                "output_table1": {
+                    "label": "differential expression",
+                    "info": "For paired data, takes posterior likelihoods and order the counts according to differential expression between replicate groups",
+                    "type": "output-table"
+                },
+                "output_table2": {
+                    "label": "consistent differential expression",
+                    "info": "For paired data, takes posterior likelihoods and order the counts according to consistent differential expression between the pairs",
+                    "type": "output-table"
+                }
+            }
+        }
+    ]
+}

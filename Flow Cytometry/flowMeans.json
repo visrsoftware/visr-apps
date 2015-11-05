@@ -1,0 +1,153 @@
+{
+    "label": "flowMeans",
+    "categories": [
+        {
+            "label": "flowMeans - basic",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable",
+                    "info": "Columns selected to perform the analysis",
+                    "type": "multi-column-numerical"
+                },
+                "is_maxN_NA": {
+                    "label": "estimate max number of clusters",
+                    "info": "If TRUE, the value will be estimated automatically",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_maxN"
+                    ]
+                },
+                "input_maxN": {
+                    "label": "max number of clusters (if above unselected)",
+                    "info": "An integer specifying the max number of clusters",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "active": false
+                },
+                "is_numC_NA": {
+                    "label": "estimate number of clusters",
+                    "info": "If TRUE, the value will be estimated automatically",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_numC"
+                    ]
+                },
+                "input_numC": {
+                    "label": "number of clusters (if above unselected)",
+                    "info": "An integer specifying the number of clusters",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "active-condition": "is_numC_NA == false"
+                },
+                "is_MaxCovN_NA": {
+                    "label": "use all the points for covariance",
+                    "info": "If TRUE, all the points will be used",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_MaxCovN"
+                    ]
+                },
+                "input_MaxCovN": {
+                    "label": "Max number of points for covariance (if above unselected)",
+                    "info": "An integer specifying the max number of points used for calculating the covariance",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "active": false
+                },
+                "is_MaxKernN_NA": {
+                    "label": "use all the points for kernel",
+                    "info": "If TRUE, all the points will be used",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_MaxKernN"
+                    ]
+                },
+                "input_MaxKernN": {
+                    "label": "Max number of points for kernel (if above unselected)",
+                    "info": "An integer specifying the max number of points used for counting the modes using kernel density estimation",
+                    "type": "int",
+                    "default": "0",
+                    "min": 0,
+                    "active": false
+                }
+           }
+        },
+        {
+            "label": "flowMeans - advanced",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": true,
+            "variables": {
+                "input_iter_max": {
+                    "label": "max number of iterations ",
+                    "info": "An integer specifying the maximum number of iterations allowed",
+                    "type": "int",
+                    "default": "50",
+                    "min": 0
+                },
+                "input_nstart": {
+                    "label": "N start",
+                    "info": "An integer specifying the number of random sets used for initialization",
+                    "type": "int",
+                    "default": "10",
+                    "min": 0
+                },
+                "input_do_Mahalanobis": {
+                    "label": "Mahalanobis",
+                    "info": "If TRUE, mahalanobis distance will be used. Otherwised, euclidean distance will be used",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "input_do_Standardize": {
+                    "label": "Standardize",
+                    "info": "If TRUE, the data will be transformed to the [0,1] interval",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "input_do_OrthagonalResiduals": {
+                    "label": "Orthagonal Residuals",
+                    "info": "If TRUE, the residuals are transformed to orthagonal distance",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "input_do_addNoise": {
+                    "label": "Add Noise",
+                    "info": "If TRUE, uniform noise is added to data to prevent singularity issues",
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "input_update": {
+                    "label": "Standardize",
+                    "info": " [Mahalanobis] update distance function at each merging iteration with recalculating mahalanobis distances. [Mean] update distance matrix after each merging step with averaging. [None] do not update distance matrix",
+                    "type": "string",
+                    "default": "Mahalanobis",
+                    "items": [
+                        "Mahalanobis",
+                        "Mean",
+                        "None"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output",
+            "info": "Outputs column of the clustering",
+            "collapsed": false,
+            "variables": {
+                "output_column": {
+                    "label": "Cluster IDs",
+                    "type": "output-column",
+                    "default": "flowMeans_cluster ID"
+                }
+            }
+        }
+    ]
+}

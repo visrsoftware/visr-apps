@@ -1,0 +1,39 @@
+{
+    "label": "ScreePlot",
+    "info": "Determine the Number of Factors to Extract in Factor Analysis. Count how many green triangles are there before the black line cuts the green line. That's the optimal no. of factors. ",
+    "categories": [
+        {
+            "label": "input",
+            "info": "Controls to specify parameters of the scree plot",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variables",
+                    "info": "Two or more columns selected to product the scree plot.",
+                    "type": "multi-column-numerical"
+                },
+                "input_rep": {
+                    "label": "replications",
+                    "info": "number of replications of the correlation matrix",
+                    "type": "int",
+                    "default": 100
+                },
+                "input_cent": {
+                    "label": "quantile",
+                    "info": "quantile of the distribution on which the decision is made",
+                    "type": "double",
+                    "default": 0.05
+                },
+                "input_model": {
+                    "label": "model",
+                    "type": "string",
+                    "default": "components",
+                    "items": [
+                        "components",
+                        "factors"
+                    ]
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,209 @@
+{
+    "label": "flowClust",
+    "categories": [
+        {
+            "label": "flowClust - basic",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable",
+                    "info": "Columns selected to perform the analysis",
+                    "type": "multi-column-numerical"
+                },
+                "input_K": {
+                    "label": "number of clusters (K)",
+                    "info": "An integer indicating the numbers of clusters",
+                    "type": "int",
+                    "default": "6",
+                    "min": 2
+                },
+                "input_B": {
+                    "label": "max number of EM iterations (B)",
+                    "info": "The maximum number of EM iterations",
+                    "type": "int",
+                    "default": "500",
+                    "min": 0
+                },
+                "is_min_count_NULL": {
+                    "label": "use min of data as per each variable",
+                    "info": "If TRUE,  min count is the minimum of data as per each variable ",
+                    "type": "boolean",
+                    "default": "false",
+                    "activate-list": [
+                        "input_min_count"
+                    ]
+                },
+                "input_min_count": {
+                    "label": "min count (if above unselected)",
+                    "info": "An integer specifying the threshold count for filtering data points from below. Default means 10 or more data points are smaller than or equal to min, they will be excluded from the analysis. To suppress filtering, set it as -1",
+                    "type": "int",
+                    "default": "10",
+                    "min": 0,
+                    "active": true
+                },
+                "is_max_count_NULL": {
+                    "label": "use max of data as per each variable",
+                    "info": "If TRUE,  max count is the minimum of data as per each variable ",
+                    "type": "boolean",
+                    "default": "false",
+                    "activate-list": [
+                        "input_max_count"
+                    ]
+                },
+                "input_max_count": {
+                    "label": "max count (if above unselected)",
+                    "info": "An integer specifying the threshold count for filtering data points from above. Interpretation is similar to that of min count",
+                    "type": "int",
+                    "default": "10",
+                    "min": 0,
+                    "active": true
+                },
+                "input_min": {
+                    "label": "min (ex: 100,1,10,...)",
+                    "info": "The lower boundary set for data filtering; it can be NULL. Note that it is a vector of length equal to the number of variables (columns), implying that a different value can be set as per each variable",
+                    "type": "string",
+                    "default": "NULL"
+                },
+                "input_max": {
+                    "label": "max (ex: 100,1,10,...)",
+                    "info": "The upper boundary set for data filtering. Interpretation is similar to that of min",
+                    "type": "string",
+                    "default": "NULL"
+                },
+                "use_flowMerge": {
+                    "label": "use flowMerge to improve output",
+                    "info": "flowMerge allows multiple mixture components to represent the same cell sub-population. Merged clusters are summarized by a weighted combination of their component model parameters. The result is a mixture model that retains the good model Fitting properties of the max BIC solution but the number of components more closely reflects the true number of distinct cell sub-populations",
+                    "type": "boolean",
+                    "default": "true"
+                }
+           }
+      },
+      {
+            "label": "flowClust - advanced",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": true,
+            "variables": {
+                "input_tol": {
+                    "label": "tolerance",
+                    "info": "The tolerance used to assess the convergence of the EM",
+                    "type": "double",
+                    "default": "0.00001"
+                },
+                "input_nu": {
+                    "label": "degrees of freedom",
+                    "info": "used for the t distribution. If Inf, Gaussian distribution will be used",
+                    "type": "int",
+                    "default": "4"
+                },
+                "input_lambda": {
+                    "label": "lambda",
+                    "info": "The initial transformation to be applied to the data",
+                    "type": "int",
+                    "default": "1"
+                },
+                "input_nu_est_string": {
+                    "label": "Estimate degrees of freedom",
+                    "info": "specifying how degrees of freedom is estimated",
+                    "type": "string",
+                    "default": "no estimation",
+                    "items": [
+                        "no estimation",
+                        "estimation",
+                        "cluster-specific estimation"
+                    ]
+                },
+                "input_trans_string": {
+                    "label": "Estimate Box-Cox transformation",
+                    "info": "specifying how the Box-Cox transformation parameter is estimated from the data",
+                    "type": "string",
+                    "default": "estimation",
+                    "items": [
+                        "no estimation",
+                        "estimation",
+                        "cluster-specific estimation"
+                    ]
+                },
+                "input_level": {
+                    "label": "outlier level",
+                    "info": " A numeric value between 0 and 1 specifying the threshold quantile level used to call a point an outlier. The default means any point outside the 90% quantile region will be called an outlier.",
+                    "type": "double",
+                    "default": "0.9",
+                    "min": 0,
+                    "max": 1
+                },
+                "is_u_cutoff_NULL": {
+                    "label": "use outlier level as u_cutoff",
+                    "info": "use the outlier level varible as u cutoff",
+                    "type": "boolean",
+                    "default": "true",
+                    "activate-list": [
+                        "input_u_cutoff"
+                    ]
+                },
+                "input_u_cutoff": {
+                    "label": "u_cutoff (if above unselected)",
+                    "info": "criterion used to identify outliers to measure the degree of outlyingness based on the Mahalanobis distance",
+                    "type": "double",
+                    "default": "0.5",
+                    "active": false
+                },
+                "input_z_cutoff": {
+                    "label": "z_cutoff",
+                    "info": "A numeric value between 0 and 1 underlying a criterion which may be used together with level/u.cutoff to identify outliers. A point with the probability of assignment z (i.e., the posterior probability that a data point belongs to the cluster assigned) smaller than z.cutoff will be called an outlier. zero means assignment will be made no matter how small the associated probability is, and outliers will be identified solely based on the rule set by level or cutoff",
+                    "type": "int",
+                    "default": 0,
+                    "min": 0,
+                    "max": 1
+                },
+                "input_randomStart": {
+                    "label": "random initialization",
+                    "info": "A numeric value indicating how many times a random parition of the data is generated for initialization. zero means a deterministic partition based on kmeans clustering is used. A value of 10 means random partitions of the data will be generated, each of which is followed by a short EM run. The partition leading to the highest likelihood value will be adopted to be the initial partition for the eventual long EM run",
+                    "type": "int",
+                    "default": 0
+                },
+                "input_B_init": {
+                    "label": "max number of EM iterations (random init)",
+                    "info": "An integer specifying the maximum number of EM iterations following each random partition in random initialization",
+                    "type": "int",
+                    "default": "500",
+                    "min": 0
+                },
+                "input_tol_init": {
+                    "label": "tolerance (random init)",
+                    "info": "The tolerance used as the stopping criterion for the short EM runs in random initialization",
+                    "type": "double",
+                    "default": "0.01"
+                },
+                "input_seed": {
+                    "label": "seed",
+                    "info": "An integer giving the seed number used when randomStart>0",
+                    "type": "int",
+                    "default": "1"
+                },
+               "input_criterion": {
+                    "label": "criterion",
+                    "info": "the criterion used to choose the best model. This argument is only relevant when length(K)>1",
+                    "type": "string",
+                    "default": "BIC",
+                    "items": [
+                        "BIC",
+                        "ICL"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output",
+            "info": "Outputs column of the clustering",
+            "collapsed": false,
+            "variables": {
+                "output_column": {
+                    "label": "Cluster IDs",
+                    "type": "output-column",
+                    "default": "flowClust_cluster ID"
+                }
+            }
+        }
+    ]
+}

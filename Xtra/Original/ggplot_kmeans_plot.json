@@ -1,0 +1,103 @@
+{
+   "label":"k-means and ggplot example",
+   "info":"An example that uses kmeans and ggplot",
+   "categories":[
+      {
+         "label":"k-means",
+         "info":"Controls to specify Kmeans clustering parameters",
+         "collapsed":false,
+         "variables":{
+            "cluster_input":{
+               "label":"input",
+               "info":"input column(s)",
+               "type":"multi-column-numerical",
+               "min":1
+            },
+            "cluster_k":{
+               "label":"k",
+               "type":"int",
+               "min":1,
+               "default":3
+            },
+            "cluster_algorithm":{
+               "label":"algorithm",
+               "info": "The algorithm used for clustering",
+               "type":"string",
+               "default":"MacQuveen",
+               "items":["Hartigan-Wong","Lloyd","Forgy","MacQueen"]
+            }
+         }
+      },
+      {
+         "label":"Plot",
+         "info":"Controls to specify Plot parameters",
+         "collapsed":false,
+         "variables":{
+            "plot_tile":{
+               "label":"plot title",
+               "type":"string"
+            },
+            "scatter_x":{
+               "label":"scatter plot x",
+               "type":"column-numerical"
+            },
+            "scatter_y":{
+               "label":"scatter plot y",
+               "type":"column-numerical"
+            },
+            "histogram_x":{
+               "label":"histogram x",
+               "type":"column-numerical"
+            },
+            "histogram_xlim":{
+               "label":"x range",
+               "type":"range-int",
+               "min":0,
+               "max":20,
+               "default":[0,5]
+            },
+            "text_size":{
+               "label":"text size",
+               "type":"int",
+               "default":20
+            }
+         }
+      },
+      {
+         "label":"Misc",
+         "info":"Miscelaneous test parameters",
+         "collapsed":true,
+         "variables":{
+            "cluster_trace":{
+               "label":"trace",
+               "info":"if true, tracing information on the progress of the algorithm is produced",
+               "type":"boolean",
+               "default":true
+            },
+            "test_double":{
+               "label":"number",
+               "info":"test double variable",
+               "type":"double",
+               "default":2.5
+            },
+            "text_color":{
+               "label":"background",
+               "type":"color",
+               "default":"#FFFFFF"
+            },
+            "input_file":{
+               "label":"input file",
+               "type":"filename",
+               "mode":"load",
+               "default":"123"
+            },
+            "output_file":{
+               "label":"output file",
+               "type":"filename",
+               "mode":"save"
+            }
+         }
+      }
+   ]
+
+}

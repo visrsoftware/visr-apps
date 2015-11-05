@@ -1,0 +1,82 @@
+{
+    "label": "sSeq",
+    "info": "sSeq - Shrinkage estimation of dispersion in Negative Binomial models for RNA-seq experiments with small sample size",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_sample1": {
+                    "label": "sample 1",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_sample2": {
+                    "label": "sample 2",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_pairedDesign": {
+                    "label": "paired design",
+                    "info": "if true, the tests are performed specifically for the paired design experiment.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_pairedDesigndispMethod": {
+                    "label": "dispersion method",
+                    "info": "A character specifying the method of selecting data used for the paired design experiment. When the input is per-pair (the default input), the dispersion estimates are shrunk within each pair of samples. The shrinkage target is different in different pair of samples. When the input is pooled, firstly method of moment estimates for dispersion are obtained within each pair of samples, and then the average estimates across all pairs of samples are shrunk toward a common targets among genes.",
+                    "type": "string",
+                    "default": "per-pair",
+                    "items": [
+                        "per-pair",
+                        "pooled"
+                    ]
+                },
+                "input_precol": {
+                    "label": "specify pairs",
+                    "info": "A data.frame specifying the additional factors for testing in complex experiments.",
+                    "type": "string"
+                },
+                "input_useFisher": {
+                    "label": "Fisher's method",
+                    "info": "A logic value specifying whether Fisher’s method of combining multiple p- values for a gene is used in the paired design experiment. ",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_cutoff": {
+                    "label": "FDR threshold",
+                    "info": "false discovery rate threshold",
+                    "type": "double",
+                    "default": 0.05,
+                    "min": 0,
+                    "max": 1
+                }
+            }
+        },
+        {
+            "label": "Output Column Names",
+            "collapsed": false,
+            "variables": {
+                "output_mean": {
+                    "label": "mean",
+                    "info": "mean expression in counts",
+                    "type": "output-column"
+                },
+                "output_log2FoldChange": {
+                    "label": "log2 Fold Change",
+                    "info": "the magnitude of the fold-change in log2 scale",
+                    "type": "output-column"
+                },
+                "output_pvalue": {
+                    "label": "p value",
+                    "type": "output-column"
+                },
+                "output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,128 @@
+{
+    "label": "tweeDEseq",
+    "info": "tweeDEseq - RNA-seq data analysis using the Poisson-Tweedie family of distributions",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "samples",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_pregroup": {
+                    "label": "group",
+                    "info": "treatment conditions",
+                    "type": "string"
+                },
+                "input_fdr": {
+                    "label": "FDR threshold",
+                    "info": "false discovery rate threshold",
+                    "type": "double",
+                    "default": 0.05,
+                    "min": 0,
+                    "max": 1
+                }
+            }
+        },
+        {
+            "label": "Parameters",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_method": {
+                    "label": "normalization method",
+                    "info": "specific method to use in order to normalize the input matrix of counts.",
+                    "type": "string",
+                    "default": "TMM",
+                    "items": [
+                        "TMM",
+                        "cqn"
+                    ]
+                },
+                "input_commondisp": {
+                    "label": "common dispersion",
+                    "info": "logical indicating whether a common or tagwise (default) dispersions should be estimated and employed when adjusting counts. This argument is only relevant when method=TMM",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_priordf": {
+                    "label": "prior df",
+                    "info": "argument provided to the call of estimateTagwiseDisp which defines the prior degrees of freedom and defines the amount of shrinkage of the estimated tagwise dispersions to the common one. By default prior.df=8 thus assumming no shrinkage toward that common dispersion. This argument is not used if common dispersion=TRUE. This argument is only relevant when method=TMM",
+                    "type": "int",
+                    "default": 8
+                },
+                "input_cpmcutoff": {
+                    "label": "cpm cutoff",
+                    "info": "expression level cutoff defined as the minimum number of counts per million.",
+                    "type": "double",
+                    "default": 0.5
+                },
+                "input_nsamplescutoff": {
+                    "label": "min number of samples",
+                    "info": "minimum number of samples where a gene should meet the counts per million cutoff (cpm.cutoff) in order to be kept as part of the count data matrix.",
+                    "type": "int",
+                    "default": 2
+                },
+                "input_meancpmcutoff": {
+                    "label": "min mean cpm cutoff",
+                    "info": "minimum mean of counts per million cutoff that a gene should meet in order to be kept. When the value of this argument is larger than 0 then it overrules the other arguments cpm.cutoff and n.samples.cutoff.",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_log2fc": {
+                    "label": "log2 fold change cutoff",
+                    "info": "cutoff on the minimum value of the log2 fold change.",
+                    "type": "double",
+                    "default": 0
+                }
+            }
+        },
+        {
+            "label": "Output Column Names",
+            "collapsed": false,
+            "variables": {
+                "output_overallMean": {
+                    "label": "overall mean",
+                    "info": "overall mean expression in counts",
+                    "type": "output-column"
+                },
+                "output_mean1": {
+                    "label": "meanA",
+                    "info": "mean expression in counts for each sample group",
+                    "type": "output-column"
+                },
+                "output_mean2": {
+                    "label": "meanB",
+                    "info": "mean expression in counts for each sample group",
+                    "type": "output-column"
+                },
+                "output_log2FoldChange": {
+                    "label": "log2 Fold Change",
+                    "info": "the magnitude of the fold-change in log2 scale",
+                    "type": "output-column"
+                },
+                "output_pval": {
+                    "label": "p value",
+                    "type": "output-column"
+                },
+                "output_padj": {
+                    "label": "adjusted p value (FDR)",
+                    "info": "Benjamini-Hochberg adjusted p value",
+                    "type": "output-column"
+                },
+                "output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                },
+                "deGenes": {
+                    "label": "genes",
+                    "info": "a subset of gene meeting cutoffs on the minimum magnitude of the fold-change and maximum FDR",
+                    "type": "output-table"
+                }
+            }
+        }
+    ]
+}

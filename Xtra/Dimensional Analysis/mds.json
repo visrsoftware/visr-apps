@@ -1,0 +1,104 @@
+{
+    "label": "Multidimensional scaling",
+    "info": "Classical multidimensional scaling of a data matrix. Also known as principal coordinates analysis",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify multidimensional scaling parameters",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variables",
+                    "info": "variable(s) selected to perform multidimensional scaling",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_k": {
+                    "label": "max dimension",
+                    "info": "the maximum dimension of the space which the data are to be represented in; must be in {1, 2, …, n-1}",
+                    "type": "int",
+                    "min": 1,
+                    "default": 2
+                },
+                "input_method": {
+                    "label": "distance measure",
+                    "type": "string",
+                    "default": "enclidean",
+                    "items": [
+                        "euclidean",
+                        "maximum",
+                        "manhattan",
+                        "canberra",
+                        "binary",
+                        "minkowski",
+                        "hamming"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Multidimensional scaling"
+                },
+                "input_xlab": {
+                    "label": "horizontal axis",
+                    "type": "string",
+                    "default": "Coordinate 1"
+                },
+                "input_ylab": {
+                    "label": "vertical axis",
+                    "type": "string",
+                    "default": "Coordinate 2"
+                },
+				"input_labels": {
+                    "label": "labels",
+                    "type": "column"
+                },
+                "input_cex": {
+                    "label": "character expansion",
+                    "info": "character expansion factor",
+                    "type": "double",
+                    "default": 0.8
+                },
+                "input_pos": {
+                    "label": "position",
+                    "info": "Values of 1, 2, 3 and 4, respectively indicate positions below, to the left of, above and to the right of the specified coordinates",
+                    "type": "int",
+                    "default": 4,
+                    "items": [
+                        1,
+                        2,
+                        3,
+                        4
+                    ]
+                },
+                "input_col": {
+                    "label": "color",
+                    "type": "string",
+                    "default": "blue"
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs column of the coordinates of the points chosen to represent the dissimilarities",
+            "collapsed": false,
+            "variables": {
+                "output_x": {
+                    "label": "Coordinate 1",
+                    "type": "output-column"
+                },
+                "output_y": {
+                    "label": "Coordinate 2",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

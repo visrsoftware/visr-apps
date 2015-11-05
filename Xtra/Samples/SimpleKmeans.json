@@ -1,0 +1,13 @@
+
+   {  "label":"kmeans", "categories":[
+      { "variables":{
+         "param.columns":   {"type":"multi-column-numerical" },
+         "param.k":         {"type":"int", "default":3 },
+         "param.algorithm": {"items":["Hartigan-Wong", "Lloyd",
+                                      "Forgy", "MacQueen"]},
+         "param.plot.title":{"default":"kmeans result"},
+         "output.clusterid":{"type":"output-column"}
+      }}
+   ]}
+
+

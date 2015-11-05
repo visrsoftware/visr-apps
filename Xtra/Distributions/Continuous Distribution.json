@@ -1,0 +1,258 @@
+{
+    "label": "Generate continuous random distribution",
+    "info": "Generate continuous random distribution",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_choice": {
+                    "label": "choice of distribution",
+                    "type": "string",
+                    "items": [
+                        "Normal distribution",
+                        "t distribution",
+                        "Chi-squared distribution",
+                        "F distribution",
+                        "Exponential distribution",
+                        "Uniform distribution",
+                        "Beta distribution",
+                        "Cauchy distribution",
+                        "Logistic distribution",
+                        "Lognormal distribution",
+                        "Gamma distribution",
+                        "Weibull distribution",
+                        "Gumbel distribution"
+                    ]
+                },
+                "input_row": {
+                    "label": "number of samples(rows)",
+                    "type": "int",
+					"default":0
+                },
+                "input_seed": {
+                    "label": "seed",
+                    "info": "set random number generator seed",
+                    "type": "int",
+                    "default": 123
+                }
+            }
+        },
+        {
+            "label": "Normal distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_mean": {
+                    "label": "mean",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_stddev": {
+                    "label": "standard deviation",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "t distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_df": {
+                    "label": "degrees of freedom",
+                    "type": "int"
+                }
+            }
+        },
+        {
+            "label": "Chi-squared distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_df": {
+                    "label": "degrees of freedom",
+                    "type": "int"
+                }
+            }
+        },
+        {
+            "label": "F distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_df1": {
+                    "label": "Numerator degrees of freedom",
+                    "info": "for F distribution",
+                    "type": "int"
+                },
+                "input_df2": {
+                    "label": "Denominator degrees of freedom",
+                    "info": "for F distribution",
+                    "type": "int"
+                }
+            }
+        },
+        {
+            "label": "Exponential distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_rate": {
+                    "label": "rate",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "Uniform distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_min": {
+                    "label": "minimum",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_max": {
+                    "label": "maximum",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "Beta distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_shape1": {
+                    "label": "alpha (shape)",
+                    "type": "double"
+                },
+                "input_shape2": {
+                    "label": "beta (shape)",
+                    "type": "double"
+                }
+            }
+        },
+        {
+            "label": "Cauchy distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_location1": {
+                    "label": "location",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_scale1": {
+                    "label": "scale",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "Logistic distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_location2": {
+                    "label": "location",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_scale2": {
+                    "label": "scale",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "Lognormal distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_meanlog": {
+                    "label": "mean(log scale)",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_sdlog": {
+                    "label": "standard deviation(log scale)",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "Gamma distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_scale3": {
+                    "label": "scale",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_shape3": {
+                    "label": "shape",
+                    "type": "double"
+                }
+            }
+        },
+        {
+            "label": "Weibull distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_scale4": {
+                    "label": "scale",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_shape4": {
+                    "label": "shape",
+                    "type": "double"
+                }
+            }
+        },
+        {
+            "label": "Gumbel distribution",
+            "info": "Specify the parameter for the chosen distribution",
+            "collapsed": true,
+            "variables": {
+                "input_scale5": {
+                    "label": "scale",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_shape5": {
+                    "label": "shape",
+                    "type": "double"
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs the selected results",
+            "collapsed": false,
+            "variables": {
+                "output_col": {
+                    "label": "sample",
+                    "type": "output-column",
+                    "default": "sample"
+                },
+				"output_sample": {
+                    "label": "sample table",
+                    "type": "output-table"
+                }
+            }
+        }
+    ]
+}

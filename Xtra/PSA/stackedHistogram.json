@@ -1,0 +1,64 @@
+{
+    "label": "Stacked Histogram",
+    "info": "Stacked Histogram",
+    "categories": [
+        {
+            "label": "Input",
+            "variables": {
+                "visr.param.columns": {
+                    "label": "Columns to show on stacked histogram",
+                    "info": "variables selected for the analysis",
+                    "type": "multi-column",
+                    "min": 1
+                },
+                
+                "visr.param.sort1": {
+                    "label": "Sort by (1st)",
+                    "info": "1st column to sort the histogram by",
+                    "type": "column"
+                },
+                "visr.param.sort2": {
+                    "label": "Sort by (2nd)",
+                    "info": "2nd column to sort the histogram by",
+                    "type": "column"
+                },
+                "visr.param.sort3": {
+                    "label": "Sort by (3rd)",
+                    "info": "3rd column to sort the histogram by",
+                    "type": "column"
+                },
+                "visr.param.enableBinning": {
+                    "label": "bin numerical values",
+                    "info": "if true, the numerical values are binned before sorted",
+                    "type": "boolean",
+                    "default": true
+                }, 
+                "visr.param.numBins": {
+                    "label": "bin count",
+                    "type": "int",
+                    "info": "number of bins (if binning is enabled)",
+                    "default": 10
+                }
+            }
+        },
+        {
+            "label": "Plot",
+            "variables": {
+                "visr.param.leftMargin": {
+                    "label": "left margin",
+                    "type": "int",
+                    "info": "empty margin to the left of the plots",
+                    "default": 10,
+                    "min":1
+                },
+                "visr.param.labelCex": {
+                    "label": "label size",
+                    "type": "int",
+                    "info": "label font size",
+                    "default": 10,
+                    "min":1
+                }
+            }
+        }
+    ]
+}

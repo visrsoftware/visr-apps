@@ -1,0 +1,28 @@
+{
+    "label": "Friedman Rank Sum Test",
+    "info": "Performs a Friedman rank sum test with unreplicated blocked data.",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the test",
+            "collapsed": false,
+            "variables": {
+                "input_variable": {
+                    "label": "variable",
+                    "info": "Column selected to perform the test",
+                    "type": "column-numerical"
+                },
+                "input_groups": {
+                    "label": "grouping variable",
+                    "info": "grouping variable",
+                    "type": "column"
+                },
+                "input_blocks": {
+                    "label": "blocking variable",
+                    "info": "blocking variable",
+                    "type": "column"
+                }
+            }
+        }
+    ]
+}

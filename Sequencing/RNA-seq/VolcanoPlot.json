@@ -1,0 +1,77 @@
+{
+    "label": "Volcano plot",
+    "info": "A volcano plot is a scatter plot used when analysing micro-array data sets. The log fold change is plotted on the x-axis and the negative log10 p-value is plotted on the y-axis.",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters",
+            "collapsed": false,
+            "variables": {
+                "input_logfold": {
+                    "label": "log fold change",
+                    "type": "column-numerical"
+                },
+                "input_p": {
+                    "label": "p-value",
+                    "info": "p values or adjusted p values",
+                    "type": "column-numerical"
+                },
+                "input_label": {
+                    "label": "label",
+                    "info": "use the column as text labels",
+                    "type": "column"
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_cutlog": {
+                    "label": "log fold change cutoff",
+                    "type": "double",
+                    "default": 2
+                },
+                "input_highlight": {
+                    "label": "testing rule",
+                    "type": "string",
+                    "default": "Bonferroni",
+                    "items": [
+                        "Bonferroni",
+                        "FDR"
+                    ]
+                },
+                "input_cutp": {
+                    "label": "p-value cutoff",
+                    "type": "double",
+                    "default": 0.05
+                },
+                "input_alpha": {
+                    "label": "transparency",
+                    "info": "Alpha transparency for overlapping elements expressed as a fraction between 0 (complete transparency) and 1 (complete opacity)",
+                    "type": "double",
+                    "default": 0.4,
+                    "min": 0,
+                    "max": 1
+                },
+                "input_size": {
+                    "label": "size",
+                    "info": "the size of the points",
+                    "type": "double",
+                    "default": 1.75
+                },
+                "input_text": {
+                    "label": "text labels",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_textsize": {
+                    "label": "text size",
+                    "type": "double",
+                    "default": 1.2
+                }
+            }
+        }
+    ]
+}

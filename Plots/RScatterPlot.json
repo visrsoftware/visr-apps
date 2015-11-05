@@ -1,0 +1,79 @@
+{
+   "label":"R Scatter Plot",
+   "categories":[
+      {
+         "label":"Input",
+         "collapsed":false,
+         "variables":{
+            "input_x":{
+               "label":"X",
+               "type":"column-numerical"
+            },
+            "input_y":{
+               "label":"Y",
+               "type":"column-numerical"
+            }
+         }
+      },
+      {
+         "label":"Plot",
+         "collapsed":false,
+         "variables":{
+            "input_label":{
+               "label":"label",
+               "type":"column"
+            },
+            "input_color":{
+               "label":"color",
+               "type":"column"
+            },
+            "input_color_factor":{
+               "label":"color as factor",
+               "type":"boolean",
+               "default":false
+            },
+            "input_xscale":{
+               "label":"X Scale",
+               "type":"string",
+               "default":"comma",
+               "items":["comma","abbreviate", "scientific", "percent", "log2", "log10"]
+            }, 
+            "input_yscale":{
+               "label":"Y Scale",
+               "type":"string",
+               "default":"comma",
+               "items":["comma","abbreviate", "scientific", "percent", "log2", "log10"]
+            }, 
+            "input_point_alpha":{
+               "label":"point alpha",
+               "type":"double",
+               "default":1
+            },
+            "input_point_size":{
+               "label":"point size",
+               "type":"double",
+               "default":3
+            },
+            "input_text_size":{
+               "label":"text size",
+               "type":"int",
+               "default":15
+            },
+            "input_legend_title":{
+               "label":"legend",
+               "type":"string"
+            }, 
+            "input_title":{
+               "label":"plot title",
+               "type":"string"
+            }, 
+            "input_legend_position":{
+               "label":"legend position",
+               "type":"string",
+               "items":["bottom", "top", "left", "right"]
+            }
+         }
+      }
+   ]
+
+}

@@ -1,0 +1,56 @@
+{
+   "label":"edgeR",
+   "info":"edgeR",
+   "categories":[
+      {
+         "label":"Input Columns",
+         "info":"Input columns",
+         "variables":{
+            "input_group1":{
+               "label":"group1",
+               "type":"multi-column-numerical",
+               "min":1
+            },
+            "input_group2":{
+               "label":"group2",
+               "type":"multi-column-numerical",
+               "min":1
+            },
+            "input_adjust_method":{
+               "label":"adjust method",
+               "type":"string",
+               "default":"BH",
+               "items":["none", "BH", "fdr", "BY", "holm"]
+            },
+            "input_pvalue":{
+               "label":"p-value",
+               "type":"double",
+               "default":"0.05",
+               "min": 0,
+               "max": 1
+            },
+            "input_cpm_cutoff":{
+               "label":"cpm cutoff",
+               "type":"double",
+               "default":"1",
+               "min": 0
+            },
+            "input_isGLM":{
+               "label":"Use GLM",
+               "type":"boolean",
+               "default":false
+            }
+         }
+      },
+      {
+         "label":"Output Column Names",
+         "collapsed":false,
+         "variables":{
+            "output_decide":{
+               "label":"cluster id (de)",
+               "type":"output-column"
+            }
+         }
+      }
+   ]
+}

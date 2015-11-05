@@ -1,0 +1,54 @@
+{
+    "label": "Frequency Table",
+    "info": " builds a contingency table, expresses table entries as fraction of marginal table, computes table margins and plots a mosaic",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable(s)",
+                    "info": "variable(s) selected to build the frequency table",
+                    "type": "multi-column"
+                },
+                "input_margin": {
+                    "label": "table margin",
+                    "info": "For a contingency table in array form, compute the sum of table entries for each index.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_prop": {
+                    "label": "percentages",
+                    "info": "Express Table Entries as Fraction of Marginal Table",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": " Controls to spefify plotting parameter",
+            "collapsed": false,
+            "variables": {
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+					"default":"Frenquency Table"
+                },
+                "input_color": {
+                    "label": "colour",
+                    "info": " if true, uses a gamma-corrected grey palette, if false, gives empty boxes with no shading. Used only when shade is false.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_shade": {
+                    "label": "shade",
+                    "info": "a logical indicating whether to produce extended mosaic plots, or a numeric vector of at most 5 distinct positive numbers giving the absolute values of the cut points for the residuals.",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        }
+    ]
+}

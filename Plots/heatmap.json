@@ -1,0 +1,262 @@
+{
+    "label": "Heatmap",
+    "info": "Draws heatmap plots",
+    "libraries": [
+        "gplots",
+        "RColorBrewer"
+    ],
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify heatmap parameters",
+            "collapsed": false,
+            "variables": {
+                "visr.param.columns": {
+                    "label": "input",
+                    "info": "input column(s)",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                }
+            }
+        },
+        {
+            "label": "Normalization",
+            "info": "Controls to specify normalization",
+            "collapsed": true,
+            "variables": {
+                "visr.param.normalize": {
+                    "label": "normalization",
+                    "info": "normalization to be applied to the values for mapping colors: if log10(x), all values should be > 0; if log10(x+1), all values should be > -1",
+                    "type": "string",
+                    "default": "none",
+                    "items": [
+                        "none",
+                        "log10(x)",
+                        "log10(x+1)"
+                    ]
+                },
+                "visr.param.manualscaling": {
+                    "label": "clamp",
+                    "type": "boolean",
+                    "default": false
+                },
+                "visr.param.manualmin": {
+                    "label": "clamp min",
+                    "type": "double"
+                },
+                "visr.param.manualmax": {
+                    "label": "clamp max",
+                    "type": "double"
+                },
+                "visr.param.scale": {
+                    "label": "scale",
+                    "info": "indicates if the values should be centered and scaled in either the row direction or the column direction, or none. If scale='row' the rows are scaled to have mean zero and standard deviation one",
+                    "type": "string",
+                    "default": "none",
+                    "items": [
+                        "none",
+                        "row",
+                        "column"
+                    ]
+                },
+                "visr.param.narm": {
+                    "label": "remove missing data",
+                    "info": "indicates whether missing data (NA)'s should be removed",
+                    "type": "boolean",
+                    "default": true
+                }
+            }
+        },
+        {
+            "label": "Ordering",
+            "info": "Controls ordering options for rows and columns",
+            "collapsed": true,
+            "variables": {
+                "visr.param.dendrogram": {
+                    "label": "dendrogram",
+                    "info": "character string indicating whether to draw 'none', 'row', 'column' or 'both' dendrograms.",
+                    "type": "string",
+                    "default": "none",
+                    "items": [
+                        "both",
+                        "row",
+                        "column",
+                        "none"
+                    ]
+                },
+                "visr.param.sort_column": {
+                    "label": "sort column (if no dendogram on rows)",
+                    "type": "column-numerical",
+                    "info": "sort by one column, if row dendogram is off"
+                },
+                "visr.param.sort_decreasing": {
+                    "label": "sort from high to low",
+                    "info": "if true, sorting will be from highest value to lowest",
+                    "type": "boolean",
+                    "default": false
+                },
+                "visr.param.startIndex": {
+                    "label": "start index",
+                    "type": "int",
+                    "info": "start index counting from top (e.g. +1 is 1st element). use negative to count from bottom (e.g. -1 is last element)",
+                    "default": 1
+                },
+                "visr.param.endIndex":{
+                    "label": "end index",
+                    "info": "end index counting from top (e.g. +1 is 1st element). use negative to count from bottom (e.g. -1 is last element)",
+                    "type": "int",
+                    "default": -1
+                }
+            }
+        },
+        {
+            "label": "Labels",
+            "info": "Controls labeling parameters",
+            "collapsed": true,
+            "variables": {
+                "visr.param.label": {
+                    "label": "row labels",
+                    "info": "specifies which column to be used for the row labels",
+                    "type": "column"
+                },
+                "visr.param.srtRow": {
+                    "label": "row label rotation",
+                    "type": "int",
+                    "default": 0,
+                    "min": 0
+                },
+                "visr.param.rowLabelSize":{
+                    "label": "row label text size",
+                    "type": "double",
+                    "default": 1,
+                    "min": 0.01
+                },
+                "visr.param.labCol": {
+                    "label": "show column labels",
+                    "type": "boolean",
+                    "default": true
+                },
+                "visr.param.srtCol": {
+                    "label": "column labels rotation",
+                    "type": "int",
+                    "default": 30,
+                    "min": 0
+                },
+                "visr.param.colLabelSize":{
+                    "label": "column label text size",
+                    "type": "double",
+                    "default": 1.5,
+                    "min": 0.01
+                },
+                "visr.param.xlab": {
+                    "label": "x axis label",
+                    "type": "string"
+                },
+                "visr.param.ylab": {
+                    "label": "y axis label",
+                    "type": "string"
+                },
+                "visr.param.main": {
+                    "label": "main title",
+                    "type": "string",
+                    "default": ""
+                },
+                "visr.param.margin1": {
+                    "label": "bottom margin",
+                    "type": "double",
+                    "default": 5,
+                    "min": 0
+                },
+                "visr.param.margin2": {
+                    "label": "right margin",
+                    "type": "double",
+                    "default": 5,
+                    "min": 0
+                }
+            }
+        },
+        {
+            "label": "Color",
+            "info": "Controls color options",
+            "collapsed": true,
+            "variables": {
+                 "visr.param.color_map": {
+                    "label": "color map",
+                    "type": "multi-color",
+                    "info": "color map value",
+                    "default": "Red-Yellow-Blue 7"
+                },
+                "visr.param.colormap_count": {
+                    "label": "color count",
+                    "info" : "number of interpolated colors to generate in the color map",
+                    "type": "int",
+                    "default": 50,
+                    "min": 1
+                },
+                "visr.param.border": {
+                    "label": "add borders around cells",
+                    "type": "boolean",
+                    "default": false
+                },
+                "visr.param.bordercolor": {
+                    "label": "border color",
+                    "type": "color",
+                    "default": "#000000"
+                },
+                "visr.param.borderwidth": {
+                    "label": "border width",
+                    "type": "double",
+                    "default": 0.01
+                },
+                "visr.param.trace": {
+                    "label": "trace",
+                    "info": "character string indicating whether a solid trace line should be drawn across 'row's or down 'column's, 'both' or 'none'. The distance of the line from the center of each color-cell is proportional to the size of the measurement.",
+                    "type": "string",
+                    "default": "none",
+                    "items": [
+                        "none",
+                        "column",
+                        "row",
+                        "both"
+                    ]
+                },
+                "visr.param.tracecol": {
+                    "label": "trace color",
+                    "info": "gives the color for trace line",
+                    "type": "color",
+                    "default": "#00FFFF"
+                }
+            }
+        },
+        {
+            "label": "Color Key",
+            "info": "Controls the color key parameters",
+            "collapsed": true,
+            "variables": {
+                "visr.param.key": {
+                    "label": "show",
+                    "info": "logical indicating whether a color-key should be shown",
+                    "type": "boolean",
+                    "default": true
+                },
+                "visr.param.keysize": {
+                    "label": "size",
+                    "info": "the size of the color key",
+                    "type": "double",
+                    "default": 1.5
+                },
+                "visr.param.densityinfo": {
+                    "label": "key plot",
+                    "info": "the plot type to show in the color key",
+                    "type": "string",
+                    "default": "histogram",
+                    "items": [
+                        "histogram",
+                        "density",
+                        "none"
+                    ]
+                }
+            }
+        }
+    ]
+}

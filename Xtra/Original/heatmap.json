@@ -1,0 +1,115 @@
+{
+   "label":"Heatmap",
+   "info":"Draws heatmap plots",
+   "libraries":["ggplot2", "reshape2", "RColorBrewer", "seriation"],
+   "categories":[
+      {
+         "label":"Input",
+         "info":"Controls to specify Kmeans clustering parameters",
+         "collapsed":false,
+         "variables":{
+            "input_columns":{
+               "label":"input",
+               "info":"input column(s)",
+               "type":"multi-column-numerical",
+               "min":1
+            },
+            "input_normalize":{
+               "label":"normalize input",
+               "info":"if true, values will be normalized such that min=0, median=0.5, and max=1 before plotting",
+               "type":"boolean",
+               "default":true
+            },
+            "input_sort_column":{
+               "label":"sort column",
+               "type":"column-numerical"
+            },
+            "input_sort_decreasing":{
+               "label":"decreasing sort (high to low)",
+               "info":"if true, sorting will be from high to low",
+               "type":"boolean",
+               "default":false
+            }
+         }
+      },
+      {
+         "label":"Plot Options",
+         "info":"Controls to specify plotting parameters",
+         "collapsed":false,
+         "variables":{
+            "input_plot_title":{
+               "label":"plot title",
+               "type":"string",
+               "default":"heatmap plot"
+            },
+            "input_text_size":{
+               "label":"label size",
+               "type":"int",
+               "default":20
+            },
+            "input_color_low":{
+               "label":"color low",
+               "type":"color",
+               "info":"color for the minimum value",
+               "default":"#0000FF"
+            },
+            "input_color_mid":{
+               "label":"color mid",
+               "type":"color",
+               "info":"color for the midpoint value",
+               "default":"#FFFFFF"
+            },
+            "input_color_high":{
+               "label":"color high",
+               "type":"color",
+               "info":"color for the high value",
+               "default":"#FF0000"
+            },
+            "input_dendogram":{
+               "label":"dendogram",
+               "type":"string",
+               "default":"none",
+               "items":["none", "column", "row", "both"]
+            },
+            "input_rowOrdered":{
+               "label":"order dendogram",
+               "type":"boolean",
+               "default":false
+            },
+            "input_rowLabels":{
+               "label":"row labels",
+               "type":"boolean",
+               "default":false
+            },
+            "input_rowRotate":{
+               "label":"row rotate",
+               "type":"int",
+               "default":45,
+               "min": 0
+            },
+            "input_colLabels":{
+               "label":"column labels",
+               "type":"boolean",
+               "default":false
+            },
+            "input_colRotate":{
+               "label":"column rotate",
+               "type":"int",
+               "default":25,
+               "min": 0
+            },
+            "input_hasKey":{
+               "label":"show key",
+               "type":"boolean",
+               "default":false
+            },
+            "input_keySize":{
+               "label":"key size",
+               "type":"int",
+               "default":1
+            }
+         }
+      }
+   ]
+
+}

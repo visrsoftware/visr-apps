@@ -1,0 +1,28 @@
+{
+    "label": "Relative Log Expression (RLE)",
+    "info": "The log-ratio of the read count of each gene to the median read count across samples",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Columns to calculate RLE for",
+            "variables": {
+                "input_columns": {
+                    "label": "columns",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                }
+            }
+        },
+		{
+            "label": "Output Columns",
+            "collapsed": false,
+            "variables": {
+                "output_RLE": {
+                    "label": "Output Columns Prefix",
+                    "type": "output-multi-column",
+					"info": "RLE values of columns"
+                }
+            }
+        }
+    ]
+}

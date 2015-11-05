@@ -1,0 +1,126 @@
+{
+    "label": "Hierarchical Clustering",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the cluster analysis",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable",
+                    "info": "Columns selected to perform the analysis",
+                    "type": "multi-column-numerical"
+                },
+                "input_distmethod": {
+                    "label": "distance measure",
+                    "info": "the distance measure to be used",
+                    "type": "string",
+                    "default": "euclidean",
+                    "items": [
+                        "euclidean",
+                        "maximum",
+                        "manhattan",
+                        "canberra",
+                        "binary",
+                        "minkowski"
+                    ]
+                },
+                "input_clustmethod": {
+                    "label": "agglomeration method",
+                    "info": "the agglomeration method to be used",
+                    "type": "string",
+                    "default": "complete",
+                    "items": [
+                        "ward",
+                        "single",
+                        "complete",
+                        "average",
+                        "mcquitty",
+                        "median",
+                        "centroid"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "plotstage": {
+                    "label": " choice of plot",
+                    "info": "Which plot do you want to view?",
+                    "type": "string",
+                    "items": [
+                        "Cluster dendrogram labeled with cluster ID",
+                        "Cluster dendrogram",
+                        "boxplot"
+                    ]
+                },
+                "input_label": {
+                    "label": "labels",
+                    "info": "if true, the row names or row numbers of the original data are used as labels for the leaves of the tree; otherwise, no labels at all are plotted.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_hang": {
+                    "label": "hang",
+                    "info": "The fraction of the plot height by which labels should hang below the rest of the plot",
+                    "type": "double",
+                    "default": 0.1
+                },
+                "input_axes": {
+                    "label": "axes",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Cluster Dendrogram"
+                },
+                "input_sub": {
+                    "label": "subtitle",
+                    "type": "string"
+                },
+                "input_xlab": {
+                    "label": "horizontal axis",
+                    "type": "string"
+                },
+                "input_ylab": {
+                    "label": "vertical axis",
+                    "type": "string",
+                    "default": "Height"
+                },
+                "input_k": {
+                    "label": "k",
+                    "info": "an integer scalar or vector with the desired number of groups",
+                    "type": "int",
+                    "default": "1"
+                },
+                "input_h": {
+                    "label": "h",
+                    "info": "numeric scalar or vector with heights where the tree should be cut.",
+                    "type": "double",
+                    "default": "0"
+                },
+                "input_column": {
+                    "label": "table and boxplot",
+                    "info": "Column selected to produce the table and boxplot",
+                    "type": "multi-column-numerical"
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs column of the clustering",
+            "collapsed": false,
+            "variables": {
+                "output_cutree": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,67 @@
+{
+   "label":"Summary",
+   "info":"Basic summary about data",
+   "categories":[
+      {
+         "label": "Input",
+         "info": "Controls to specify heatmap parameters",
+         "collapsed": false,
+         "variables":{
+             "input_columns": {
+                 "label": "variable",
+                 "info": "Columns selected to perform the analysis",
+                 "type": "multi-column-numerical"
+             }
+         }
+      },
+      {
+         "label": "Plot",
+         "info": "Controls plot options",
+         "collapsed": false,
+         "variables": {
+            "input_color":{
+               "label":"color",
+               "type":"column"
+            },
+            "input_color_factor":{
+               "label":"color as factor",
+               "type":"boolean",
+               "default":false
+            },
+             "visr.param.color_map": {
+                "label": "color map",
+                "type": "multi-color",
+                "info": "color map value",
+                "default": "Red-Yellow-Blue 7"
+             },
+             "visr.param.point_shape": {
+                 "label": "point shape",
+                 "info": "the plotting symbols",
+                 "type": "string",
+                 "default": "filled circle",
+                 "items": [
+                     "filled circle",
+                     "circle"
+                 ]
+            },
+            "input_point_alpha":{
+               "label":"point alpha",
+               "type":"double",
+               "default":1,
+               "min": 0,
+               "max": 1
+            },
+            "input_point_size":{
+               "label":"point size",
+               "type":"double",
+               "default":5,
+               "min": 1
+            },
+            "input_title":{
+               "label":"plot title",
+               "type":"string"
+            }
+         }
+      }
+   ]
+}

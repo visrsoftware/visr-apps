@@ -1,0 +1,244 @@
+{
+    "label": "OmicCircos",
+    "info": "High-quality circular visualization of omics data",
+    "categories": [
+        {
+            "label": "Segments",
+            "info": "The segment data lay out the foundation of a circular graph and typically are used to draw the outmost anchor track. ",
+            "collapsed": false,
+            "variables": {
+                "input_name": {
+                    "label": "name",
+                    "info": "the segment or chromosome names",
+                    "type": "column"
+                },
+                "input_start": {
+                    "label": "start",
+                    "info": "the start positions of the segment",
+                    "type": "column"
+                },
+                "input_end": {
+                    "label": "end",
+                    "info": "the end positions of the segment",
+                    "type": "column"
+                },
+                "input_position": {
+                    "label": "position",
+                    "info": "the segment positions. If not specified, the start positions of the segment are used as positions",
+                    "type": "column"
+                }
+            }
+        },
+        {
+            "label": "Outmost anchor track",
+            "info": "Controls to specify parameters",
+            "collapsed": false,
+            "variables": {
+                "input_R0": {
+                    "label": "radius",
+                    "info": "integer, radius of the outmost anchor track",
+                    "type": "int",
+                    "default": 300
+                },
+                "input_scale0": {
+                    "label": "draw scale",
+                    "info": "draw scale?",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_printchrlab": {
+                    "label": "draw labels",
+                    "info": "draw chromosomes or segment labels?",
+                    "type": "boolean",
+                    "default": true
+                },
+				"input_cex_tick": {
+                    "label": "tick size",
+                    "type": "double",
+                    "default": 0.8
+                },
+				"input_cex_label": {
+                    "label": "label size",
+                    "type": "double",
+                    "default": 1.5
+                },
+                "input_alpha": {
+                    "label": "transparency",
+                    "type": "double",
+                    "default": 1
+                }
+            }
+        },
+        {
+            "label": "Inner track",
+            "info": "Controls to specify parameters",
+            "collapsed": false,
+            "variables": {
+                "input_values": {
+                    "label": "values",
+                    "info": "values to be drawn in the graph",
+                    "type": "multi-column"
+                },
+                "input_R": {
+                    "label": "radius",
+                    "info": "percentage, the circle radius",
+                    "type": "double",
+                    "default": 90
+                },
+                "input_type": {
+                    "label": "type",
+                    "info": "type of the plot",
+                    "type": "string",
+                    "items": [
+                        "b",
+                        "box",
+                        "l",
+                        "s",
+                        "h",
+                        "ms",
+                        "hist",
+                        "heatmap",
+                        "heatmap2",
+                        "ci95",
+                        "lh",
+                        "ls",
+                        "ml",
+                        "ml2",
+                        "ml3",
+                        "quant75",
+                        "quant90",
+                        "s.sd",
+                        "ss",
+                        "sv",
+                        "chr"
+                    ],
+                    "item-labels": [
+                        "bar charts",
+                        "box plots",
+                        "lines",
+                        "dots",
+                        "histograms",
+                        "multiple points",
+                        "polygons for multiple samples",
+                        "heatmaps",
+                        "heatmaps with genomic coordinates",
+                        "95% confidence interval lines",
+                        "horizontal lines",
+                        "lines in stair steps",
+                        "multiple lines (for more than 1 samples)",
+                        "multiple horizontal lines",
+                        "multiple lines in stair steps",
+                        "75% quantile lines",
+                        "90% quantile lines",
+                        "dots proportional to standard deviation",
+                        "dot sizes proportional to the values",
+                        "dot sizes proportional to the variances",
+                        "plots of chromosomes or segments"
+                    ]
+                },
+                "input_w": {
+                    "label": "circle width",
+                    "info": "percentage of the outermost anchor track as the circle width",
+                    "type": "double",
+                    "default": 10
+                },
+                "input_scale": {
+                    "label": "scale",
+                    "info": "draw scale?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_B": {
+                    "label": "background",
+                    "info": "draw background?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_lwd": {
+                    "label": "line width",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_colbar": {
+                    "label": "legend",
+                    "info": "draw legend for heatmap only",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_colbarpo": {
+                    "label": "legend position",
+                    "info": "legend position for heatmap",
+                    "type": "string",
+                    "default": "topleft",
+                    "items": [
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "topleft",
+                        "bottomright",
+                        "topright",
+                        "bottomleft"
+                    ]
+                },
+                "input_cutoff": {
+                    "label": "cutoff",
+                    "info": "for plot type multiple lines in stair steps only",
+                    "type": "double",
+                    "default": 0
+                }
+            }
+        },
+        {
+            "label": "Highlight",
+            "info": "Controls to specify parameters",
+            "collapsed": true,
+            "variables": {
+                "input_highlight": {
+                    "label": "highlight",
+                    "info": "Highlight part of the graph?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_hlcolshade": {
+                    "label": "shade color",
+                    "type": "color",
+                    "default": "#FFFF00"
+                },
+                "input_hlcolborder": {
+                    "label": "border color",
+                    "type": "color",
+                    "default": "#FF0000"
+                },
+                "input_hlinnerradius": {
+                    "label": "inner radius",
+                    "info": "percentage of the outermost anchor track as the inner radius",
+                    "type": "double",
+                    "default": 50
+                },
+                "input_hlouterradius": {
+                    "label": "outer radius",
+                    "info": "percentage of the outermost anchor track as the outer radius",
+                    "type": "double",
+                    "default": 100
+                },
+                "input_hlstartsegment": {
+                    "label": "start segment",
+                    "type": "int"
+                },
+                "input_hlendsegment": {
+                    "label": "end segment",
+                    "type": "int"
+                },
+                "input_hlstartposition": {
+                    "label": "start position",
+                    "type": "double"
+                },
+                "input_hlendposition": {
+                    "label": "end position",
+                    "type": "double"
+                }
+            }
+        }
+    ]
+}

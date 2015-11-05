@@ -1,0 +1,58 @@
+{
+    "label": "Student's t-Test",
+    "info": "Performs one and two sample t-tests on vectors of data.",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the t-test",
+            "collapsed": false,
+            "variables": {
+                "input_x": {
+                    "label": "variable 1",
+                    "info": "Column selected to perform the t-test on",
+                    "type": "column-numerical"
+                },
+                "input_y": {
+                    "label": "variable 2",
+                    "info": "Optional column selected to perform the t-test on",
+                    "type": "column-numerical"
+                },
+                "input_alternative": {
+                    "label": "alternative",
+                    "info": "the alternative hypothesis",
+                    "type": "string",
+                    "default": "two.sided",
+                    "items": [
+                        "two.sided",
+                        "less",
+                        "greater"
+                    ]
+                },
+                "input_mu": {
+                    "label": "mean",
+                    "info": "a number indicating the true value of the mean (or difference in means if you are performing a two sample test)",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_paired": {
+                    "label": "paired",
+                    "info": "a logical indicating whether you want a paired t-test",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_varequal": {
+                    "label": "pooled variance",
+                    "info": "a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_conflevel": {
+                    "label": "confidence level",
+                    "info": "confidence level of the interval",
+                    "type": "double",
+                    "default": 0.95
+                }
+            }
+        }
+    ]
+}

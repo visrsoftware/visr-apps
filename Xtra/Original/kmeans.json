@@ -1,0 +1,43 @@
+{
+   "label":"k-means",
+   "info":"Performs kmeans clustering on the data table",
+   "categories":[
+      {
+         "label":"k-means",
+         "info":"Controls to specify Kmeans clustering parameters",
+         "collapsed":false,
+         "variables":{
+            "cluster_input":{
+               "label":"input",
+               "info":"input column(s)",
+               "type":"multi-column-numerical",
+               "min":1
+            },
+            "cluster_k":{
+               "label":"k",
+               "type":"int",
+               "min":1,
+               "default":3
+            },
+            "cluster_algorithm":{
+               "label":"algorithm",
+               "info": "The algorithm used for clustering",
+               "type":"string",
+               "default":"MacQueen",
+               "items":["Hartigan-Wong","Lloyd","Forgy","MacQueen"]
+            }
+         }
+      },
+      {
+         "label":"Output Column Name",
+         "info":"Outputs column of the clustering",
+         "collapsed":false,
+         "variables":{
+            "cluster_id":{
+               "label":"cluster id",
+               "type":"output-column"
+            }
+         }
+      }
+   ]
+}

@@ -1,0 +1,89 @@
+{
+    "label": "Correlogram",
+    "info": "produces a graphical display of a correlation matrix",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the input",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variable(s)",
+                    "info": "variable(s) selected for plotting",
+                    "type": "multi-column-numerical"
+                },
+                "input_order": {
+                    "label": " order",
+                    "info": " Should variables be re-ordered? Use PCA for PCA-based re-ordering, OLO for optimal leaf ordering.",
+                    "type": "string",
+                    "default": "none",
+                    "items": [
+                        "PCA",
+                        "OLO",
+                        "none"
+                    ]
+                },
+                "input_type": {
+                    "label": "type",
+                    "info": " Use 'data' or 'cor' to explicitly specify that 'x' is data or a correlation matrix.",
+                    "type": "string",
+                    "items": [
+                        "data",
+                        "cor"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": " Controls to spefify plotting parameter",
+            "collapsed": false,
+            "variables": {
+                "input_lowerpanel": {
+                    "label": "lower panel",
+                    "info": "Separate panel functions used below the diagonal:panel.pie (the filled portion of the pie indicates the magnitude of the correlation); panel.shade (the depth of the shading indicates the magnitude of the correlation); panel.ellipse (confidence ellipse and smoothed line); panel.pts (scatterplot)",
+                    "type": "string",
+                    "default": "panel.shade",
+                    "items": [
+                        "panel.pie",
+                        "panel.shade",
+                        "panel.ellipse",
+                        "panel.pts"
+                    ]
+                },
+                "input_upperpanel": {
+                    "label": "upper panel",
+                    "info": "Separate panel functions used above the diagonal:panel.pie (the filled portion of the pie indicates the magnitude of the correlation); panel.shade (the depth of the shading indicates the magnitude of the correlation); panel.ellipse (confidence ellipse and smoothed line); panel.pts (scatterplot)",
+                    "type": "string",
+                    "default": "panel.pie",
+                    "items": [
+                        "panel.pie",
+                        "panel.shade",
+                        "panel.ellipse",
+                        "panel.pts"
+                    ]
+                },
+                "input_cormethd": {
+                    "label": "method",
+                    "info": "Correlation method to use in panel functions.",
+                    "type": "string",
+                    "default": "pearson",
+                    "items": [
+                        "pearson",
+                        "spearman",
+                        "kendall"
+                    ]
+                },
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Correlogram"
+                },
+                "input_sub": {
+                    "label": "subtitle",
+                    "type": "string"
+                }
+            }
+        }
+    ]
+}

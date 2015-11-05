@@ -1,0 +1,41 @@
+{
+    "label": "Pearson's Chi-squared Test for Count Data",
+    "info": "Performs chi-squared contingency table tests and goodness-of-fit tests",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the test",
+            "collapsed": false,
+            "variables": {
+                "input_x": {
+                    "label": "variable 1",
+                    "info": "Column selected to perform the test on",
+                    "type": "column"
+                },
+                "input_y": {
+                    "label": "variable 2",
+                    "info": "Column selected to perform the test",
+                    "type": "column"
+                },
+                "input_correct": {
+                    "label": "continuity correction",
+                    "info": "a logical indicating whether to apply continuity correction when computing the test statistic for 2 by 2 tables: one half is subtracted from all |O - E| differences; however, the correction will not be bigger than the differences themselves. No correction is done if simulate p-value = TRUE.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_simulatepvalue": {
+                    "label": "p-values by Monte Carlo simulation",
+                    "info": "a logical indicating whether to compute p-values by Monte Carlo simulation",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_B": {
+                    "label": "B",
+                    "info": "an integer specifying the number of replicates used in the Monte Carlo test",
+                    "type": "int",
+                    "default": 2000
+                }
+            }
+        }
+    ]
+}

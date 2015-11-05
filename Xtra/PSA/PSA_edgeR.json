@@ -1,0 +1,31 @@
+
+   {  "label":"PSA-edgeR", "categories":[
+      { "label": "Input", "variables": {
+            "visr.param.directory":         {"label":"Runs directory", "type":"filename", "mode": "dir", "default": "/runs/"}
+         }
+      } ,
+      { "label": "Count Up/Down", "variables": {
+            "visr.param.mdsColumnIndex":   {"label":"Column Index for MDS", "type":"int", "default": "1"}
+      }},
+      
+      { "label": "Output", "variables": {
+            "visr.param.summaryUpDown":   {"label":"Column Prefix for (#Up,#Down)", "type":"output-multi-column", "default": "sum_"},
+            "visr.param.recalc": { "label": "Recalculate everything", "type":"boolean", "default": "false" },
+            "visr.param.mdsMethod": {
+                    "label": "distance metric for MDS",
+                    "type": "string",
+                    "default": "manhattan",
+                    "items": [
+                        "euclidean",
+                        "maximum",
+                        "manhattan",
+                        "canberra",
+                        "binary",
+                        "minkowski",
+                        "hamming"
+                    ]
+                },
+            
+            "visr.output.summaryMDS":   {"label":"MDS column name", "type":"output-multi-column", "default": "mds_"}
+      }}
+   ]}

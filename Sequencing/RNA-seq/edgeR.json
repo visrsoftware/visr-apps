@@ -1,0 +1,211 @@
+{
+    "label": "edgeR",
+    "info": "edgeR - differential expression analyses of read counts arising from RNA-Seq, SAGE or similar technologies",
+    "categories": [
+        {
+            "label": "Basic Mode",
+            "info": "Controls to specify the parameters",
+            "variables": {
+                "input_group1": {
+                    "label": "Group 1",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_group2": {
+                    "label": "Group 2",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                }
+            }
+        },
+        {
+            "label": "Advanced Mode",
+            "info": "Controls to specify the parameters",
+            "collapsed": true,
+            "variables": {
+                "input_advanced": {
+                    "label": "Use advanced analysis?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_columns": {
+                    "label": "Samples",
+                    "info": "samples selected for analysis",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_group": {
+                    "label": "Samples grouping",
+                    "info": "How are the samples groups?",
+                    "type": "string",
+                    "default": "1,1,2,2"
+                }
+            }
+        },
+        {
+            "label": "Parameters",
+            "collapsed": true,
+            "variables": {
+                "input_method": {
+                    "label": "Method for differential test",
+                    "info": "Do you want to use generalized linearmodel likelihood ratio test, or exact test for deferential test? The exact test is only applicable to experiments with a single factor.",
+                    "type": "string",
+                    "default": "exact test",
+                    "items": [
+                        "exact test",
+                        "glm likelihood ratio test"
+                    ]
+                },
+                "input_cpm_cutoff": {
+                    "label": "CPM cutoff",
+                    "info": "filter out tags with very low counts and keep tags that are expressed at a reasonable level in at least one group",
+                    "type": "double",
+                    "default": "1",
+                    "min": 0
+                },
+                "input_normalizationmethod": {
+                    "label": "Normalization method",
+                    "info": "normalization method used to scale the raw library sizes",
+                    "type": "string",
+                    "default": "TMM",
+                    "items": [
+                        "TMM",
+                        "RLE",
+                        "upperquartile",
+                        "none"
+                    ]
+                },
+                "input_mdsmethod": {
+                    "label": "MDS plot method",
+                    "info": "Method used to compute distances between the samples for plotting",
+                    "type": "string",
+                    "default": "logFC",
+                    "items": [
+                        "logFC",
+                        "bcv"
+                    ]
+                },
+                "input_n": {
+                    "label": "Number of most significant tags",
+                    "info": "number of tags to display/return in the output",
+                    "type": "int",
+                    "default": 20
+                },
+                "input_pvalue": {
+                    "label": "P-value",
+                    "info": "give the desired size of the test of classification",
+                    "type": "double",
+                    "default": "0.05",
+                    "min": 0,
+                    "max": 1
+                },
+                "input_adjustmethod": {
+                    "label": "P-value adjustment method",
+                    "info": "specify p-value adjustment method",
+                    "type": "string",
+                    "default": "BH",
+                    "items": [
+                        "none",
+                        "BH",
+                        "fdr",
+                        "BY",
+                        "holm"
+                    ]
+                },
+                "input_foldchanges": {
+                    "label": "fold changes",
+                    "info": "draw lines indicating fold changes",
+                    "type": "double",
+                    "default": 2
+                }
+            }
+        },
+        {
+            "label": "Exact test",
+            "info": "parameters to specify for exact test",
+            "collapsed": true,
+            "variables": {
+                "input_pair": {
+                    "label": "pair",
+                    "info": "providing the pair of groups to be compared",
+                    "type": "string",
+                    "default": "1,2"
+                },
+                "input_trend": {
+                    "label": "trend",
+                    "info": "method for estimating dispersion trend",
+                    "type": "string",
+                    "default": "movinggave",
+                    "items": [
+                        "none",
+                        "movingave",
+                        "loess"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "GLM test",
+            "info": "parameters to specify for GLM likelihood ratio test",
+            "collapsed": true,
+            "variables": {
+                "input_ruvseq": {
+                    "label": "remove umwanted variation",
+                    "info": "Remove Unwanted Variation from RNA-Seq Data Using RUVSeq package",
+                    "type": "boolean",
+                    "default": false
+                },
+				"input_ruvn":{
+					"label":"number of significantly DE genes",
+					"info":"all but these top DE genes are used as negative control",
+					"type":"int",
+					"default":5000
+				},
+                "input_coef": {
+                    "label": "coefficient",
+                    "info": "integer indicating which coefficients of the linear model are to be tested equal to zero. Specify either coefficient or contrast.",
+                    "type": "int",
+                    "default": 2
+                },
+                "input_contrast": {
+                    "label": "contrast",
+                    "info": "specify one or more contrasts of the linear model coefficients to be tested equal to zero. Specify either coefficient or contrast.",
+                    "type": "string"
+                },
+                "input_experimentaldesign": {
+                    "label": "experimental design",
+                    "type": "string",
+                    "default": "simple",
+                    "items": [
+                        "simple",
+                        "full interaction",
+                        "blocking"
+                    ]
+                },
+                "input_prefactor1": {
+                    "label": "factor 1",
+                    "type": "string"
+                },
+                "input_prefactor2": {
+                    "label": "factor 2",
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "label": "Output",
+            "collapsed": false,
+            "variables": {
+                "output_decide": {
+                    "label": "Cluster IDs (DE)",
+                    "type": "output-column"
+                },
+                "output_normalized": {
+                    "label": "Normalized Counts (set CPM cutoff=0)",
+                    "type": "output-multi-column",
+					"info": "Normalized read counts"
+                }
+            }
+        }
+    ]
+}

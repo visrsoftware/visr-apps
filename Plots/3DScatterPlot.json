@@ -1,0 +1,107 @@
+{
+    "label": "3D Scatter Plot",
+    "categories": [
+        {
+            "label": "Input",
+            "collapsed": false,
+            "variables": {
+                "input_x": {
+                    "label": "X(explanatory variable)",
+                    "type": "column-numerical"
+                },
+                "input_y": {
+                    "label": "Y(explanatory variable)",
+                    "type": "column-numerical"
+                },
+                "input_z": {
+                    "label": "Z(response variable)",
+                    "type": "column-numerical"
+                },
+                "input_fit": {
+                    "label": "Regression plane",
+                    "info": "if true, fit a regression plane",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "collapsed": false,
+            "variables": {
+                "input_type": {
+                    "label": "type",
+                    "info": "character indicating the type of plot: p for points, l for lines, h for vertical lines to x-y-plane",
+                    "type": "string",
+                    "default": "p",
+                    "items": [
+                        "p",
+                        "l",
+                        "h"
+                    ],
+                    "item-labels": [
+                        "points",
+                        "lines ",
+                        "vertical lines"
+                    ]
+                },
+                "input_pch": {
+                    "label": "plotting character",
+                    "type": "double",
+                    "default": 16
+                },
+                "input_scaley": {
+                    "label": "scale",
+                    "info": "scale of y axis related to x- and z axis",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_angle": {
+                    "label": "angle",
+                    "info": "angle between x and y axis ",
+                    "type": "double",
+                    "default": 40
+                },
+                "input_highlight3d": {
+                    "label": "highlight 3d",
+                    "info": "points will be drawn in different colors related to y coordinates ",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_grid": {
+                    "label": "grid",
+                    "info": " whether a grid should be drawn on the plot.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_box": {
+                    "label": "box",
+                    "info": " whether a box should be drawn around the plot.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "3D Scatterplot"
+                },
+                "input_sub": {
+                    "label": "subtitle",
+                    "type": "string"
+                },
+                "input_xlab": {
+                    "label": "x axis",
+                    "type": "string"
+                },
+                "input_ylab": {
+                    "label": "y axis",
+                    "type": "string"
+                },
+                "input_zlab": {
+                    "label": "z axis",
+                    "type": "string"
+                }
+            }
+        }
+    ]
+}

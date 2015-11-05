@@ -1,0 +1,69 @@
+{
+    "label": "Correlation, Variance and Covariance (Matrices)",
+    "info": "computes the variance, the covariance or correlation, or scales a covariance matrix into the corresponding correlation matrix efficiently",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters",
+            "collapsed": false,
+            "variables": {
+                "input_choice": {
+                    "label": "choice",
+                    "info": "Computes variance, covariance, or correlation",
+                    "type": "string",
+                    "items": [
+                        "Variance",
+                        "Covariance",
+                        "Correlation",
+                        "cov2cor"
+                    ]
+                },
+                "input_x": {
+                    "label": "x",
+                    "info": "Columns selected",
+                    "type": "multi-column-numerical"
+                },
+                "input_narm": {
+                    "label": "remove missing values",
+                    "info": "Should missing values be removed?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_method": {
+                    "label": "method",
+                    "info": "indicates which correlation coefficient (or covariance) is to be computed",
+                    "type": "string",
+                    "default": "pearson",
+                    "items": [
+                        "pearson",
+                        "kendall",
+                        "spearman"
+                    ]
+                },
+                "input_use": {
+                    "label": "use",
+                    "info": "gives a method for computing covariances in the presence of missing values",
+                    "type": "string",
+                    "default": "everything",
+                    "items": [
+                        "everything",
+                        "all.obs",
+                        "complete.obs",
+                        "na.or.complete",
+                        "pairwise.complete.obs"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output",
+            "collapsed": false,
+            "variables": {
+                "output_co": {
+                    "label": "output table",
+                    "type": "output-table"
+                }
+            }
+        }
+    ]
+}

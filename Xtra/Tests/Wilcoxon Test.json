@@ -1,0 +1,70 @@
+{
+    "label": "Wilcoxon Rank Sum and Signed Rank Tests",
+    "info": "Performs one- and two-sample Wilcoxon tests on vectors of data; the latter is also known as ‘Mann-Whitney’ test.",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the test",
+            "collapsed": false,
+            "variables": {
+                "input_x": {
+                    "label": "variable 1",
+                    "info": "Column selected to perform the test on",
+                    "type": "column-numerical"
+                },
+                "input_y": {
+                    "label": "variable 2",
+                    "info": "Optional column selected to perform the test",
+                    "type": "column-numerical"
+                },
+                "input_alternative": {
+                    "label": "alternative",
+                    "info": "the alternative hypothesis",
+                    "type": "string",
+                    "default": "two.sided",
+                    "items": [
+                        "two.sided",
+                        "less",
+                        "greater"
+                    ]
+                },
+                "input_mu": {
+                    "label": "mean",
+                    "info": "a number specifying an optional parameter used to form the null hypothesis",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_paired": {
+                    "label": "paired",
+                    "info": "a logical indicating whether you want a paired test",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_exact": {
+                    "label": "exact p-value",
+                    "info": "a logical indicating whether an exact p-value should be computed. If not, a normal approximation is used.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_correct": {
+                    "label": "continuity correction",
+                    "info": "a logical indicating whether to apply continuity correction in the normal approximation for the p-value",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_confint": {
+                    "label": "confidence interval",
+                    "info": "a logical indicating whether a confidence interval should be computed",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_conflevel": {
+                    "label": "confidence level",
+                    "info": "confidence level of the interval",
+                    "type": "double",
+                    "default": 0.95
+                }
+            }
+        }
+    ]
+}

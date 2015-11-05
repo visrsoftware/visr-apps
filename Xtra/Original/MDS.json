@@ -1,0 +1,9 @@
+{ "label":"MDS", "categories":[
+   {"label":"input", "variables":{
+      "input_columns": { "type":"multi-column-numerical" }
+   }},
+   {"label":"output", "variables":{
+      "output_x": { "type":"output-column" },
+      "output_y": { "type":"output-column" }
+   }}
+]}

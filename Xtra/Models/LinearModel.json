@@ -1,0 +1,45 @@
+{
+    "label": "Linear Models",
+    "info": "Fit linear models",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_y": {
+                    "label": "response variable",
+                    "info": "response variable selected in the model",
+                    "type": "column",
+                    "min": 1
+                },
+                "input_columns": {
+                    "label": "explanatory variable(s)",
+                    "info": "explanatory variables selected in the model",
+                    "type": "multi-column",
+					"min": 1
+                },
+                "input_weights": {
+                    "label": "weights",
+                    "info": "if true, weighted least squares is used with weights weights (that is, minimizing sum(w*e^2))",
+                    "type": "column-numerical"
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs the selected results",
+            "collapsed": false,
+            "variables": {
+                "output_residuals": {
+                    "label": "residuals",
+                    "type": "output-column"
+                },
+                "output_fittedvalues": {
+                    "label": "fitted.values",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

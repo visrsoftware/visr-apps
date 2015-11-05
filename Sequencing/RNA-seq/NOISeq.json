@@ -1,0 +1,157 @@
+{
+    "label": "NOISeq",
+    "info": "NOISeq - Differential expression for RNA-seq data",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_sample1": {
+                    "label": "sample 1",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_sample2": {
+                    "label": "sample 2",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                }
+            }
+        },
+        {
+            "label": "Parameters",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_replicates": {
+                    "label": "replicates",
+                    "info": " the type of replicates to be used is defined",
+                    "type": "string",
+                    "default": "technical",
+                    "items": [
+                        "technical",
+                        "biological",
+                        "no"
+                    ]
+                },
+                "input_k": {
+                    "label": "k",
+                    "info": "Counts equal to 0 are replaced by k",
+                    "type": "double",
+                    "default": 0.5,
+                    "min": 0,
+                    "max": 1
+                },
+                "input_norm": {
+                    "label": "normalization method",
+                    "info": "Normalization method. It can be one of rpkm (default), uqua (upper quartile), tmm (trimmed mean of M) or n (no normalization).",
+                    "type": "string",
+                    "default": "rpkm",
+                    "items": [
+                        "rpkm",
+                        "uqua",
+                        "tmm",
+                        "n"
+                    ]
+                },
+                "input_lc": {
+                    "label": "length correction",
+                    "info": "Length correction is done by dividing expression by length^lc",
+                    "type": "double",
+                    "default": 0
+                },
+                "input_pnr": {
+                    "label": "pnr",
+                    "info": "Percentage of the total reads used to simulated each sample when no replicates are available.",
+                    "type": "double",
+                    "default": 0.2
+                },
+                "input_nss": {
+                    "label": "nss",
+                    "info": "Number of samples to simulate for each condition (nss>= 2).",
+                    "type": "int",
+                    "default": 5
+                },
+                "input_v": {
+                    "label": "variability",
+                    "info": "Variability in the simulated sample total reads.",
+                    "type": "double",
+                    "default": 0.02
+                },
+                "input_r": {
+                    "label": "resampling",
+                    "info": "Number of permutations to generate noise distribution by resampling",
+                    "type": "int",
+                    "default": 5
+                },
+                "input_adj": {
+                    "label": "smoothing parameter",
+                    "info": "Smoothing parameter for the Kernel Density Estimation of noise distribution. Higher values produce smoother curves.",
+                    "type": "double",
+                    "default": 1.5
+                },
+                "input_nclust": {
+                    "label": "number of clusters",
+                    "info": "Number of clusters for the K-means algorithm. Used when the number of replicates per condition is less than 5.",
+                    "type": "int",
+                    "default": 15
+                },
+                "input_filter": {
+                    "label": "filter",
+                    "info": "Method to filter out low count features before computing differential expression analysis. If filter=0, no filtering is performed. If 1, CPM method is applied. If 2, Wilcoxon test method (not recommended when the number of replicates per condition is less than 5), If 3, proportion test method.",
+                    "type": "int",
+                    "default": 1,
+                    "items": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "input_cv": {
+                    "label": "cv cutoff",
+                    "info": "Cutoff for the coefficient of variation per condition to be used in CPM filtering method.",
+                    "type": "double",
+                    "default": 500
+                },
+                "input_cpm": {
+                    "label": "cpm",
+                    "info": "Cutoff for the counts per million value to be used in CPM and proportion test filtering methods.",
+                    "type": "double",
+                    "default": 1
+                },
+                "input_q": {
+                    "label": "prabability threshold",
+                    "info": "Value for the probability threshold",
+                    "type": "double",
+                    "default": 0.95
+                }
+            }
+        },
+        {
+            "label": "Output Column Names",
+            "collapsed": false,
+            "variables": {
+                "deg": {
+                    "label": "DE genes",
+                    "info": "all the differentially expressed features",
+                    "type": "output-table"
+                },
+                "deg1": {
+                    "label": "DE genes 1",
+                    "info": "only the differentially expressed features that are more expressed in condition 1 than in condition 2",
+                    "type": "output-table"
+                },
+                "deg2": {
+                    "label": "DE genes 2",
+                    "info": "only the differentially expressed features that are under-expressed in condition 1 with regard to condition 2",
+                    "type": "output-table"
+                },
+				"output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                }
+            }
+        }
+    ]
+}

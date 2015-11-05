@@ -1,0 +1,236 @@
+{
+    "label": "DESeq",
+    "info": "DESeq - Differential gene expression analysis based on the negative binomial distribution",
+    "categories": [
+        {
+            "label": "DEseq - basic",
+            "info": "Controls to specify the parameters",
+            "variables": {
+                "input_group1": {
+                    "label": "group1",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_group2": {
+                    "label": "group2",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                }
+            }
+        },
+        {
+            "label": "DEseq - advanced",
+            "info": "Controls to specify the parameters",
+            "collapsed": true,
+            "variables": {
+                "input_advanced": {
+                    "label": "Use advanced analysis?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_columns": {
+                    "label": "samples",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_GLM": {
+                    "label": "two factor analysis",
+                    "info": "Do you want to perform a glm test with two factors?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_prefactor1": {
+                    "label": "factor 1",
+                    "info": "treatment conditions",
+                    "type": "string"
+                },
+                "input_prefactor2": {
+                    "label": "factor 2",
+                    "info": " factor to control - ignore if only have a single factor analysis",
+                    "type": "string"
+                },
+                "input_ruvseq": {
+                    "label": "remove umwanted variation",
+                    "info": "Remove Unwanted Variation from RNA-Seq Data Using RUVSeq package",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_ruvn":{
+                    "label":"number of significantly DE genes",
+                    "info":"all but these top DE genes are used as control",
+                    "type":"int",
+                    "default":5000
+                }
+            }
+        },
+        {
+            "label": "Parameters",
+            "info": "Controls to specify the parameters",
+            "collapsed": false,
+            "variables": {
+                "input_fdr": {
+                    "label": "FDR threshold",
+                    "info": "false discovery rate threshold",
+                    "type": "double",
+                    "default": 0.1,
+                    "min": 0,
+                    "max": 1
+                },
+                "input_dispersionmethod": {
+                    "label": "method",
+                    "type": "string",
+                    "default": "pooled",
+                    "items": [
+                        "blind",
+                        "pooled",
+                        "pooled-CR",
+                        "per-condition"
+                    ]
+                },
+                "input_dispersionsharingMode": {
+                    "label": "sharing mode",
+                    "type": "string",
+                    "default": "maximum",
+                    "items": [
+                        "maximum",
+                        "gene-est-only",
+                        "fit-only"
+                    ]
+                },
+                "input_dispersionfitType": {
+                    "label": "fit type",
+                    "type": "string",
+                    "default": "local",
+                    "items": [
+                        "local",
+                        "parametric"
+                    ]
+                },
+                "input_plot": {
+                    "label": "optional plots",
+                    "type": "string",
+                    "default": "",
+                    "items": [
+                        "",
+                        "heatmap for the 30 most highly expressed genes",
+                        "Heatmap of the sample-to-sample distances",
+                        "Principal component plot of the samples"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Plot Options<br>(single factor analysis)",
+            "info": "",
+            "collapsed": true,
+            "variables": {
+                "input_plotx": {
+                    "label": "x",
+                    "type": "string",
+                    "default": "baseMean",
+                    "items": [
+                        "baseMean",
+                        "baseMeanA",
+                        "baseMeanB",
+                        "foldChange",
+                        "log2FoldChange",
+                        "pval",
+                        "padj"
+                    ]
+                },
+                "input_ploty": {
+                    "label": "y",
+                    "type": "string",
+                    "default": "foldChange",
+                    "items": [
+                        "baseMean",
+                        "baseMeanA",
+                        "baseMeanB",
+                        "foldChange",
+                        "log2FoldChange",
+                        "pval",
+                        "padj"
+                    ]
+                },
+                "input_plotlog": {
+                    "label": "log scale",
+                    "type": "string",
+                    "default": "xy",
+                    "items": [
+                        "",
+                        "x",
+                        "y",
+                        "xy"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output Column Names<br>(single factor analysis)",
+            "collapsed": false,
+            "variables": {
+                "output_baseMean": {
+                    "label": "baseMean",
+                    "type": "output-column"
+                },
+                "output_baseMeanA": {
+                    "label": "baseMeanA",
+                    "type": "output-column"
+                },
+                "output_baseMeanB": {
+                    "label": "baseMeanB",
+                    "type": "output-column"
+                },
+                "output_foldChange": {
+                    "label": "fold Change",
+                    "type": "output-column"
+                },
+                "output_log2FoldChange": {
+                    "label": "log2 Fold Change",
+                    "type": "output-column"
+                },
+                "output_pval": {
+                    "label": "p value",
+                    "type": "output-column"
+                },
+                "output_padj": {
+                    "label": "adjusted p value (FDR)",
+                    "type": "output-column"
+                },
+                "output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                }
+            }
+        },
+        {
+            "label": "Output Column Names (two factor analysis)",
+            "collapsed": true,
+            "variables": {
+                "output_pval": {
+                    "label": "p value",
+                    "type": "output-column"
+                },
+                "output_padj": {
+                    "label": "adjusted p value (FDR)",
+                    "type": "output-column"
+                },
+                "output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                }
+            }
+        },
+        {
+            "label": "Normalized Counts",
+            "collapsed": true,
+            "variables": {
+                "normalizedCounts": {
+                    "label": "Name Prefix",
+                    "type": "output-multi-column",
+                    "info": "Normalized read counts"
+                }
+            }
+        }
+    ]
+}

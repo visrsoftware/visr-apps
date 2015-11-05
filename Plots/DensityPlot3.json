@@ -1,0 +1,63 @@
+{
+    "label": "Density Plot",
+    "info": "densityPlot contructs and graphs nonparametric density estimates for multiple variables.",
+    "categories": [
+        {
+            "label": "Input",
+            "info": "Controls to specify parameters of the Kernel density estimation",
+            "collapsed": false,
+            "variables": {
+                "input_column": {
+                    "label": "variable",
+                    "info": "Column selected to produce the numerical summary",
+                    "type": "multi-column-numerical"
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_legendlocation": {
+                    "label": "legend location",
+                    "info": "location for the legend when densities are plotted for several groups",
+                    "type": "string",
+                    "default": "topright",
+                    "items": [
+                        "bottomright",
+                        "bottom",
+                        "bottomleft",
+                        "left",
+                        "topleft",
+                        "top",
+                        "topright",
+                        "right",
+                        "center"
+                    ]
+                },
+				"input_transparency":{
+					"label":"transparency",
+					"type":"double",
+					"default":0.3,
+					"min":0,
+					"max":1
+				},
+                "input_main": {
+                    "label": "title",
+                    "type": "string",
+                    "default": "Density plot"
+                },
+                "input_xlab": {
+                    "label": "x axis",
+                    "type": "string"
+                },
+                "input_ylab": {
+                    "label": "y axis",
+                    "type": "string",
+                    "default": "Density"
+                }
+            }
+        }
+    ]
+}
