@@ -3,6 +3,18 @@
     "info": "edgeR - differential expression analyses of read counts arising from RNA-Seq, SAGE or similar technologies",
     "categories": [
         {
+            "label": "Mode",
+            "info": "Controls the mode for analysis",
+            "variables": {
+            "input_advanced": {
+                "label": "Use advanced analysis?",
+                "info": "Controls to specify the parameters",
+                "type": "boolean",
+                "default": false
+                }
+            }
+        },
+        {
             "label": "Basic Mode",
             "info": "Controls to specify the parameters",
             "variables": {
@@ -16,18 +28,14 @@
                     "type": "multi-column-numerical",
                     "min": 1
                 }
-            }
+            },
+            "active-condition": "input_advanced == false"
         },
         {
             "label": "Advanced Mode",
             "info": "Controls to specify the parameters",
             "collapsed": true,
             "variables": {
-                "input_advanced": {
-                    "label": "Use advanced analysis?",
-                    "type": "boolean",
-                    "default": false
-                },
                 "input_columns": {
                     "label": "Samples",
                     "info": "samples selected for analysis",
@@ -40,7 +48,8 @@
                     "type": "string",
                     "default": "1,1,2,2"
                 }
-            }
+            },
+            "active-condition": "input_advanced == true"
         },
         {
             "label": "Parameters",
@@ -142,7 +151,8 @@
                         "loess"
                     ]
                 }
-            }
+            },
+            "active-condition": "input_method == exact test"
         },
         {
             "label": "GLM test",
@@ -190,7 +200,8 @@
                     "label": "factor 2",
                     "type": "string"
                 }
-            }
+            },
+            "active-condition": "input_method == glm likelihood ratio test"
         },
         {
             "label": "Output",

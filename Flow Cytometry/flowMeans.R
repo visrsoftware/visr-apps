@@ -1,5 +1,5 @@
 source("visrutils.R")
-visr.library("flowMeans")
+visr.biocLite("flowMeans")
 visr.applyParameters()
 
 d <- subset(input_table, select = input_columns)

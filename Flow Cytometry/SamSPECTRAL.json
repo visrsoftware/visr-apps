@@ -46,10 +46,7 @@
                     "label": "estimate number of spectral clusters",
                     "info": "If TRUE, the number of spectral clusters is automatically computed",
                     "type": "boolean",
-                    "default": "true",
-                    "activate-list": [
-                        "input_number_of_clusters"
-                    ]
+                    "default": "true"
                 },
                 "input_number_of_clusters": {
                     "label": "number of clusters (if above unselected)",
@@ -57,7 +54,7 @@
                     "type": "int",
                     "default": "0",
                     "min": 0,
-                    "active": false
+                    "active-condition": "is_number_of_clusters_NA == false"
                 },
                 "input_do_sampling": {
                     "label": "do sampling",
@@ -81,10 +78,7 @@
                     "label": "estimate number of clusters for kmeans",
                     "info": "If TRUE, automatic estimation number of clusters for running kmeans algorithm based on eigen values curve",
                     "type": "boolean",
-                    "default": "true",
-                    "activate-list": [
-                        "input_k_for_kmeans"
-                    ]
+                    "default": "true"
                 },
                 "input_k_for_kmeans": {
                     "label": "k for kmeans (if above unselected)",
@@ -92,7 +86,7 @@
                     "type": "int",
                     "default": "0",
                     "min": 0,
-                    "active": false
+                    "active-condition": "is_k_for_kmeans_NA == false"
                 },
                 "input_m": {
                     "label": "m",
@@ -105,17 +99,14 @@
                     "label": "don't associate the number of spectral clusters with eigenvalues",
                     "info": "If TRUE, eigenvalues will not be used to determine the number of spectral clusters",
                     "type": "boolean",
-                    "default": "true",
-                    "activate-list": [
-                        "input_min_eigenvalue"
-                    ]
+                    "default": "true"
                 },
                 "input_min_eigenvalue": {
                     "label": "min eigenvalue (if above unselected)",
                     "info": "The number of spectral clusters is determined such that corresponding eigenvalues are larger than this threshold",
                     "type": "int",
                     "default": "0",
-                    "active": false
+                    "active-condition": "is_min_eigenvalue_NA == false"
                 },
                 "input_minimum_degree": {
                     "label": "min degree",

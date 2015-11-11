@@ -29,10 +29,7 @@
                     "label": "use min of data as per each variable",
                     "info": "If TRUE,  min count is the minimum of data as per each variable ",
                     "type": "boolean",
-                    "default": "false",
-                    "activate-list": [
-                        "input_min_count"
-                    ]
+                    "default": "false"
                 },
                 "input_min_count": {
                     "label": "min count (if above unselected)",
@@ -40,16 +37,13 @@
                     "type": "int",
                     "default": "10",
                     "min": 0,
-                    "active": true
+                    "active-condition": "is_min_count_NULL == false"
                 },
                 "is_max_count_NULL": {
                     "label": "use max of data as per each variable",
                     "info": "If TRUE,  max count is the minimum of data as per each variable ",
                     "type": "boolean",
-                    "default": "false",
-                    "activate-list": [
-                        "input_max_count"
-                    ]
+                    "default": "false"
                 },
                 "input_max_count": {
                     "label": "max count (if above unselected)",
@@ -57,7 +51,7 @@
                     "type": "int",
                     "default": "10",
                     "min": 0,
-                    "active": true
+                    "active-condition": "is_max_count_NULL == false"
                 },
                 "input_min": {
                     "label": "min (ex: 100,1,10,...)",
@@ -136,17 +130,14 @@
                     "label": "use outlier level as u_cutoff",
                     "info": "use the outlier level varible as u cutoff",
                     "type": "boolean",
-                    "default": "true",
-                    "activate-list": [
-                        "input_u_cutoff"
-                    ]
+                    "default": "true"
                 },
                 "input_u_cutoff": {
                     "label": "u_cutoff (if above unselected)",
                     "info": "criterion used to identify outliers to measure the degree of outlyingness based on the Mahalanobis distance",
                     "type": "double",
                     "default": "0.5",
-                    "active": false
+                    "active-condition": "is_u_cutoff_NULL == false"
                 },
                 "input_z_cutoff": {
                     "label": "z_cutoff",

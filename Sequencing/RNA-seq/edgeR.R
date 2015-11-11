@@ -347,7 +347,3 @@ generateRLE <- function (object) {
     print(capture.output(print(counts)),collapse='\n')
   }
 }}
-
-visr.output.summary<-list(c("DE down regulated",length(output_decide[output_decide < 0]),
-                          c("DE up regulated",length(output_decide[output_decide > 0])),
-                          c("DE none regulated",length(output_decide[output_decide == 0])))

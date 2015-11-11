@@ -1,6 +1,6 @@
 source("visrutils.R")
-visr.library("flowMerge")
-visr.library("flowClust")
+visr.biocLite("flowMerge")
+visr.biocLite("flowClust")
 visr.applyParameters()
 
 d <- subset(input_table, select = input_columns)

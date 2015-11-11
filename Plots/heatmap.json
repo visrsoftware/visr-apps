@@ -42,11 +42,13 @@
                 },
                 "visr.param.manualmin": {
                     "label": "clamp min",
-                    "type": "double"
+                    "type": "double",
+                    "active-condition": "visr.param.manualscaling == true"
                 },
                 "visr.param.manualmax": {
                     "label": "clamp max",
-                    "type": "double"
+                    "type": "double",
+                    "active-condition": "visr.param.manualscaling == true"
                 },
                 "visr.param.scale": {
                     "label": "scale",
@@ -123,13 +125,15 @@
                     "label": "row label rotation",
                     "type": "int",
                     "default": 0,
-                    "min": 0
+                    "min": 0,
+                    "active-condition": "visr.param.label == specified"
                 },
                 "visr.param.rowLabelSize":{
                     "label": "row label text size",
                     "type": "double",
                     "default": 1,
-                    "min": 0.01
+                    "min": 0.01,
+                    "active-condition": "visr.param.label == specified"
                 },
                 "visr.param.labCol": {
                     "label": "show column labels",
@@ -140,13 +144,15 @@
                     "label": "column labels rotation",
                     "type": "int",
                     "default": 30,
-                    "min": 0
+                    "min": 0,
+                    "active-condition": "visr.param.labCol == true"
                 },
                 "visr.param.colLabelSize":{
                     "label": "column label text size",
                     "type": "double",
                     "default": 1.5,
-                    "min": 0.01
+                    "min": 0.01,
+                    "active-condition": "visr.param.labCol == true"
                 },
                 "visr.param.xlab": {
                     "label": "x axis label",
@@ -201,12 +207,14 @@
                 "visr.param.bordercolor": {
                     "label": "border color",
                     "type": "color",
-                    "default": "#000000"
+                    "default": "#000000",
+                    "active-condition": "visr.param.border == true"
                 },
                 "visr.param.borderwidth": {
                     "label": "border width",
                     "type": "double",
-                    "default": 0.01
+                    "default": 0.01,
+                    "active-condition": "visr.param.border == true"
                 },
                 "visr.param.trace": {
                     "label": "trace",
@@ -224,7 +232,8 @@
                     "label": "trace color",
                     "info": "gives the color for trace line",
                     "type": "color",
-                    "default": "#00FFFF"
+                    "default": "#00FFFF",
+                    "active-condition": "visr.param.trace == specified"
                 }
             }
         },
@@ -243,7 +252,8 @@
                     "label": "size",
                     "info": "the size of the color key",
                     "type": "double",
-                    "default": 1.5
+                    "default": 1.5,
+                    "active-condition": "visr.param.key == true"
                 },
                 "visr.param.densityinfo": {
                     "label": "key plot",
@@ -254,7 +264,8 @@
                         "histogram",
                         "density",
                         "none"
-                    ]
+                    ],
+                    "active-condition": "visr.param.key == true"
                 }
             }
         }

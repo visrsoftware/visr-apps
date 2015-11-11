@@ -1,5 +1,5 @@
 source("visrutils.R")
-visr.library("SamSPECTRAL")
+visr.biocLite("SamSPECTRAL")
 visr.applyParameters()
 
 d <- subset(input_table, select = input_columns)
