@@ -1,6 +1,0 @@
-{ "label":"ScreePlot", "categories":[
-   {"label":"input", "variables":{
-      "input_columns": { "type":"multi-column-numerical" , "label":"variables"}
-   }}
-
-]}

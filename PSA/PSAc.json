@@ -1,7 +1,8 @@
 
    {  "label":"PSA-edgeR", "categories":[
       { "label": "Input", "variables": {
-            "visr.param.directory":         {"label":"Runs directory", "type":"filename", "mode": "dir", "default": "/runs/"}
+            "visr.param.directory":         {"label":"Runs directory", "type":"filename", "mode": "dir", "default": "/runs/"},
+            "visr.param.directory2":         {"label":"Compare algorithm directory (optional)", "type":"filename", "mode": "dir", "default": "/runs/"}
          }
       } ,
       { "label": "Count Up/Down", "variables": {
@@ -14,7 +15,7 @@
             "visr.param.mdsMethod": {
                     "label": "distance metric for MDS",
                     "type": "string",
-                    "default": "manhattan",
+                    "default": "euclidean",
                     "items": [
                         "euclidean",
                         "maximum",

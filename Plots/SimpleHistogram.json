@@ -1,4 +1,0 @@
-{ "categories":[{ "variables":{
-   "input_region":{"type":"column-numerical"},
-   "input_pvalue":{"type":"double","default":0.01,"max":0.5}
-}}]}

@@ -100,12 +100,12 @@
                 "visr.param.startIndex": {
                     "label": "start index",
                     "type": "int",
-                    "info": "start index counting from top (e.g. +1 is 1st element). use negative to count from bottom (e.g. -1 is last element)",
+                    "info": "start row index. Use positive value to count from top or negative value to count from bottom of the sorted rows. e.g. +1 is the top most row and -1 is the bottom most row after applying sorting/dendogram on the entire input data table.",
                     "default": 1
                 },
                 "visr.param.endIndex":{
                     "label": "end index",
-                    "info": "end index counting from top (e.g. +1 is 1st element). use negative to count from bottom (e.g. -1 is last element)",
+                    "info": "end row index. same rules apply as the start index above",
                     "type": "int",
                     "default": -1
                 }

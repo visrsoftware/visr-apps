@@ -17,10 +17,9 @@ visr.applyParameters()
 isRowDendogram = (visr.param.dendrogram == "both" || visr.param.dendrogram == "row")
 isColDendogram = (visr.param.dendrogram == "both" || visr.param.dendrogram == "column")
 
+columnLabels <- ""
 if (visr.param.labCol) {
-  visr.param.labCol <- visr.param.columns
-} else {
-  visr.param.labCol <- ""
+  columnLabels <- visr.param.columns
 }
 
 if (visr.param.main=="")
@@ -63,22 +62,22 @@ if (visr.param.narm) {
 
 heatmapMatrix <- heatmapMatrix[heatmapRows,]
 
-#### hierarchical clustering on rows
-hcRow <- NULL
-if (isRowDendogram) {
-  hcRow<-hclust(dist(heatmapMatrix))
-  heatmapRows <- heatmapRows[rev(hcRow$order)]
-}
-
 #### hierarchical clustering on columns
 hcCol <- NULL
 if (isColDendogram)
   hcCol<-hclust(dist(t(heatmapMatrix)))
 
-if (!isRowDendogram && visr.param.sort_column != "") {
+#### hierarchical clustering on rows
+hcRow <- NULL
+sortedHeatmapRows <- heatmapRows
+if (isRowDendogram) {
+  hcRow<-hclust(dist(heatmapMatrix))
+  sortedHeatmapRows <- heatmapRows[rev(hcRow$order)]
+} else if (visr.param.sort_column != "") {
   # sort the rows by the specified column
   heatmapRows <- heatmapRows[order(input_table[heatmapRows, visr.param.sort_column], decreasing=visr.param.sort_decreasing)]
   heatmapMatrix <- heatmapMatrix[heatmapRows,]
+  sortedHeatmapRows <- heatmapRows
 }
 
 
@@ -95,7 +94,7 @@ if (visr.param.startIndex < 1 || visr.param.endIndex > length(heatmapRows) || vi
 # check if the range has changed
 if (visr.param.startIndex > 1 || visr.param.endIndex < length(heatmapRows)) {
   # recalculate the range
-  heatmapRows <- heatmapRows[visr.param.startIndex:visr.param.endIndex]
+  heatmapRows <- sortedHeatmapRows[visr.param.startIndex:visr.param.endIndex]
   heatmapMatrix <- as.matrix(heatmapData)
   heatmapMatrix <- heatmapMatrix[heatmapRows,]
 
@@ -194,11 +193,11 @@ heatmap_color <- colorRampPalette(visr.param.color_map)(n = length(breaks)-1)
 ##################################
 
 visr.param.labRow <- visr.param.label
-heatmapLabelRows <- ""
+rowLabels <- ""
 if (visr.param.labRow != "") {
 	# get the row labels
-  #heatmapLabelRows <- subset(input_table, select = c(visr.param.columns, visr.param.label))
-  heatmapLabelRows <- input_table[heatmapRows, visr.param.label]
+  #rowLabels <- subset(input_table, select = c(visr.param.columns, visr.param.label))
+  rowLabels <- input_table[heatmapRows, visr.param.label]
 }
 
 if(visr.param.key == FALSE)
@@ -276,8 +275,8 @@ heatmapResult <-
     cexCol = visr.param.colLabelSize,
     #cexRow = 0.2 + 1/log10(nr),
     #cexCol = 0.2 + 1/log10(nc),
-    labRow = heatmapLabelRows,
-    labCol = visr.param.labCol,
+    labRow = rowLabels,
+    labCol = columnLabels,
     srtRow = visr.param.srtRow,
     srtCol = visr.param.srtCol,
     #adjRow = c(0,NA),

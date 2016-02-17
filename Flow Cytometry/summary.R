@@ -23,8 +23,13 @@ final_color <- "black"
 if(input_color != "") {
 	if(input_color_factor) {
 		palette(visr.param.color_map)
-		input_color_modified <- as.factor(inputtable[,input_color])
-		final_color <- input_color_modified
+		factor <- as.factor(inputtable[,input_color])
+		if(typeof(inputtable[,input_color]) == "character") {
+			input_color_modified <- as.numeric(factor)
+		} else {
+			input_color_modified <- factor
+		}
+	final_color <- input_color_modified
 	} else {
 		input_color_modified <- inputtable[,input_color]
 		heatmap_color <- colorRampPalette(visr.param.color_map)(n = length(input_color_modified)-1)
