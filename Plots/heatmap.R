@@ -5,13 +5,9 @@ visr.library("gplots")
 visr.library("RColorBrewer")
 visr.library("functional")
 
-#input_table <- read.table("~/Downloads/R42_Timecourse_Zscores7filtered\ for\ D1\ and\ D3mir-snordFiltered.txt", header=T,sep="\t",check.names=F)
-#input_table <- read.table("~/Research/svn/Projects/GeneCalc/Distribution/data/Muscle.txt", header=T,sep="\t",check.names=F)
-
-#visr.param.columns<-c("Tom-dmg-d1.FPKM","Tom-dmg-d2.FPKM","Tom-dmg-d3.FPKM","Tom-dmg-d4.FPKM","Tom-dmg-d5.FPKM","Tom-dmg-d7.FPKM","Tom-dmg-d10.FPKM","Tom-dmg-d14.FPKM")
-#visr.param.columns<-c("WholeMuscle","MusclePellet","Linminus","Linplus","LinSca1minus","LinSca1plus")
 
 ### Exporting parameters to R environment...
+#visr.readInputTable("~/Research/Data/PSA/LTRs.txt");
 visr.applyParameters()
 
 isRowDendogram = (visr.param.dendrogram == "both" || visr.param.dendrogram == "row")
@@ -144,10 +140,21 @@ if (visr.param.normalize == "log10(x)" || visr.param.normalize == "log10(x+1)") 
 if (!visr.param.manualscaling) {
   minData <- min(heatmapMatrix)
   maxData <- max(heatmapMatrix)
-  if (head(breaks,1) > minData)
+  minBreak <- min(breaks)
+  if (head(breaks,1) > minData) {
+    if (head(breaks,1) - minData < minBreak) {
+      breaks = breaks[-1]
+    }
     breaks=append(breaks, minData, 0)
-  if (tail(breaks,1) < maxData)
+  }
+
+  if (tail(breaks,1) < maxData) {
+    if (maxData - tail(breaks,1) < minBreak) {
+      # to avoid very small breaks due to the rounding errors. which will cause the error: "Error in seq.default(min.raw, max.raw, by = min(diff(breaks)/4)) : 'by' argument is much too small"
+      breaks = breaks[-length(breaks)]
+    }
     breaks = append(breaks, maxData)
+  }
 }
 heatmap_color <- colorRampPalette(visr.param.color_map)(n = length(breaks)-1)
 

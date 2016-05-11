@@ -129,4 +129,35 @@ visr.getHomeLibPath <- function()
   return(paste(visr.getHomeDir(),"/VisRseq/RLibs",sep=""))
 }
 
+#the function currently wraps print so that it doesn't print in VisRseq causing the SIGPIPE error.
+visr.print<-function(msg) {
+  if (!visr.isGUI())
+    print(msg)
+}
+
+# utility function to open data tables with corrected column names for debugging within R studio.
+visr.readInputTable <-function(file) {
+  input.table <<- read.csv(file, sep = "\t", check.names = F)
+  colnames(input.table) <- make.names(gsub("[^a-zA-Z0-9_]", "_", colnames(input.table)))
+  input_table <<- input.table
+  return (input.table)
+}
+
+visr.setLogDir <- function(logDir) {
+  visr.var.logDir <<- logDir;
+  if (nchar(logDir) > 0) {
+    sinkFile <- file(paste(logDir,"/all.txt",sep=""), open = "wt")
+    sink(sinkFile)
+    sink(sinkFile, type = "message")
+    #print(date())
+  } else {
+    ## back to the console
+    if (sink.number() > 0) {
+      #print(date())
+      sink(type = "message")
+      sink()
+    }
+  }
+}
+
 #.libPaths(c(visr.getHomeLibPath(), .libPaths()))
