@@ -1,13 +1,28 @@
-
-   {  "label":"kmeans", "categories":[
-      { "variables":{
-         "param.columns":   {"type":"multi-column-numerical" },
-         "param.k":         {"type":"int", "default":3 },
-         "param.algorithm": {"items":["Hartigan-Wong", "Lloyd",
-                                      "Forgy", "MacQueen"]},
-         "param.plot.title":{"default":"kmeans result"},
-         "output.clusterid":{"type":"output-column"}
-      }}
-   ]}
-
-
+{
+  "label": "kmeans",
+  "info": "",
+  "categories":[  {
+    "label": "",
+    "info": "",
+    "variables": {
+      "visr.param.columns": {
+        "type": "multi-column-numerical"
+      },
+      "visr.param.k": {
+        "type": "int",
+        "default": 3
+      },
+      "visr.param.algorithm": {
+        "type": "string",
+        "items": [ "Hartigan-Wong","Lloyd","Forgy","MacQueen" ]
+      },
+      "visr.param.plot.title": {
+        "type": "string",
+        "default": "kmeans results"
+      },
+      "visr.param.output.clusterid": {
+        "type": "output-column"
+      }
+    }
+  }]
+}

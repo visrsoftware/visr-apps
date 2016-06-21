@@ -1,0 +1,20 @@
+{
+  "label": "edgeR",
+  "info": "",
+  "categories":[  {
+    "label": "",
+    "info": "",
+    "variables": {
+      "visr.param.group1": {
+        "type": "multi-column-numerical"
+      },
+      "visr.param.group2": {
+        "type": "multi-column-numerical"
+      },
+      "visr.param.output.de": {
+        "label": "DE clusters",
+        "type": "output-column"
+      }
+    }
+  }]
+}

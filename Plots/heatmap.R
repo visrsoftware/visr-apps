@@ -5,9 +5,7 @@ visr.library("gplots")
 visr.library("RColorBrewer")
 visr.library("functional")
 
-
 ### Exporting parameters to R environment...
-#visr.readInputTable("~/Research/Data/PSA/LTRs.txt");
 visr.applyParameters()
 
 isRowDendogram = (visr.param.dendrogram == "both" || visr.param.dendrogram == "row")
@@ -41,12 +39,18 @@ if (length(visr.param.columns) == 1)
 heatmapData <- subset(input_table, select = visr.param.columns)
 heatmapMatrix <- as.matrix(heatmapData)
 
+if (visr.param.scale == "rows-> mean(0) sd(1)") {
+  heatmapMatrix <- (heatmapMatrix - rowMeans(heatmapMatrix)) / apply(heatmapMatrix, 1, sd)
+} else if (visr.param.scale == "columns-> mean(0) sd(1)") {
+  heatmapMatrixT <- t(heatmapMatrix)
+  heatmapMatrix <- t((heatmapMatrixT - rowMeans(heatmapMatrixT)) / apply(heatmapMatrixT, 1, sd))
+}
+  
+
 if (isRowDendogram && nrow(input_table) > 10000) {
   #TODO: use fastcluster for large tables. https://cran.r-project.org/web/packages/fastcluster/fastcluster.pdf
   visr.message(paste("You have requested row dendogram for a large number of rows (", nrow(input_table), "). This may take a while. Continue (ignore)?"), type="error")
 }
-
-#debug: heatmapMatrix[1,] <- NA
 
 heatmapRows <- c(1 : nrow(heatmapMatrix))
 
@@ -66,6 +70,7 @@ if (isColDendogram)
 #### hierarchical clustering on rows
 hcRow <- NULL
 sortedHeatmapRows <- heatmapRows
+
 if (isRowDendogram) {
   hcRow<-hclust(dist(heatmapMatrix))
   sortedHeatmapRows <- heatmapRows[rev(hcRow$order)]
@@ -75,7 +80,6 @@ if (isRowDendogram) {
   heatmapMatrix <- heatmapMatrix[heatmapRows,]
   sortedHeatmapRows <- heatmapRows
 }
-
 
 # subset of rows between startIndex and endIndex
 if (visr.param.startIndex < 0)
@@ -87,15 +91,34 @@ if (visr.param.endIndex < 0)
 if (visr.param.startIndex < 1 || visr.param.endIndex > length(heatmapRows) || visr.param.startIndex > visr.param.endIndex)
   visr.message(paste("Invalid range Indices start index = ", visr.param.startIndex , ", end index = ", visr.param.endIndex), type="error")
 
+
+if (visr.param.showRowTicks) {
+  rowIndexLabels<-rep("", nrow(input_table))
+  rowIndexLabels[sortedHeatmapRows] <- as.character(seq(1, length(sortedHeatmapRows)))
+  rowIndexLabels[-sortedHeatmapRows[c(visr.param.startIndex, visr.param.endIndex, seq(0, length(sortedHeatmapRows),visr.param.rowTickInterval))]] <- "    "
+}
+
+if (nchar(visr.output.orderIndex) > 0) { # an output column name specified
+  visr.output.orderIndex <- rep(-1, nrow(input_table))
+  visr.output.orderIndex[sortedHeatmapRows] <- seq(1, length(sortedHeatmapRows))
+}
+
 # check if the range has changed
 if (visr.param.startIndex > 1 || visr.param.endIndex < length(heatmapRows)) {
   # recalculate the range
   heatmapRows <- sortedHeatmapRows[visr.param.startIndex:visr.param.endIndex]
   heatmapMatrix <- as.matrix(heatmapData)
   heatmapMatrix <- heatmapMatrix[heatmapRows,]
+  sortedHeatmapRows <- heatmapRows
 
   if (isRowDendogram) {
-    hcRow<-hclust(dist(heatmapMatrix))
+    if (visr.param.reorderRows) {
+      hcRow<-hclust(dist(heatmapMatrix))
+    } else {
+      # don't apply a dendrogram as it will reorder
+      hcRow<-NULL
+      isRowDendogram <- FALSE
+    }
   }
 }
 
@@ -111,12 +134,12 @@ if (exists("breaks"))
 minData <- min(heatmapMatrix)
 maxData <- max(heatmapMatrix)
 
-if (visr.param.manualscaling == TRUE) {  #if clamp(), update minData/ maxData with input clamp min/max
-  if (visr.param.manualmin >= visr.param.manualmax)
+if (visr.param.clampvalues == TRUE) {  #if clamp(), update minData/ maxData with input clamp min/max
+  if (visr.param.clampmin >= visr.param.clampmax)
     visr.message("'clamp max' should be greater than 'clamp min'", type="error")
 
-  minData <- visr.param.manualmin
-  maxData <- visr.param.manualmax
+  minData <- visr.param.clampmin
+  maxData <- visr.param.clampmax
 }
 
 #create breaks for color map
@@ -137,74 +160,41 @@ if (visr.param.normalize == "log10(x)" || visr.param.normalize == "log10(x+1)") 
 
 # if not clamping, append breaks with the actual min and max;
 # otherwise, clamp with the input clamp min and max
-if (!visr.param.manualscaling) {
+if (!visr.param.clampvalues) {
   minData <- min(heatmapMatrix)
   maxData <- max(heatmapMatrix)
-  minBreak <- min(breaks)
+  minBreak <- min(lapply(list(breaks), diff)[[1]]) # get the minimum diff between the breaks
   if (head(breaks,1) > minData) {
     if (head(breaks,1) - minData < minBreak) {
-      breaks = breaks[-1]
+      breaks = breaks[-1] # remove the first break element
     }
-    breaks=append(breaks, minData, 0)
+    breaks=append(breaks, minData, 0) # append to the start
   }
 
   if (tail(breaks,1) < maxData) {
     if (maxData - tail(breaks,1) < minBreak) {
       # to avoid very small breaks due to the rounding errors. which will cause the error: "Error in seq.default(min.raw, max.raw, by = min(diff(breaks)/4)) : 'by' argument is much too small"
-      breaks = breaks[-length(breaks)]
+      breaks = breaks[-length(breaks)] # remove the last break element
     }
-    breaks = append(breaks, maxData)
+    breaks = append(breaks, maxData) # append to end
   }
 }
 heatmap_color <- colorRampPalette(visr.param.color_map)(n = length(breaks)-1)
 
-
-
-#fnorm<-function(x) {
-#  return (pmin((x-min(x))/(2*(median(x)-min(x))), 1.0))
-#}
-#
-#if (visr.param.normalize == "linear [0 .. 1]") {
-#  heatmapMatrix<-apply(heatmapMatrix, 2, fnorm)
-#}
-#
-#if(visr.param.normalize == "log10(x)") {
-#  for(i in 1:ncol(heatmapMatrix)) {
-#    if (is.numeric(heatmapMatrix[,i]))
-#      heatmapMatrix[,i] <- log10(heatmapMatrix[,i])
-#  }
-#}
-#else if(visr.param.normalize == "log10(x+1)") {
-#  for(i in 1:ncol(heatmapMatrix)) {
-#    if (is.numeric(heatmapMatrix[,i]))
-#      heatmapMatrix[,i] <- log10(heatmapMatrix[,i]+1)
-#  }
-#}
-#heatmapMatrix <- data.matrix(heatmapMatrix[apply(heatmapMatrix, 1, Compose(is.finite, all)),])
-
-#if (visr.param.manualscaling == TRUE) {
-#  heatmapMatrix[heatmapMatrix <= visr.param.manualmin] = visr.param.manualmin
-#  heatmapMatrix[heatmapMatrix >= visr.param.manualmax] = visr.param.manualmax
-#}
-
-#if (visr.param.label == "")
-#{
-#  visr.param.labRow <- ""
-#   m_1 <- heatmapMatrix
-#} else {
-#
-#}
-
 ##################################
-#  Color labels
+#  row labels
 ##################################
 
 visr.param.labRow <- visr.param.label
 rowLabels <- ""
 if (visr.param.labRow != "") {
-	# get the row labels
-  #rowLabels <- subset(input_table, select = c(visr.param.columns, visr.param.label))
+  # get the row labels
   rowLabels <- input_table[heatmapRows, visr.param.label]
+}
+
+if (visr.param.showRowTicks) {
+  rowTickLabels <- rowIndexLabels[heatmapRows]
+  rowLabels <- paste(rowTickLabels, rowLabels, sep = "   ")
 }
 
 if(visr.param.key == FALSE)
@@ -218,6 +208,11 @@ layout(mat = rbind(4:3,2:1), widths = c(1.5,4), heights = c(1.5,4))
 if (!visr.param.border) {
   visr.param.bordercolor<-"#00000000"
 }
+
+
+##################################
+#  Draw heatmap
+##################################
 
 dendogramRow <- FALSE
 dendogramCol <- FALSE
@@ -236,11 +231,11 @@ heatmapResult <-
     Colv = dendogramCol, #isColDendogram,
     #distfun = dist,
     #hclustfun = hclust,
-    dendrogram = visr.param.dendrogram,
+    dendrogram = ifelse(isRowDendogram, ifelse(isColDendogram, "both","row"), ifelse(isColDendogram, "column", "none")),
     #symm = visr.param.symm,
 
     # data scaling
-    scale = visr.param.scale,
+    scale = "none", #visr.param.scale,
     na.rm= visr.param.narm,
 
     # image plot
@@ -249,7 +244,7 @@ heatmapResult <-
 
     # mapping data to colors
     #breaks = visr.param.breaks,
-	  breaks=breaks,
+    breaks=breaks,
     #symbreaks= visr.param.symbreaks,
 
     # colors
@@ -303,7 +298,7 @@ heatmapResult <-
     main = visr.param.main,
     xlab = visr.param.xlab,
     ylab = visr.param.ylab,
-	  key.xlab="value", key.ylab="count", key.title = "",
+    key.xlab="value", key.ylab="count", key.title = "",
 
     #key.xtickfun = function() {
     #return (list (at    = parent.frame()$scale01(c(key.breaks[1],key.breaks[length(key.breaks)])),

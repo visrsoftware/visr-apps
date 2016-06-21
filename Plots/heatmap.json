@@ -24,8 +24,19 @@
             "info": "Controls to specify normalization",
             "collapsed": true,
             "variables": {
+                "visr.param.scale": {
+                    "label": "scale data",
+                    "info": "indicates if the values should be centered and scaled in either the row direction or the column direction, or none. If scale='row' the rows are scaled to have mean zero and standard deviation one",
+                    "type": "string",
+                    "default": "none",
+                    "items": [
+                        "none",
+                        "rows-> mean(0) sd(1)",
+                        "columns -> mean(0) sd(1)"
+                    ]
+                },
                 "visr.param.normalize": {
-                    "label": "normalization",
+                    "label": "color map normalization",
                     "info": "normalization to be applied to the values for mapping colors: if log10(x), all values should be > 0; if log10(x+1), all values should be > -1",
                     "type": "string",
                     "default": "none",
@@ -35,31 +46,20 @@
                         "log10(x+1)"
                     ]
                 },
-                "visr.param.manualscaling": {
-                    "label": "clamp",
+                "visr.param.clampvalues": {
+                    "label": "clamp values before color mapping",
                     "type": "boolean",
                     "default": false
                 },
-                "visr.param.manualmin": {
+                "visr.param.clampmin": {
                     "label": "clamp min",
                     "type": "double",
-                    "active-condition": "visr.param.manualscaling == true"
+                    "active-condition": "visr.param.clampvalues == true"
                 },
-                "visr.param.manualmax": {
+                "visr.param.clampmax": {
                     "label": "clamp max",
                     "type": "double",
-                    "active-condition": "visr.param.manualscaling == true"
-                },
-                "visr.param.scale": {
-                    "label": "scale",
-                    "info": "indicates if the values should be centered and scaled in either the row direction or the column direction, or none. If scale='row' the rows are scaled to have mean zero and standard deviation one",
-                    "type": "string",
-                    "default": "none",
-                    "items": [
-                        "none",
-                        "row",
-                        "column"
-                    ]
+                    "active-condition": "visr.param.clampvalues == true"
                 },
                 "visr.param.narm": {
                     "label": "remove missing data",
@@ -80,14 +80,14 @@
                     "type": "string",
                     "default": "none",
                     "items": [
-                        "both",
+                        "none",
                         "row",
                         "column",
-                        "none"
+                        "both"
                     ]
                 },
                 "visr.param.sort_column": {
-                    "label": "sort column (if no dendogram on rows)",
+                    "label": "sort by column (if no dendogram on rows)",
                     "type": "column-numerical",
                     "info": "sort by one column, if row dendogram is off"
                 },
@@ -98,16 +98,39 @@
                     "default": false
                 },
                 "visr.param.startIndex": {
-                    "label": "start index",
+                    "label": "top row index",
                     "type": "int",
-                    "info": "start row index. Use positive value to count from top or negative value to count from bottom of the sorted rows. e.g. +1 is the top most row and -1 is the bottom most row after applying sorting/dendogram on the entire input data table.",
+                    "info": "Use positive value to count from top or negative value to count from bottom of the sorted rows. e.g. +1 is the top most row and -1 is the bottom most row after applying sorting/dendogram on the entire input data table.",
                     "default": 1
                 },
                 "visr.param.endIndex":{
-                    "label": "end index",
-                    "info": "end row index. same rules apply as the start index above",
+                    "label": "bottom row index",
+                    "info": "Same rules apply as the start row index above",
                     "type": "int",
                     "default": -1
+                },
+                "visr.param.showRowTicks": {
+                    "label": "show ordered row indices",
+                    "info": "if true, will show indices for the rows after sorting",
+                    "type": "boolean",
+                    "default": false
+                },
+                "visr.param.rowTickInterval": {
+                    "label": "show index interval",
+                    "type": "int",
+                    "info": "Specifies the interval to show the ordered indexes",
+                    "default": 10,
+                    "active-condition": "visr.param.showRowTicks == true"
+                },
+                "visr.param.reorderRows": {
+                    "label": "dendrogram for subset (ordering may change)",
+                    "info": "if true, will reorder the dendogram on the subset specified by start and end index",
+                    "type": "boolean",
+                    "default": false
+                },
+                "visr.output.orderIndex": {
+                    "label": "Save the ordering as column",
+                    "type": "output-column"
                 }
             }
         },
