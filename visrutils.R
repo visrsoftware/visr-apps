@@ -264,17 +264,16 @@ visr.category <- function(label, info = "") {
 #' @param label   the label for the parameter's GUI control. will use name if NULL
 #' @param info    additional information about parameter shown as tooltip in VisRseq
 #' @param default default value for the parameter
-visr.param <- function(
-                    name, label = NULL, info = NULL,
-                    default = NULL, min = NULL, max = NULL,
-                    items = NULL, item.labels = NULL,
-                    filename.mode = c("load", "save", "dir"),
-                    type = c("string", "character", "int", "integer", "double", "boolean", "logical", "multi-string",
-                            "column", "multi-column", "column-numerical", "multi-column-numerical",
-                            "color", "multi-color", "filename",
-                            "output-column", "output-multi-column", "output-table"),
-                    debugvalue = NULL
-                    ) {
+visr.param <- function(name, label = NULL, info = NULL,
+                       default = NULL, min = NULL, max = NULL,
+                       items = NULL, item.labels = NULL,
+                       filename.mode = c("load", "save", "dir"),
+                       type = c("string", "character", "int", "integer", "double", "boolean", "logical", "multi-string",
+                               "column", "multi-column", "column-numerical", "multi-column-numerical",
+                               "color", "multi-color", "filename",
+                               "output-column", "output-multi-column", "output-table"),
+                       debugvalue = NULL
+                      ) {
   if (visr.isGUI())
     return()
 
