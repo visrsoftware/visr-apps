@@ -1,0 +1,16 @@
+{
+  "label": "Simple Boxplot",
+  "info": "",
+  "categories":[  {
+    "label": "",
+    "info": "",
+    "variables": {
+      "visr.param.y": {
+        "type": "column-numerical"
+      },
+      "visr.param.group": {
+        "type": "column"
+      }
+    }
+  }]
+}
