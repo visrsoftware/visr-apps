@@ -2,7 +2,7 @@
   "label": "kmeans",
   "info": "",
   "categories":[  {
-    "label": "",
+    "label": "clustering parameters",
     "info": "",
     "variables": {
       "visr.param.columns": {
@@ -15,7 +15,13 @@
       "visr.param.algorithm": {
         "type": "string",
         "items": [ "Hartigan-Wong","Lloyd","Forgy","MacQueen" ]
-      },
+      }
+    }
+  },
+  {
+    "label": "output",
+    "info": "",
+    "variables": {
       "visr.param.plot.title": {
         "type": "string",
         "default": "kmeans results"
