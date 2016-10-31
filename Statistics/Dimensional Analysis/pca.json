@@ -1,5 +1,5 @@
 {
-    "label": "Principal Component Analysis",
+    "label": "PCA",
     "info": "Principal Component Analysis",
     "categories": [
         {
@@ -14,13 +14,7 @@
                 },
                 "input_cor": {
                     "label": "correlation matrix? (or covariance matrix)",
-                    "info": "a logical value indicating whether the calculation should use the correlation matrix or the covariance matrix. (The correlation matrix can only be used if there are no constant variables.)",
-                    "type": "boolean",
-                    "default": true
-                },
-				"input_scores": {
-                    "label": "scores",
-                    "info": "a logical value indicating whether the score on each principal component should be calculated.)",
+                    "info": "Whether the calculation should use the correlation matrix or the covariance matrix. Note that the correlation matrix can only be used if there are no constant variables",
                     "type": "boolean",
                     "default": true
                 },
@@ -37,29 +31,32 @@
             }
         },
         {
-            "label": "Output Column Names",
+            "label": "PCA Output",
             "info": "Outputs columns of the principal components",
             "collapsed": false,
             "variables": {
-                "data.matrix(ouput_scores[,1])": {
-                    "label": "Comp.1",
-                    "info": "1st principal component",
-                    "type": "output-column"
+                "output_scores":{
+                   "label": "PCA table",
+                   "info": "The scores of the input on the principal components",
+                   "type": "output-table"
                 },
-                "data.matrix(ouput_scores[,2])": {
-                    "label": "Comp.2",
-                    "info": "2nd principal component",
-                    "type": "output-column"
-                },
-                "data.matrix(ouput_scores[,3])": {
-                    "label": "Comp.3",
-                    "info": "3rd principal component",
-                    "type": "output-column"
-                },
-                "data.matrix(ouput_scores[,4])": {
-                    "label": "Comp.4",
-                    "info": "4th principal component",
-                    "type": "output-column"
+                "concat_columns": {
+                    "label": "Columns to include in PCA table",
+                    "info": "Selected columns will be binded to the PCA table output",
+                    "type": "multi-column",
+                    "min": 0
+                }
+            }
+        },
+        {
+            "label": "Eigen Vectors Output",
+            "info": "Output eigen vectors",
+            "collapsed": false,
+            "variables": {
+                "output_ev":{
+                   "label":"Eigen vectors table",
+                   "info": "Output table of eigen vectors for each principal component",
+                   "type":"output-table"
                 }
             }
         }
