@@ -169,6 +169,10 @@
             "label": "Output Column Names<br>(single factor analysis)",
             "collapsed": false,
             "variables": {
+                "output_cluster": {
+                    "label": "cluster id",
+                    "type": "output-column"
+                },
                 "output_baseMean": {
                     "label": "baseMean",
                     "type": "output-column"
@@ -196,10 +200,6 @@
                 "output_padj": {
                     "label": "adjusted p value (FDR)",
                     "type": "output-column"
-                },
-                "output_cluster": {
-                    "label": "cluster id",
-                    "type": "output-column"
                 }
             }
         },
@@ -226,9 +226,9 @@
             "collapsed": true,
             "variables": {
                 "normalizedCounts": {
-                    "label": "Name Prefix",
+                    "label": "Prefix",
                     "type": "output-multi-column",
-                    "info": "Normalized read counts"
+                    "info": "A prefix for the column names with normalized read counts"
                 }
             }
         }
