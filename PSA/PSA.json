@@ -1,20 +1,31 @@
 
    {  "label":"PSA-edgeR", "categories":[
-      { "label": "Input", "variables": {
-            "visr.param.directory":         {"label":"Runs directory", "type":"filename", "mode": "dir", "default": "/runs/"}
-         }
-      } ,
+      { "label": "Input", "variables":  {
+      	"visr.param.directory1":         {"label":"Runs directory", "type":"filename", "mode": "dir", "default": ""},
+        "visr.param.directory2":         {"label":"Runs directory 2", "type":"filename", "mode": "dir", "default": ""}
+      }} ,
       { "label": "Count Up/Down", "variables": {
-            "visr.param.mdsColumnIndex":   {"label":"Column Index for MDS", "type":"int", "default": "1"}
+            "visr.param.mdsColumnIndex":   {
+                  "label":"Column index for MDS",
+                  "info":"Index of output column to compute MDS and summary for. (1 = first column of output)",
+                  "type":"int", "default": 1, "min": 1
+            }
       }},
       
       { "label": "Output", "variables": {
-            "visr.param.summaryUpDown":   {"label":"Column Prefix for (#Up,#Down)", "type":"output-multi-column", "default": "sum_"},
-            "visr.param.recalc": { "label": "Recalculate everything", "type":"boolean", "default": "false" },
+            "visr.param.summaryUpDown":   {
+                  "label":"Column Prefix for (#Up,#Down)",
+                  "type":"output-multi-column", "default": "sum_"
+            },
+            "visr.param.recalc": {
+                  "label": "Recalculate everything",
+                  "type":"boolean",
+                  "default": false
+            },
             "visr.param.mdsMethod": {
                     "label": "distance metric for MDS",
                     "type": "string",
-                    "default": "euclidean",
+                    "default": "manhattan",
                     "items": [
                         "euclidean",
                         "maximum",
@@ -26,6 +37,10 @@
                     ]
                 },
             
-            "visr.output.summaryMDS":   {"label":"MDS column name", "type":"output-multi-column", "default": "mds_"}
+            "visr.output.summaryMDS":   {
+                  "label":"MDS column name",
+                  "type":"output-multi-column",
+                  "default": "mds_"
+            }
       }}
    ]}

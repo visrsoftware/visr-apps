@@ -41,7 +41,7 @@ allRunsMatrix <- NULL
 loadAllRunsMatrixIfNull<-function() {
   if (is.null(allRunsMatrix)) {
     visr.print("loading the allRunsMatrix.txt")
-    allRunsMatrix <<- read.table(paste(visr.param.directory, "/allRunsMatrix.txt", sep=""), header=FALSE, sep="\t", check.names = F)
+    allRunsMatrix <<- read.table(paste(visr.param.directory1, "/allRunsMatrix.txt", sep=""), header=FALSE, sep="\t", check.names = F)
   }
 }
 
@@ -49,7 +49,7 @@ distanceMatrix <- NULL
 loadDistanceMatrixIfNull<-function(){
   if (is.null(distanceMatrix)) {
     visr.print("loading the distanceMatrix.txt")
-    distanceMatrix <<- read.table(paste(visr.param.directory, "/distanceMatrix.txt" ,sep=""), sep="\t", check.names = F)
+    distanceMatrix <<- read.table(paste(visr.param.directory1, "/distanceMatrix.txt" ,sep=""), sep="\t", check.names = F)
   }
 }
 
@@ -65,7 +65,7 @@ storeMinDistColumns <- FALSE
 ###############################################################################
 # Setting paths and loading crucial index files
 ###############################################################################
-path <- visr.param.directory
+path <- visr.param.directory1
 
 visr.print("loading the index files")
 pathIndex <- paste(path, "/index.txt", sep="")
