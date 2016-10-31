@@ -23,6 +23,12 @@
                     "info": "if true, the outliers are drawn",
                     "type": "boolean",
                     "default": false
+                },
+                "input_sort": {
+                    "label": "sort",
+                    "info": "if true, the plot will be sorted",
+                    "type": "boolean",
+                    "default": false
                 }
             }
         },

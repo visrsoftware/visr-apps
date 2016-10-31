@@ -1,0 +1,79 @@
+{
+  "label": "Violin Plot",
+  "info": "",
+  "categories":[  {
+    "label": "",
+    "info": "",
+    "variables": {
+      "visr.param.y": {
+        "label": "numeric variable (y)",
+        "type": "column-numerical"
+      },
+      "visr.param.x": {
+        "label": "group (x)",
+        "type": "column"
+      },
+      "visr.param.factorx": {
+        "label": "treat group (x) as fator?",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.trim": {
+        "label": "trim?",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.vertical": {
+        "label": "vertical stacking?",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.boxplot": {
+        "label": "add boxplot?",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.bpwidth": {
+        "label": "boxplot width",
+        "type": "double",
+        "default": 0.1
+      },
+      "visr.param.mean_sdl": {
+        "label": "add mean +/- sd?",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.border": {
+        "label": "color border",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.fill": {
+        "label": "filled",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.legendpos": {
+        "label": "legend position",
+        "type": "string",
+        "default": "right",
+        "items": [ "none","left","right","top","bottom" ]
+      },
+      "visr.param.xlabel": {
+        "label": "x label",
+        "type": "string",
+        "default": ""
+      },
+      "visr.param.ylabel": {
+        "label": "y label",
+        "type": "string",
+        "default": ""
+      },
+      "visr.param.title": {
+        "label": "title",
+        "type": "string",
+        "default": ""
+      }
+    }
+  }]
+}
