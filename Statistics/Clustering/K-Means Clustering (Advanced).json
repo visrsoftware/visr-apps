@@ -1,0 +1,91 @@
+{
+    "label": "k-means",
+    "info": "Performs kmeans clustering on the data table",
+    "categories": [
+        {
+            "label": "k-means",
+            "info": "Controls to specify Kmeans clustering parameters",
+            "collapsed": false,
+            "variables": {
+                "input_columns": {
+                    "label": "variables",
+                    "info": "variable(s) selected to perform the k-means clustering",
+                    "type": "multi-column-numerical",
+                    "min": 1
+                },
+                "input_scale": {
+                    "label": "standardize variables",
+                    "info": "standardize variables if the data vary in range",
+                    "type": "boolean",
+                    "default": true
+                },
+                "input_centers": {
+                    "label": "centers",
+                    "type": "int",
+                    "min": 1,
+                    "default": 3
+                },
+                "input_nc": {
+                    "label": "maximum number of clusters to consider",
+                    "type": "int",
+                    "min": 1,
+                    "default": 15
+                }
+            }
+        },
+        {
+            "label": "Plot Options",
+            "info": "Controls to specify plotting parameters",
+            "collapsed": false,
+            "variables": {
+                "input_choiceofplot": {
+                    "label": "choice of plot",
+                    "info": "Which plot do you want to view?",
+                    "type": "string",
+                    "default": "K-means clustering",
+                    "items": [
+                        "Plot the within groups sums of squares vs. the number of clusters extracted",
+                        "Recommended number of clusters using 26 criteria provided by the NbClust package",
+                        "K-means clustering"
+                    ]
+                },
+                "input_itermax": {
+                    "label": "iterations",
+                    "info": "the maximum number of iterations allowed",
+                    "type": "int",
+                    "default": 10
+                },
+                "input_nstart": {
+                    "label": "start",
+                    "info": "How many random sets should be chosen?",
+                    "type": "int",
+                    "default": 1
+                },
+                "input_algorithm": {
+                    "label": "algorithm",
+                    "info": "The algorithm used for clustering",
+                    "type": "string",
+                    "default": "Hartigan-Wong",
+                    "items": [
+                        "Hartigan-Wong",
+                        "Lloyd",
+                        "Forgy",
+                        "MacQueen"
+                    ]
+                }
+            }
+        },
+        {
+            "label": "Output Column Name",
+            "info": "Outputs column of the clustering",
+            "collapsed": false,
+            "variables": {
+                "output_clusterid": {
+                    "label": "cluster ID",
+                    "type": "output-column",
+					"default":"clusterID"
+                }
+            }
+        }
+    ]
+}

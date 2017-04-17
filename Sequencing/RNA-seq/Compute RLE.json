@@ -1,28 +1,25 @@
 {
-    "label": "Relative Log Expression (RLE)",
-    "info": "The log-ratio of the read count of each gene to the median read count across samples",
-    "categories": [
-        {
-            "label": "Input",
-            "info": "Columns to calculate RLE for",
-            "variables": {
-                "input_columns": {
-                    "label": "columns",
-                    "type": "multi-column-numerical",
-                    "min": 1
-                }
-            }
-        },
-		{
-            "label": "Output Columns",
-            "collapsed": false,
-            "variables": {
-                "output_RLE": {
-                    "label": "Output Columns Prefix",
-                    "type": "output-multi-column",
-					"info": "RLE values of columns"
-                }
-            }
-        }
-    ]
+  "label": "Relative Log Expression (RLE)",
+  "info": "The log-ratio of the read count of each gene to the median read count across samples",
+  "categories":[  {
+    "label": "",
+    "info": "",
+    "variables": {
+      "visr.param.columns": {
+        "label": "Columns to calculate RLE for",
+        "type": "multi-column-numerical"
+      },
+      "visr.param.addvalue": {
+        "label": "Add number",
+        "info": "The number to add to all counts (necessary if there is 0 in data)",
+        "type": "double",
+        "default": 0
+      },
+      "visr.param.output_RLE": {
+        "label": "Output Columns Prefix",
+        "info": "RLE values of columns",
+        "type": "output-multi-column"
+      }
+    }
+  }]
 }
