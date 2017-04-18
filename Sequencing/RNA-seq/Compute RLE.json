@@ -10,7 +10,7 @@
         "type": "multi-column-numerical"
       },
       "visr.param.addvalue": {
-        "label": "Add number",
+        "label": "Increment all counts by",
         "info": "The number to add to all counts (necessary if there is 0 in data)",
         "type": "double",
         "default": 0
@@ -21,10 +21,17 @@
         "type": "boolean",
         "default": true
       },
+      "visr.param.output_Normalized": {
+        "label": "Size Normalized Output Columns Prefix",
+        "info": "values of columns normalized by the size factor",
+        "type": "output-multi-column",
+        "default": "SizeNorm_"
+      },
       "visr.param.output_RLE": {
-        "label": "Output Columns Prefix",
+        "label": "RLE Output Columns Prefix",
         "info": "RLE values of columns",
-        "type": "output-multi-column"
+        "type": "output-multi-column",
+        "default": "RLE_"
       }
     }
   }]
