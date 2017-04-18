@@ -15,6 +15,12 @@
         "type": "double",
         "default": 0
       },
+      "visr.param.scale": {
+        "label": "Scale by library sizes",
+        "info": "Calculate normalization factors and scale the raw library sizes.",
+        "type": "boolean",
+        "default": true
+      },
       "visr.param.output_RLE": {
         "label": "Output Columns Prefix",
         "info": "RLE values of columns",

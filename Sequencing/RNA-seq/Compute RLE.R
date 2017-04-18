@@ -2,12 +2,11 @@ source("visrutils.R")
 
 visr.app.start("Relative Log Expression (RLE)", info = "The log-ratio of the read count of each gene to the median read count across samples")
 visr.param("columns", type = "multi-column-numerical", label = "Columns to calculate RLE for")
-visr.param("addvalue", type = "double", label = "Add number", default = 0.0, info="The number to add to all counts (necessary if there is 0 in data)")
+visr.param("addvalue", type = "double", label = "Increment all counts by", default = 0.0, info="The number to add to all counts (necessary if there is 0 in data)")
+visr.param("scale", type = "boolean", label = "Scale by library sizes", default = TRUE, info="Calculate normalization factors and scale the raw library sizes.")
 visr.param("output_RLE", type = "output-multi-column", label = "Output Columns Prefix", info ="RLE values of columns")
 visr.app.end(printjson=TRUE, writefile=T)
 visr.applyParameters()
-
-visr.biocLite("edgeR")
 
 generateRLE <- function (object) {
   nARR = dim(object)[2]
@@ -25,8 +24,13 @@ generateRLE <- function (object) {
 
 X <- subset(visr.input, select = visr.param.columns)
 X <- X + visr.param.addvalue
-f <- calcNormFactors(X) # Calculate normalization factors to scale the raw library sizes.
 
-visr.param.output_RLE<-generateRLE(X*f)
+if (visr.param.scale) {
+  visr.biocLite("edgeR")
+  f <- calcNormFactors(X) # Calculate normalization factors to scale the raw library sizes.
+  X <- X*f
+}
+
+visr.param.output_RLE<-generateRLE(X)
 par(mfrow=c(1,1))
-boxplot(x = output_RLE, xlab = "Output", ylab = "RLE", main = "RLE output", outline = FALSE)
+boxplot(x = visr.param.output_RLE, xlab = "Data Columns", ylab = "RLE Value", main = "Relative Log Expression (RLE)", outline = FALSE)
