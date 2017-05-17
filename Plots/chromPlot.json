@@ -1,0 +1,238 @@
+{
+  "label": "Chrom Plot 4.0",
+  "info": "",
+  "categories":[  {
+    "label": "Data Visibility",
+    "info": "",
+    "variables": {
+      "visr.param.plottitle": {
+        "label": "Plot Title",
+        "type": "string",
+        "default": "Chromosome Plot"
+      },
+      "visr.param.humangenome": {
+        "label": "Genome",
+        "type": "string",
+        "default": "hg19 Human Genome",
+        "items": [ "hg19 Human Genome","mm10 Mouse Genome" ]
+      },
+      "visr.param.bandsorideogram": {
+        "label": "Data On Chromosomes",
+        "type": "string",
+        "default": "Bands",
+        "items": [ "Bands","Ideogram","None" ]
+      },
+      "visr.param.chromside": {
+        "label": "Data On Sides Of Chromosomes",
+        "info": "Please select Statistics data column first if choosing Statistics option. For Gene IDs, small dataset is preferable.",
+        "type": "string",
+        "default": "Gene Transcripts",
+        "items": [ "Gene Transcripts","Statistics","Statistics & Gene Transcripts","Gene IDs","None" ]
+      },
+      "visr.param.datacolor": {
+        "label": "Gene Transcripts Color",
+        "type": "color",
+        "default": "#2e8b57"
+      },
+      "visr.param.textsizepercentage": {
+        "label": "Text Size Percentage",
+        "type": "int",
+        "default": 100,
+        "min": 50,
+        "max": 200
+      }
+    }
+  },
+  {
+    "label": "Chromosomes",
+    "info": "",
+    "variables": {
+      "visr.param.chromosome1": {
+        "label": "Chromosome 1",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome2": {
+        "label": "Chromosome 2",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome3": {
+        "label": "Chromosome 3",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome4": {
+        "label": "Chromosome 4",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome5": {
+        "label": "Chromosome 5",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome6": {
+        "label": "Chromosome 6",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome7": {
+        "label": "Chromosome 7",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome8": {
+        "label": "Chromosome 8",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome9": {
+        "label": "Chromosome 9",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome10": {
+        "label": "Chromosome 10",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome11": {
+        "label": "Chromosome 11",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome12": {
+        "label": "Chromosome 12",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome13": {
+        "label": "Chromosome 13",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome14": {
+        "label": "Chromosome 14",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome15": {
+        "label": "Chromosome 15",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome16": {
+        "label": "Chromosome 16",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome17": {
+        "label": "Chromosome 17",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome18": {
+        "label": "Chromosome 18",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome19": {
+        "label": "Chromosome 19",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome20": {
+        "label": "Chromosome 20 (Human Only)",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome21": {
+        "label": "Chromosome 21 (Human Only)",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosome22": {
+        "label": "Chromosome 22 (Human Only)",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosomeX": {
+        "label": "Chromosome X",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.chromosomeY": {
+        "label": "Chromosome Y",
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  {
+    "label": "Bands Input",
+    "info": "",
+    "variables": {
+      "visr.param.chromno": {
+        "label": "Chromosome Number",
+        "type": "column"
+      },
+      "visr.param.start": {
+        "label": "Gene Start",
+        "type": "column-numerical"
+      },
+      "visr.param.end": {
+        "label": "Gene End",
+        "type": "column-numerical"
+      },
+      "visr.param.id": {
+        "label": "Gene ID",
+        "type": "column"
+      },
+      "visr.param.bandcolor": {
+        "label": "Band Color",
+        "type": "color",
+        "default": "#ff3030"
+      },
+      "visr.param.strandsvisible": {
+        "label": "Bands Colored By Strand +/-",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.strandsinput": {
+        "label": "Strands",
+        "type": "column"
+      },
+      "visr.param.strandscolor": {
+        "label": "Band Color (-)",
+        "type": "color",
+        "default": "#0000cd"
+      }
+    }
+  },
+  {
+    "label": "Statistics",
+    "info": "",
+    "variables": {
+      "visr.param.statline": {
+        "label": "Lines",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.statmean": {
+        "label": "Mean",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.statcol": {
+        "label": "Statistics Data",
+        "type": "column-numerical"
+      },
+      "visr.param.statcolor": {
+        "label": "Statistics Color",
+        "type": "color",
+        "default": "#9932cc"
+      }
+    }
+  }]
+}
