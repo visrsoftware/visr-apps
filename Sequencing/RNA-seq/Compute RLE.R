@@ -30,7 +30,7 @@ X <- X + visr.param.addvalue
 if (visr.param.scale) {
   visr.biocLite("edgeR")
   f <- calcNormFactors(X) # Calculate normalization factors to scale the raw library sizes.
-  X <- X*f
+  X <- apply(X, 1, "*", f)
 }
 
 visr.param.output_Normalized<-X
