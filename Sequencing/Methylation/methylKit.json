@@ -1,355 +1,177 @@
 {
-    "label": "methylKit",
-    "info": "DNA methylation analysis from high-throughput bisulfite sequencing results",
-    "categories": [
-        {
-            "label": "Input",
-            "info": "data files used in the analysis",
-            "collapsed": false,
-            "variables": {
-                "input_file1": {
-                    "label": "file 1",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file2": {
-                    "label": "file 2",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file3": {
-                    "label": "file 3",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file4": {
-                    "label": "file 4",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file5": {
-                    "label": "file 5",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file6": {
-                    "label": "file 6",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file7": {
-                    "label": "file 7",
-                    "type": "filename",
-					"default":""
-                },
-                "input_file8": {
-                    "label": "file 8",
-                    "type": "filename",
-					"default":""
-                },
-                "input_treatment": {
-                    "label": "treatment",
-                    "info": "a vector contatining 0, 1 and etc. denoting sample conditions",
-                    "type": "string"
-                },
-                "input_context": {
-                    "label": "context",
-                    "info": "methylation context string",
-                    "type": "string",
-                    "items": [
-                        "CpG",
-                        "CpH",
-                        "CHH"
-                    ],
-                    "default": "CpG"
-                },
-                "input_pipeline": {
-                    "label": "pipeline",
-                    "info": "name of the alignment pipeline",
-                    "type": "string",
-                    "items": [
-                        "amp",
-                        "bismark"
-                    ],
-                    "default": "amp"
-                },
-                "input_destrand": {
-                    "label": "merge both strands",
-                    "info": "if TRUE, reads covering both strands of a CpG dinucleotide will be merged, do not set to TRUE if not only interested in CpGs (default: FALSE). If the methylRawList object contains regions rather than bases setting destrand to TRUE will have no effect.",
-                    "type": "boolean",
-                    "default": false
-                }
-            }
-        },
-        {
-            "label": "filtering",
-            "info": "filter samples based on read coverage",
-            "collapsed": true,
-            "variables": {
-                "input_filter": {
-                    "label": "filter samples",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_locount": {
-                    "label": "low count",
-                    "info": "An integer for read counts. Bases/regions having lower coverage than this count is discarded.",
-                    "type": "int",
-                    "default": 10
-                },
-                "input_hicount": {
-                    "label": "high count",
-                    "info": "An integer for read counts. Bases/regions having higher coverage than this is count discarded.",
-                    "type": "int",
-                    "default": 0
-                },
-                "input_loperc": {
-                    "label": "low percentage",
-                    "info": "A double [0-100] for percentile of read counts. Bases/regions having lower coverage than this percentile is discarded.",
-                    "type": "double",
-                    "default": 0,
-                    "min": 0,
-                    "max": 100
-                },
-                "input_hiperc": {
-                    "label": "high percentage",
-                    "info": "A double [0-100] for percentile of read counts. Bases/regions having higher coverage than this percentile is discarded.",
-                    "type": "double",
-                    "default": 99.9,
-                    "min": 0,
-                    "max": 100
-                }
-            }
-        },
-        {
-            "label": "tiling window",
-            "info": " summarize methylation information over tiling windows rather than doing base-pair resolution analysis",
-            "collapsed": true,
-            "variables": {
-                "input_tilingwindow": {
-                    "label": "tile the data with windows",
-                    "type": "boolean",
-                    "default": false
-                },
-                "input_winsize": {
-                    "label": "size",
-                    "info": "an integer for the size of the tiling windows",
-                    "type": "int",
-                    "default": 1000
-                },
-                "input_stepsize": {
-                    "label": "step size",
-                    "info": "an integer for the step size of tiling windows",
-                    "type": "int",
-                    "default": 1000
-                },
-                "input_covbase": {
-                    "label": "min of bases",
-                    "info": "minimum number of bases to be covered in a given window",
-                    "type": "int",
-                    "default": 0
-                }
-            }
-        },
-        {
-            "label": "Correlation and Clustering",
-            "info": "checking the sample correlation and clustering the samples based on the methylation profiles",
-            "collapsed": true,
-            "variables": {
-                "input_cormethod": {
-                    "label": "correlation method",
-                    "info": "which correlation coefficient (or covariance) is to be computed ",
-                    "type": "string",
-                    "items": [
-                        "pearson",
-                        "kendall",
-                        "spearman"
-                    ],
-                    "default": "pearson"
-                },
-                "input_dist": {
-                    "label": "distance measure",
-                    "info": "the distance measure to be used for clustering",
-                    "type": "string",
-                    "items": [
-                        "correlation",
-                        "euclidean",
-                        "maximum",
-                        "manhattan",
-                        "canberra",
-                        "binary",
-                        "minkowski"
-                    ],
-                    "default": "correlation"
-                },
-                "input_clustermethod": {
-                    "label": "clustering method",
-                    "info": "the agglomeration method to be used",
-                    "type": "string",
-                    "items": [
-                        "ward",
-                        "single",
-                        "complete",
-                        "average",
-                        "mcquitty",
-                        "median",
-                        "centroid"
-                    ],
-                    "default": "ward"
-                },
-                "input_sdfilter": {
-                    "label": "filter out low variation",
-                    "info": "For clustering, if TRUE, the bases/regions with low variation will be discarded prior to clustering ",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_sdthreshold": {
-                    "label": "sd threshold",
-                    "info": "For clustering, if filterByQuantile is TRUE, features whose standard deviations is less than the quantile denoted by sd.threshold will be removed. If filterByQuantile is FALSE, then features whose standard deviations is less than the value of sd.threshold will be removed.",
-                    "type": "double",
-                    "default": 0.5
-                },
-                "input_filterbyquantile": {
-                    "label": "filter by quantile",
-                    "info": "For clustering, a logical determining if sd threshold is to be interpreted as a quantile of all Standard Deviation values from bases/regions (true), or as an absolute value.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_scale": {
-                    "label": "scale",
-                    "info": "For PCA, if we should scale the data to have unit variance or not.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_center": {
-                    "label": "center",
-                    "info": "For PCA, if we should center the data or not.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_transpose": {
-                    "label": "transpose",
-                    "info": "For PCA, if TRUE (default) percent methylation matrix will be transposed, this is equivalent to doing PCA on variables that are regions/bases. The resulting plot will location of samples in the new coordinate system if FALSE the variables for the matrix will be samples and the resulting plot whill show how each sample (variable) contributes to the principle component.the samples that are highly correlated should have similar contributions to the principal components.",
-                    "type": "boolean",
-                    "default": true
-                }
-            }
-        },
-        {
-            "label": "Differential Methylation",
-            "info": "Get differentially methylated bases",
-            "collapsed": false,
-            "variables": {
-                "input_difference": {
-                    "label": "cutoff",
-                    "info": "cutoff for absolute value of methylation change between test and control",
-                    "type": "double",
-                    "default": 25
-                },
-                "input_qvalue": {
-                    "label": "qvalue cutoff",
-                    "info": "cutoff for qvalue of differential methylation statistic",
-                    "type": "double",
-                    "default": 0.01,
-                    "min": 0
-                },
-                "input_slim": {
-                    "label": "SLIM",
-                    "info": "If TRUE(default) SLIM method will be used for P-value adjustment. If FALSE, p.adjust with BH method will be used for P-value correction.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_weightedmean": {
-                    "label": "weighted mean",
-                    "info": "calculate the mean methylation difference between groups using read coverage as weights",
-                    "type": "boolean",
-                    "default": true
-                }
-            }
-        },
-        {
-            "label": "Annotation",
-            "info": "Annotating differential methlation events",
-            "collapsed": true,
-            "variables": {
-                "input_ann": {
-                    "label": "annotation",
-                    "type": "boolean",
-                    "default": false
-                },
-                "input_annotation": {
-                    "label": "annotation file",
-                    "info": "location of the bed file with 12 or more columns",
-                    "type": "filename",
-					"default":""
-                },
-                "input_cpgann": {
-                    "label": "CpG island annotation",
-                    "type": "boolean",
-                    "default": false
-                },
-				"input_cpgannotation": {
-                    "label": "CpG island annotation file",
-                    "info": "location of the bed file of the feature",
-                    "type": "filename",
-					"default":""
-                },
-                "input_flank": {
-                    "label": "flank",
-                    "info": "number of basepairs for the flanking regions",
-                    "type": "int",
-                    "default": 2000
-                },
-                "input_clean": {
-                    "label": "clean",
-                    "info": "If set to TRUE, flanks overlapping with other main features will be trimmed",
-                    "type": "boolean",
-                    "default": true
-                },
-                "input_removeunsual": {
-                    "label": "remove unsual",
-                    "type": "boolean",
-                    "info": "remove chromsomes with unsual names random, Un and antyhing with _ character",
-                    "default": true
-                },
-                "input_strand": {
-                    "label": "strand",
-                    "info": "If set to TRUE, annotation features and target features will be overlapped based on strand",
-                    "type": "boolean",
-                    "default": true
-                }
-            }
-        },
-        {
-            "label": "Output tables",
-            "collapsed": false,
-            "variables": {
-                "output_all": {
-                    "label": "all bases",
-                    "info": "all bases with their pvalue, qvalue, methylation difference, type and etc.",
-                    "type": "output-table"
-                },
-                "output_diff": {
-                    "label": "all differentially methylated bases",
-                    "info": "all differentially methylated bases with their pvalue, qvalue, methylation difference, type and etc.",
-                    "type": "output-table"
-                },
-                "output_hyper": {
-                    "label": "hyper methylated bases",
-                    "info": "hyper methylated bases with their pvalue, qvalue, methylation difference, type and etc.",
-                    "type": "output-table"
-                },
-                "output_hypo": {
-                    "label": "hypo methylated bases",
-                    "info": "hypo methylated bases with their pvalue, qvalue, methylation difference, type and etc.",
-                    "type": "output-table"
-                },
-                "output_anndiff": {
-                    "label": "all differentially methylated bases with annotation",
-                    "info": "all differentially methylated bases with their pvalue, qvalue, methylation difference, type, distance to TSS (transcription start site) and nearest gene name, overlap status of the methylation events with the annotation such as promoter/exon/intron and etc",
-                    "type": "output-table"
-                }
-            }
-        }
-    ]
+  "label": "Methyl Kit",
+  "info": "",
+  "categories":[  {
+    "label": "Data Files",
+    "info": "",
+    "variables": {
+      "visr.param.methcallorbismark": {
+        "label": "File Type",
+        "type": "string",
+        "items": [ "Methylation Call","Bismark" ]
+      },
+      "visr.param.onefileormulti": {
+        "label": "Number of Files",
+        "type": "string",
+        "items": [ "Multiple Files","One File" ]
+      },
+      "visr.param.file1": {
+        "label": "File 1",
+        "type": "filename",
+        "filename.mode": "load"
+      },
+      "visr.param.file2": {
+        "label": "File 2",
+        "type": "filename",
+        "filename.mode": "load"
+      },
+      "visr.param.file3": {
+        "label": "File 3",
+        "type": "filename",
+        "filename.mode": "load"
+      },
+      "visr.param.file4": {
+        "label": "File 4",
+        "type": "filename",
+        "filename.mode": "load"
+      },
+      "visr.param.filename1": {
+        "label": "File 1 Title",
+        "type": "string",
+        "default": "Test 1"
+      },
+      "visr.param.filename2": {
+        "label": "File 2 Title",
+        "type": "string",
+        "default": "Test 2"
+      },
+      "visr.param.filename3": {
+        "label": "File 3 Title",
+        "type": "string",
+        "default": "Ctrl 1"
+      },
+      "visr.param.filename4": {
+        "label": "File 4 Title",
+        "type": "string",
+        "default": "Ctrl 2"
+      }
+    }
+  },
+  {
+    "label": "Output Type",
+    "info": "",
+    "variables": {
+      "visr.param.outputtype": {
+        "label": "Output Plot Type",
+        "type": "string",
+        "items": [ "Methylation","Coverage","Correlation","Clustering","PCA","Differential Methylation Annotation" ],
+        "item-labels": [ "Methylation","Coverage","Correlation (MultiFile Only)","Clustering (MultiFile MethCall Only)","PCA (MultiFile MethCall Only)","Differential Methylation Annotation (MultiFile MethCall Only)" ]
+      }
+    }
+  },
+  {
+    "label": "Methylation/Coverage Options",
+    "info": "",
+    "variables": {
+      "visr.param.filechoose": {
+        "label": "Choose file number for plots",
+        "type": "int",
+        "default": 1,
+        "min": 1,
+        "max": 4
+      },
+      "visr.param.bothstrands": {
+        "label": "Both strands",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  {
+    "label": "Correlation/Clustering/PCA Options",
+    "info": "",
+    "variables": {
+      "visr.param.methmin": {
+        "label": "CpGs with >=1 sample per group only",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.clusteringdist": {
+        "label": "Clustering Distance Measure",
+        "type": "string",
+        "default": "correlation",
+        "items": [ "correlation","euclidean","maximum","manhattan","binary","minkowski" ]
+      },
+      "visr.param.clusteringmethod": {
+        "label": "Clustering Method",
+        "type": "string",
+        "default": "ward",
+        "items": [ "ward","single","complete","average","mcquitty","median","centroid" ]
+      },
+      "visr.param.screeoraxis": {
+        "label": "PCA Plot Type",
+        "type": "string",
+        "default": "PCA Scree Plot",
+        "items": [ "PCA Scree Plot","PCA Axis Plot" ]
+      }
+    }
+  },
+  {
+    "label": "Differential Methylation Annotation Options",
+    "info": "",
+    "variables": {
+      "visr.param.overlap": {
+        "label": "Overlap With",
+        "type": "string",
+        "default": "Exons/Introns/Promoters",
+        "items": [ "Exons/Introns/Promoters","CpG Islands" ]
+      },
+      "visr.param.difference": {
+        "label": "Percent Methylation Difference",
+        "type": "int",
+        "default": 25,
+        "min": 0,
+        "max": 100
+      },
+      "visr.param.qvalue": {
+        "label": "q-value",
+        "type": "double",
+        "default": 0.01,
+        "min": 0,
+        "max": 1
+      }
+    }
+  },
+  {
+    "label": "Filter By Coverage",
+    "info": "",
+    "variables": {
+      "visr.param.filter": {
+        "label": "Filter samples based on read coverage",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.locount": {
+        "label": "Coverage lower limit in count",
+        "type": "int",
+        "default": 10,
+        "min": 0,
+        "max": 100
+      },
+      "visr.param.loperc": {
+        "label": "Coverage lower limit in percentile",
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "max": 100
+      },
+      "visr.param.hiperc": {
+        "label": "Coverage upper limit in percentile",
+        "type": "double",
+        "default": 99.9,
+        "min": 0,
+        "max": 100
+      }
+    }
+  }]
 }
