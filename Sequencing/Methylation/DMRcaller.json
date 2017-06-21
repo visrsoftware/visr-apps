@@ -1,0 +1,120 @@
+{
+  "label": "DMRcaller",
+  "info": "",
+  "categories":[  {
+    "label": "Data Files",
+    "info": "",
+    "variables": {
+      "visr.param.cxreportfilewt": {
+        "label": "CX Report File For Wild Type",
+        "type": "filename",
+        "filename.mode": "load"
+      },
+      "visr.param.cxreportfilemutant": {
+        "label": "CX Report File For Mutant",
+        "type": "filename",
+        "filename.mode": "load"
+      }
+    }
+  },
+  {
+    "label": "Plot Options",
+    "info": "",
+    "variables": {
+      "visr.param.plot": {
+        "label": "Plot Type",
+        "type": "string",
+        "items": [ "Low Resolution Profile","Coverage","DMR Distribution","DMR Profiles" ]
+      },
+      "visr.param.plottitle": {
+        "label": "Plot Title",
+        "type": "string",
+        "default": "Methylation"
+      },
+      "visr.param.titlewt": {
+        "label": "Label For WT",
+        "type": "string",
+        "default": "WT"
+      },
+      "visr.param.titlemutant": {
+        "label": "Label For Mutant",
+        "type": "string",
+        "default": "Mutant"
+      },
+      "visr.param.context": {
+        "label": "Context",
+        "type": "string",
+        "items": [ "CG","CHH","CHG" ]
+      }
+    }
+  },
+  {
+    "label": "Selected Data Options",
+    "info": "",
+    "variables": {
+      "visr.param.chromosome": {
+        "label": "Region of Interest Chromosome",
+        "info": "Must correspond to CX Report file chromosome number column.",
+        "type": "string",
+        "default": "Chr3"
+      },
+      "visr.param.locationstart": {
+        "label": "Region of Interest Start Location",
+        "type": "int",
+        "default": 0,
+        "min": 0
+      },
+      "visr.param.locationend": {
+        "label": "Region of Interest End Location",
+        "info": "Warning: May be slow or crash (CPU intensive) with large >300Kb region when plotting DMR Profiles.",
+        "type": "int",
+        "default": 1000000,
+        "min": 0
+      }
+    }
+  },
+  {
+    "label": "Visual Options",
+    "info": "",
+    "variables": {
+      "visr.param.color1": {
+        "label": "Plot Color For WT",
+        "type": "color",
+        "default": "#006a6a"
+      },
+      "visr.param.color2": {
+        "label": "Plot Color For Mutant",
+        "type": "color",
+        "default": "#e69f00"
+      },
+      "visr.param.point1": {
+        "label": "Point Type For WT",
+        "type": "int",
+        "default": 1,
+        "min": 0,
+        "max": 25
+      },
+      "visr.param.point2": {
+        "label": "Point Type For Mutant",
+        "type": "int",
+        "default": 0,
+        "min": 0,
+        "max": 25
+      },
+      "visr.param.line1": {
+        "label": "Line Type For WT",
+        "type": "int",
+        "default": 4,
+        "min": 1,
+        "max": 6
+      },
+      "visr.param.line2": {
+        "label": "Line Type For Mutant",
+        "type": "int",
+        "default": 1,
+        "min": 1,
+        "max": 6
+      }
+    }
+  }]
+}
