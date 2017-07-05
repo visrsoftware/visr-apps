@@ -23,12 +23,6 @@
                     "info": "if true, the outliers are drawn",
                     "type": "boolean",
                     "default": false
-                },
-                "input_sort": {
-                    "label": "sort",
-                    "info": "if true, the plot will be sorted",
-                    "type": "boolean",
-                    "default": false
                 }
             }
         },
@@ -64,6 +58,27 @@
                     "info": "how far the plot whiskers extend out from the box. If range is positive, the whiskers extend to the most extreme data point which is no more than range times the interquartile range from the box. A value of zero causes the whiskers to extend to the data extremes.",
                     "type": "double",
                     "default": 1.5
+                },
+
+                "input_manual_ylim": {
+                    "label": "manually specify y-axis limits",
+                    "info": "If checked, the values speciflied below will be used for y-axis minimum and maximum, rather than automatically computed.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "input_ylim_min": {
+                    "label": "y-axis min",
+                    "info": "If \"manual y-axis limits\" is checked, this value will be used for the y-axis minimum.",
+                    "type": "double",
+                    "default": -1,
+                    "active-condition": "input_manual_ylim == true"
+                },
+                "input_ylim_max": {
+                    "label": "y-axis max",
+                    "info": "If \"manual y-axis limits\" is checked, this value will be used for the y-axis maximum.",
+                    "type": "double",
+                    "default": 1,
+                    "active-condition": "input_manual_ylim == true"
                 },
                 "input_col": {
                     "label": "colour (s)",

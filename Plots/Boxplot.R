@@ -15,6 +15,10 @@ if (input_group != "" & input_xlab == "") {
 colors<-gsub("\\s","", strsplit(input_col,",")[[1]])
 colors<-gsub("0x","#", colors)
 
+param_ylim = NULL
+if (input_manual_ylim) {
+  param_ylim = c(input_ylim_min, input_ylim_max)
+}
 
 if (input_group == "") {
   mydata <- input_table[,input_var]
@@ -37,6 +41,7 @@ if (input_group == "") {
           las=2,
           pars=list(par(mar=c(input_cexMarginBottom,5,5,5))),
           cex.lab=input_cexAxislabel/10, cex.axis=input_cexAxis/10, cex.main=input_cexTitle/10
+          , ylim = param_ylim
     )
 }
 
@@ -59,6 +64,7 @@ if (input_group != "" && length(input_var) == 1) {{
           las=2,
           pars=list(par(mar=c(input_cexMarginBottom,5,5,5))),
           cex.lab=input_cexAxislabel/10, cex.axis=input_cexAxis/10, cex.main=input_cexTitle/10
+          , ylim = param_ylim
   )
 }}
 
@@ -82,6 +88,7 @@ if(input_group != "" && length(input_var) != 1) {{
             las=2,
             pars=list(par(mar=c(input_cexMarginBottom,5,5,5))),
             cex.lab=input_cexAxislabel/10, cex.axis=input_cexAxis/10, cex.main=input_cexTitle/10
+          , ylim = param_ylim
     )
   }
 }}
