@@ -1,37 +1,70 @@
 assign("error_message", "", .GlobalEnv)
-#' Check if running in GUI (VisRseq)
+#' Check if running in GUI (VisR)
 #'
-#' Checks if running from within the VisRseq.
-#' @return  Will return \code{TRUE} if the code is running from within VisRseq.
+#' Checks if running from within the VisR
+#' @return  Will return \code{TRUE} if the code is running from within VisR.
 #' @export
 visr.isGUI<-function(){
-  if (exists("visr.var.isGUI")) {
-    if (visr.var.isGUI)
+  if (get0("visr.var.isGUI", ifnotfound = FALSE, envir = .GlobalEnv)) {
       return(TRUE)
   }
   return(FALSE)
 }
 
 
+visr.getSelectedRows<-function() {
+  selected = get0("visr.input.selectedRows", ifnotfound = NULL, envir = .GlobalEnv)
+  if (!is.null(selected)) {
+    selected <- selected + 1 # VisR is 0-based
+  }
+  return(selected)
+}
+
+visr.setSelectedRows<-function(x) {
+  assign("visr.input.selectedRows", x, .GlobalEnv)
+}
+
+visr.get <- function(paramName) {
+  return(get0(paste0("visr.param.",paramName), ifnotfound = NULL, envir = .GlobalEnv))
+}
+
 #' Apply GUI parameters
 #'
-#' Applies (imports) parameters spcified in the visrseq GUI to the R environment.
+#' Applies (imports) parameters spcified in the VisR GUI to the R environment.
 #' @export
 visr.applyParameters <- function() {
   #if (exists("visr.var.message.ignore")) rm(visr.var.message.ignore)
   dummylocalvar<-"dummyvalue"
 }
 
+readline.orig <- base::readline
+visr.readline <- function(prompt = "") {
+    if (!visr.isGUI()) {
+        return (readline.orig(prompt))
+    } else {
+        visr.message(prompt, "prompt")
+        return("\n")
+    }
+}
+
+if (visr.isGUI()) {
+    #unlockBinding("readline", .GlobalEnv)
+    #readline <- visr.readline
+    assign("readline", visr.readline, .GlobalEnv)
+    #assignInNamespace("readline", visr.readline, ns="base")
+}
+
+
 #' Show message dialog
 #'
-#' Shows a message dialog to the user in VisRseq.
+#' Shows a message dialog to the user in VisR.
 #' @param text   Message text to be shown.
-#' @param type   Message type. (\code{"error"} or \code{"warning"})
+#' @param type   Message type. (\code{"error"} or \code{"warning"} or \code{"prompt"})
 #' @examples
 #' if (any(is.na(visr.input)))
 #'     visr.message("There are NA values in the input", type="error")
 #' @export
-visr.message<-function(text, type=c("error","warning"))
+visr.message<-function(text, type=c("error","warning", "prompt"))
 {
   #TODO: replace error_message with visr.var.message
   if (exists("error_message") && is.character(error_message) && nzchar(error_message)) {
@@ -48,7 +81,7 @@ visr.message<-function(text, type=c("error","warning"))
   if (!visr.isGUI() && !exists("visr.var.message.ignore")) {
     print(error_message)
     assign("error_message", "", .GlobalEnv)
-    invisible(user_choice<-readline(prompt="(s)top / (i)gnore / ignore (a)ll ? (s/i/a)"))
+    invisible(user_choice<-readline.orig(prompt="(s)top / (i)gnore / ignore (a)ll ? (s/i/a)"))
     if (user_choice == "s") {
       stop("Terminated", call. = FALSE, domain = NA)
     } else if (user_choice == "a") {
@@ -57,37 +90,76 @@ visr.message<-function(text, type=c("error","warning"))
   }
 }
 
+
 # Loads a CRAN package. If not already installed, tries to install the package from CRAN.
 visr.library<-function (pkg) {
-  if (!require(pkg, character.only = TRUE)) {
+  visr.logProgress(paste("Loading package:", pkg))
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    visr.logProgress(paste("Installing cran package:", pkg))
     install.packages(pkg, repos = "http://cran.us.r-project.org", dependencies=TRUE)
     #update.packages(ask = TRUE)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE)) {
+    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE)) {
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
       visr.message(paste("Unable to load package", pkg))
+      visr.logProgress(paste("Failed loading package:", pkg))
+    } else {
+      visr.logProgress("");
     }
+  } else {
+    visr.logProgress("");
   }
 }
 
 visr.libraryURL<-function (pkg,url) {
-  if (!require(pkg, character.only = TRUE)) {
+  visr.logProgress(paste("Loading package:", pkg))
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    visr.logProgress(paste("Installing package", pkg,"from", url))
     install.packages(url, repos = NULL, type="source", dependencies=TRUE)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE)) {
+    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE)) {
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
       visr.message(paste("Unable to load package", pkg))
+      visr.logProgress(paste("Failed loading package:", pkg))
+    } else {
+      visr.logProgress("");
     }
+  } else {
+    visr.logProgress("");
+  }
+
+}
+
+visr.librarySource<-function (pkg, url) {
+  visr.logProgress(paste("Loading package:", pkg))
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    visr.logProgress(paste("Installing package", pkg,"from", url))
+    source(url)
+    # adding some delay, since loading the package right after installation may not work.
+    numtries=10
+    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+      Sys.sleep(0.1)
+      numtries=numtries-1
+    }
+
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+      visr.message(paste("Unable to load package", pkg))
+      visr.logProgress(paste("Failed loading package:", pkg))
+    } else {
+      visr.logProgress("");
+    }
+  } else {
+    visr.logProgress("");
   }
 }
 
@@ -96,22 +168,30 @@ visr.libraryURL<-function (pkg,url) {
 #' Loads a bioconductor package. If not already installed, tries to install the package from bioconductor.
 #' @param pkg package name
 visr.biocLite<-function (pkg) {
-  if (!require(pkg, character.only = TRUE)) {
+  visr.logProgress(paste("Loading bioconductor package:", pkg))
+  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    visr.logProgress(paste("Installing bioconductor package:", pkg))
     source("http://bioconductor.org/biocLite.R")
     biocLite(pkg,
              suppressUpdates=FALSE,     # suppress automatic updating of all installed packages.
              suppressAutoUpdate=FALSE,  # whether the BiocInstaller package updates itself.
              ask=FALSE)                 # whether to prompt user before installed packages are updated
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE)) {
+    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE)) {
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
       visr.message(paste("Unable to load package", pkg))
+      visr.logProgress(paste("Failed loading package:", pkg))
+    } else {
+      visr.logProgress("");
     }
+  } else {
+    visr.logProgress("");
   }
+
 }
 
 # used in tryCatch
@@ -137,14 +217,17 @@ visr.rebuildPackages <- function()
   #y/n: n
 
   pkgs = installed.packages()
-  idx = pkgs[,"Built"] != "3.2.2"
-  for (pkg in rownames(pkgs[idx,]))
-  {
-    visr.biocLite(pkg)
+  idx = which(pkgs[,"Built"] != getRversion())
+  if (length(idx)) {
+    for (pkg in rownames(pkgs[idx,]))
+    {
+      visr.biocLite(pkg)
+    }
   }
 }
 
-# returns the user home directory
+#' Returns the user home directory.
+#' @export
 visr.getHomeDir <- function()
 {
   if (.Platform$OS.type == "windows") {
@@ -153,38 +236,58 @@ visr.getHomeDir <- function()
   return(Sys.getenv("HOME"))
 }
 
-# returns the user library directory
+#' Returns the user library directory
+#'
+#' This is typically the ~/VisR/RLibs (*nix) or /Users/[username]/VisR/RLibs (windows).
+#' Packages are default installed in this directory to ensure write access permission.
+#' @export
 visr.getHomeLibPath <- function()
 {
-  return(paste(visr.getHomeDir(),"/VisRseq/RLibs",sep=""))
+  return(paste(visr.getHomeDir(),"/VisR/RLibs",sep=""))
 }
 
-#the function currently wraps print so that it doesn't print in VisRseq causing the SIGPIPE error.
+# Wraps R's print() function (legacy, as previously print() in VisR was causing a SIGPIPE error)
 visr.print<-function(msg) {
-  if (!visr.isGUI())
-    print(msg)
+  #if (!visr.isGUI())
+  print(msg)
 }
 
 
-# utility function to convert column names to correct format by replacing invalid characters with _
-visr.internal.validname <- function(columnnames) {
+#' Convert names to syntactically valid names.
+#'
+#' Utility function to convert column names to syntactically valid names by replacing invalid characters with _
+#' @param columnnames vector of character column names
+#' @export
+visr.makeValidNames <- function(columnnames) {
   return (make.names(gsub("[^a-zA-Z0-9_]", "_", columnnames)))
 }
 
-# utility function to open data tables with corrected column names (useful for debugging within R studio)
-visr.readDataTable <-function(file) {
-  t <- read.csv(file, sep = "\t", check.names = F)
-  colnames(t) <- visr.internal.validname(colnames(t))
+#' Read tables with corrected column names
+#'
+#' Utility function to read tables with corrected column names, as it is sent from VisR to the apps
+#' Mainly useful for debugging apps within R studio
+#' @param file  path to the tab delimited file
+#' @export
+visr.readDataTable <-function(file, delim = "\t") {
+  t <- read.csv(file, sep = delim, check.names = F)
+  colnames(t) <- visr.makeValidNames(colnames(t))
   return (t)
 }
 
-visr.setLogDir <- function(logDir) {
-  if (FALSE) {
+#' Sets the log directory.
+#'
+#' Sets the current log directory where the R output should be diverted to.
+#' @param current log directory. "" to go back to logging to console
+#' Warning: Don't call this within an app as it is called internatlly by the VisR
+visr.internal.setLogDir <- function(logDir) {
+  if (TRUE) {
     assign("visr.var.logDir", logDir, .GlobalEnv)
-    if (nchar(logDir) > 0) {
+    assign("visr.var.progressFile", paste(logDir, "/progress.txt", sep=""), .GlobalEnv)
+    if (!is.null(logDir) && nchar(logDir) > 0) {
       sinkFile <- file(paste(logDir,"/all.txt",sep=""), open = "wt")
       sink(sinkFile)
       sink(sinkFile, type = "message")
+      assign("visr.var.sinkFile", sinkFile, .GlobalEnv)
       #print(date())
     } else {
       ## back to the console
@@ -192,11 +295,80 @@ visr.setLogDir <- function(logDir) {
         #print(date())
         sink(type = "message")
         sink()
+        if (exists("visr.var.sinkFile")) {
+          close(visr.var.sinkFile)
+          rm(visr.var.sinkFile)
+        }
       }
     }
   }
 }
 
+#' Logs the current progress of the app execution.
+#' @param  message      message to be shown (e.g. the current action being performed)
+#' @param  percentage   the current progress percentage of the app (if known)
+#' @examples
+#' visr.logProgress("Normalizing the input", 0.8)
+#' @export
+visr.logProgress <- function(message, percentage = -1)
+{
+  if (exists("visr.var.progressFile")) {
+    cat(paste(percentage, message, sep="\t"), file=visr.var.progressFile, append=TRUE, sep = "\n")
+  } else {
+    if (message != "")
+      print(message)
+  }
+}
+
+#' safely shuts down a graphcis device specified by a character name
+#' @param devName device name (character)
+#' @return Logical, true if and only the device was found and shut down
+visr.internal.dev_off_safe <- function(devName) {
+  if (!is.character(devName))
+    return(FALSE)
+  devValue <- get0(devName, envir = .GlobalEnv)
+  if (!is.null(devValue) && !identical(devValue, 1)) {
+    dev.off(devValue)
+    rm(list=devName, envir = .GlobalEnv)
+    return(TRUE)
+  }
+  return(FALSE)
+}
+
+#' safely sets the current graphcis device to the device specified by a character name
+#' @param devName device name (character)
+#' @return Logical, true if and only the device was found
+visr.internal.dev_set_safe <- function(devName) {
+  if (!is.character(devName))
+    return(FALSE)
+
+  devValue <- get0(devName, envir = .GlobalEnv)
+  if (!is.null(devValue) && !identical(devValue, 1) && devValue %in% dev.list()) {
+    dev.set(devValue)
+    return(TRUE)
+  }
+  return(FALSE)
+}
+
+
+#' Prints the session info and installed packages (useful for diagnosis)
+#' @export
+visr.printSessionInfo <- function() {
+  print("sessionInfo()")
+  print(sessionInfo())
+
+  print(".libPaths()")
+  print(.libPaths())
+
+  print("installed.packages()")
+  ip <- as.data.frame(installed.packages()[,c(1,3:4)])
+  rownames(ip) <- NULL
+  ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
+  print(ip, row.names=FALSE)
+
+  print("capabilities()")
+  print(capabilities())
+}
 
 ###############################################
 #                  visr.app
@@ -224,18 +396,24 @@ visr.internal.appendJSON <- function(txt) {
 #' Starts definition of parameters for an R app.
 #' @param  name app name
 #' @param  info  app info shown as tooltip
+#' @param  input.type input type of the app. "dragAndDrop" if requires a data node to be drag and dropped. "none" otherwise.
 #' @param  debugdata  debug dataframe to be used when debuggin the app in R / RStudio
 #' @examples
 #' visr.app.start("kmeans", info="kmeans clustering")
 #' visr.app.start("kmeans", debugdata = iris) # will assign visr.input <- iris in debug mode
 #' @export
-visr.app.start <- function(name, info = "", debugdata = NULL) {
+visr.app.start <- function(name, info = "", input.type=c("none", "dragAndDrop"), instructions = "", debugdata = NULL) {
   if (visr.isGUI())
     return()
 
+  input.type <- match.arg(input.type)
+
   assign("visr.var.appJSON",
-         paste('{\n  "label": "', name, '",\n  "info": "', info, '",\n  "categories":[', sep=''),
-         .GlobalEnv)
+         paste('{\n  "label": "', name,
+               '",\n  "info": "', gsub('"', '\\\\"', gsub('\n', '\\\\n', info)),
+               '",\n  "instructions": "', gsub('"', '\\\\"', gsub('\n', '\\\\n', instructions)),
+               '",\n  "input": "', input.type,
+               '",\n  "categories":[', sep=''), .GlobalEnv)
   assign("visr.var.definedCategory", FALSE, .GlobalEnv)
   assign("visr.var.definedParam", FALSE, .GlobalEnv)
 
@@ -252,7 +430,7 @@ visr.app.start <- function(name, info = "", debugdata = NULL) {
 #'                      writefile is TRUE, a json file is generated from the caller
 #'                      source file path by replacing .R with .json
 #' @export
-visr.app.end <- function(printjson = FALSE, writefile = FALSE, filename = NULL) { # preview=FALSE
+visr.app.end <- function(printjson = TRUE, writefile = TRUE, filename = NULL) { # preview=FALSE
   if (visr.isGUI())
     return()
 
@@ -276,6 +454,8 @@ visr.app.end <- function(printjson = FALSE, writefile = FALSE, filename = NULL) 
     if (!is.null(filename)) {
       print(paste("Writing app parameter description to", filename))
       write(visr.var.appJSON, file=filename)
+    } else {
+      warning("Could not write the json file as filename parameter is not specified and could not be inferred from source R file.")
     }
   }
 }
@@ -283,22 +463,42 @@ visr.app.end <- function(printjson = FALSE, writefile = FALSE, filename = NULL) 
 #' Start category
 #'
 #' Starts a new category of parameters for the app
-#' @param label   category label to be shown in VisRseq
+#' @param label   category label to be shown in VisR
 #' @param info    additional information about category shown as tooltip
+#' @param collapsed whether the category should be initially shown in collapsed (minimized) mode
 #' @examples
 #' visr.category("clustering parameters")
 #' @export
-visr.category <- function(label, info = "") {
+visr.category <- function(label, info = "", collapsed = FALSE, active.condition = NULL) {
   if (visr.isGUI())
     return()
 
   if (visr.var.definedCategory)
     visr.internal.appendJSON('\n    }\n  },\n')
 
-  visr.internal.appendJSON(paste('  {\n    "label": "', label, '",\n    "info": "', info, '",\n    "variables": {\n', sep=""))
+  visr.internal.appendJSON(paste('  {\n',
+                                 '    "label": "', gsub('"', '\\\\"', label), '",\n',
+                                 '    "info": "', gsub('"', '\\\\"', gsub('\n', '\\\\n', info)), '",\n',
+                                 '    "collapsed": ', ifelse(collapsed, "true", "false"), ',\n',
+                                 ifelse(is.null(active.condition), '', paste(
+                                 '    "active-condition": "', active.condition, '",\n', sep='')),
+                                 '    "variables": {\n', sep=""))
   assign("visr.var.definedCategory", TRUE, .GlobalEnv)
   assign("visr.var.definedParam", FALSE, .GlobalEnv)
 }
+visr.app.category <- visr.category
+
+visr.app.paramNamePrefix = "visr.param."
+
+#' Set parameter name prefix
+#'
+#' Sets the prefix that is added to parameter name when using visr.param()
+#'
+#' @param prefix    the name prefix
+visr.app.setParamNamePrefix <- function(prefix = "visr.param.") {
+  assign("visr.app.paramNamePrefix", prefix, .GlobalEnv)
+}
+
 
 #' Add app parameter
 #'
@@ -309,7 +509,7 @@ visr.category <- function(label, info = "") {
 #' @param label   The label for the parameter's GUI control.
 #'                Will use variable name if not specified (NULL).
 #' @param info    Additional information about parameter.
-#'                Will be shown as tooltip in VisRseq.
+#'                Will be shown as tooltip in VisR.
 #' @param type    Parameter type
 #' @param default Initial default value for the parameter.
 #' @param min     Minimum value for numerical type parameters
@@ -321,14 +521,32 @@ visr.category <- function(label, info = "") {
 #' @param filename.mode  Specify the file dialog mode
 #'                (file load, file save or directory) for a
 #'                \code{"filename"} type parameter
+#' @param active.condition  A logical expression to control when this parameter will be visible.
+#'                    Should be in the form of "PARAMETER OP VALUE"
+#'                    where PARAMETER is name of a previously declared parameter (visr.param...),
+#'                    VALUE is a string, boolean or number,
+#'                    and OP is a logical operator: ==, !=, <=, <, >=, >.
+#'                    e.g. visr.param("title_font", active.condition = "visr.param.title != ''")
+#' @param options     various options to control the specific behaviors of the parameters.
+#'                    Should be specified in the form of "option1=value, option2=value, ..."
+#'                    Current defined options:
+#'                    "importRowNames" for type="output-table": if importRowNames=false, row names won't be imported. default is true.
 #' @param debugvalue  The value to be assigned to the R variable in debug mode.
 #'                    Useful for unit testing.
+#'
+#'
+#' @details
+#' For parameter type of "multi-color" the default should be in the form of "PaletteName" or "PaletteName  ColorCount".
+#' PaletteName is a color brewer palette name which can be found by display.brewer.all() of "RColorBrewer" package.
+#' (http://www.sthda.com/english/wiki/colors-in-r#using-rcolorbrewer-palettes)
+#'
+#'
 #' @examples
 #' visr.param("k", type = "integer") # specify type
 #' visr.param("k", default = 3L) # will infer type from default value
 #' visr.param("k", label = "number of clusters")  # explicitly specify label
 #' visr.param("title") # no type or default value: treated as a "string" type
-#' visr.param("algorithm", items = c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"))
+#' visr.param("algorithm", items = c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"), active.condition="visr.param.k > 1")
 #' visr.param("columns", type = "multi-column-numerical")
 #' visr.param("output.clusterid", type = "output-column") # column appended to input table
 #' @export
@@ -342,20 +560,36 @@ visr.param <- function(name, label = NULL, info = NULL,
                        default = NULL, min = NULL, max = NULL,
                        items = NULL, item.labels = NULL,
                        filename.mode = c("load", "save", "dir"),
+                       active.condition = NULL,
+                       options = NULL,
                        debugvalue = NULL) {
-  if (visr.isGUI()) # don't generate parameters when running within VisRseq
+  if (visr.isGUI()) # don't generate parameters when running within VisR
     return()
 
-  paramname = paste("visr.param", name, sep=".") #full parameter name
+  paramname = paste0(visr.app.paramNamePrefix, name) #full parameter name
 
-  if (missing(type) && !is.null(default)) {
-    #guess type from the default value
-    if (is.numeric(default) && is.integer(default)) {
-      type <- "int"
-    } else if (is.numeric(default)) {
-      type <- "double"
-    } else if (is.logical(default)) {
-      type <- "boolean"
+  if (missing(type)) {
+    if (!is.null(default)) {
+      #guess type from the default value
+      if (is.numeric(default) && is.integer(default)) {
+        type <- "int"
+      } else if (is.numeric(default)) {
+        type <- "double"
+      } else if (is.logical(default)) {
+        type <- "boolean"
+      }
+    } else if (!is.null(min)) {
+      if (is.numeric(min) && is.integer(min)) {
+        type <- "int"
+      } else if (is.numeric(min)) {
+        type <- "double"
+      }
+    } else if (!is.null(max)) {
+      if (is.numeric(max) && is.integer(max)) {
+        type <- "int"
+      } else if (is.numeric(max)) {
+        type <- "double"
+      }
     }
   }
   type <- match.arg(type)
@@ -403,6 +637,8 @@ visr.param <- function(name, label = NULL, info = NULL,
       debugvalue <- colnames(visr.input)
     } else if (type == "multi-column-numerical" && !is.null(visr.input)) {
       debugvalue <- colnames(visr.input)[which(sapply(visr.input, is.numeric))]
+    } else if (type == "multi-color") {
+      debugvalue <- "#d73027,#fc8d59,#fee090,#ffffbf,#e0f3f8,#91bfdb,#4575b4"
     }
   }
   assign(paramname, debugvalue, envir = .GlobalEnv)
@@ -412,15 +648,17 @@ visr.param <- function(name, label = NULL, info = NULL,
     default <- tolower(default)
 
   properties <- c(
-    if (!is.null(label))    {paste('"label": ',   label,    '', sep='"')} else {NULL},
-    if (!is.null(info))     {paste('"info": ',    info,     '', sep='"')} else {NULL},
+    if (!is.null(label))    {paste('"label": ',   gsub('"', '\\\\"', label),    '', sep='"')} else {NULL},
+    if (!is.null(info))     {paste('"info": ',    gsub('"', '\\\\"', gsub('\n', '\\\\n', info)),     '', sep='"')} else {NULL},
     if (!is.null(type))     {paste('"type": ',    type,     '', sep='"')} else {NULL},
     if (!is.null(default))  {paste('"default": ', default , '', sep = ifelse(default.ischar, '"', ''))} else {NULL},
     if (!is.null(min))      {paste('"min": ',     min,          sep='')} else {NULL},
     if (!is.null(max))      {paste('"max": ',     max,          sep='')} else {NULL},
     if (!is.null(items))       {paste('"items": ',       paste('[', paste('"', items,       '"', sep="", collapse=",") ,"]"), sep='')} else {NULL},
     if (!is.null(item.labels)) {paste('"item-labels": ', paste('[', paste('"', item.labels, '"', sep="", collapse=",") ,"]"), sep='')} else {NULL},
-    if (!is.null(filename.mode)) {paste('"filename.mode": ', filename.mode, '', sep='"')} else {NULL}
+    if (!is.null(filename.mode)) {paste('"filename.mode": ', filename.mode, '', sep='"')} else {NULL},
+    if (!is.null(active.condition))     {paste('"active-condition": ',    active.condition,     '', sep='"')} else {NULL},
+    if (!is.null(options))     {paste('"options": ',    options,     '', sep='"')} else {NULL}
   )
 
   properties <- properties[which(!is.na(properties))]
@@ -438,26 +676,93 @@ visr.param <- function(name, label = NULL, info = NULL,
     visr.internal.appendJSON(",\n")
   visr.internal.appendJSON(visr.internal.indent(jsonstr, 6))
   assign("visr.var.definedParam", TRUE, .GlobalEnv)
-
 }
+
+visr.app.param <- visr.param
+
 
 #' Unit test
 visr.internal.test.param <- function() {
   visr.app.start("test-app", info="A test app", debugdata = iris)
-  visr.param("test-minimal")
-  visr.param("test-auto-int", default = 2L)
-  visr.param("test-auto-double", default = 0.5)
-  visr.param("test-auto-bool", default = FALSE)
-  visr.category("group2", "info for group2")
+  visr.app.param("test-minimal")
+  visr.app.param("test-auto-int", default = 2L)
+  visr.app.param("test-auto-double", default = 0.5)
+  visr.app.param("test-auto-bool", default = FALSE)
+  visr.app.category("group2", "info for group2")
   #visr.param("test-mismatch", type="char", default=2)
-  visr.param("test-color", label="foreground", info="foreground color", type="color", default = "yellow")
-  visr.param("test-min-max", default=3, min=1, max=10)
-  visr.param("test-filename", type="filename", filename.mode = "load")
-  visr.param("test-items", items = c("i1","i2","i3"))
-  visr.param("test-item-labels", items = c("i1","i2","i3"),
+  visr.app.param("test-color", label="foreground", info="foreground color", type="color", default = "yellow")
+  visr.app.param("test-min-max", default=3, min=1, max=10)
+  visr.app.param("test-filename", type="filename", filename.mode = "load")
+  visr.app.param("test-items", items = c("i1","i2","i3"))
+  visr.app.param("test-item-labels", items = c("i1","i2","i3"),
              item.labels = c("item 1","item 2","item 3"))
   visr.app.end(printjson=TRUE, filename="~/testapp.json")
   #cat(visr.var.appJSON)
 }
 
-#.libPaths(c(visr.getHomeLibPath(), .libPaths()))
+
+#' Creates a list of strings from a comma or space separated string
+#'
+#' Creates a list of strings from a comma or space separated string
+visr.util.split_comma_string <- function(comma_separated_string) {
+  return (strsplit(comma_separated_string, split = "[ ]*[,| ]+[ ]*")[[1]])
+}
+
+#' Creates a gradient color scale
+#'
+#' Creates a gradient color scale to be used by ggplots from a string of color values
+#'
+#' @param colorsString    String of comma separted color values. e.g. "#d73027,#fc8d59,#fee090,#ffffbf,#e0f3f8,#91bfdb,#4575b4"
+#'
+#' @param label           The name of the scale. Used as axis or legend title.
+#'                        If NULL, the default, the name of the scale is taken from the first mapping used for that aesthetic.
+visr.util.scale_color_gradient <- function(colorsString, label = waiver()) {
+  colorsVec <- visr.util.split_comma_string(colorsString)
+  return (scale_colour_gradientn(colours = colorsVec, name = label))
+}
+
+#' Creates a fill color scale
+#'
+#' Creates a fill color scale to be used by ggplots from a string of color values
+#'
+#' @param colorsString    String of comma separted color values. e.g. "#d73027,#fc8d59,#fee090,#ffffbf,#e0f3f8,#91bfdb,#4575b4"
+#'
+#' @param label           The name of the scale. Used as axis or legend title.
+#'                        If NULL, the default, the name of the scale is taken from the first mapping used for that aesthetic.
+visr.util.scale_fill_gradientn <- function(colorsString, label = waiver()) {
+  colorsVec <- visr.util.split_comma_string(colorsString)
+  return (scale_fill_gradientn(colours = colorsVec, name = label))
+}
+
+# just a palette of 25 colors (https://stackoverflow.com/a/9568659/8371761)
+visr.var.customPalette25 <- c(
+  "black", "dodgerblue2","#E31A1C", # red
+  "green4",
+  "#6A3D9A", # purple
+  "#FF7F00", # orange
+  "gold1", "skyblue2","#FB9A99", # lt pink
+  "palegreen2",
+  "#CAB2D6", # lt purple
+  "#FDBF6F", # lt orange
+  "gray70", "khaki2",
+  "maroon","orchid1","deeppink1","blue1","steelblue4",
+  "darkturquoise","green1","yellow4","yellow3",
+  "darkorange4","brown"
+)
+
+
+todo_things_to_try <- function() {
+    gc()
+    gcinfo(TRUE)
+    .dynLibs()
+    library.dynam()
+    getLoadedDLLs()
+
+    warnings()
+    tail(warnings(), 2)
+    last.warning()
+
+    #package: R.utils
+    setTimeLimit()
+    withTimeout(expr)
+}
