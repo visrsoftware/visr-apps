@@ -1,0 +1,153 @@
+{
+  "label": "UpSet",
+  "info": "A visualization technique to analyze set-based data. UpSet visualizes set intersections, their properties, and the items (elements) in the dataset.",
+  "instructions": " - Drag and drop the data table\n - Specify sets to look at\n - Click [ Run ]",
+  "input": "none",
+  "categories":[  {
+    "label": "Input sets",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.sets": {
+        "label": "Sets to look at",
+        "type": "multi-column"
+      }
+    }
+  },
+  {
+    "label": "Layout Options",
+    "info": "",
+    "collapsed": true,
+    "variables": {
+      "visr.param.nintersects": {
+        "label": "Number of intersections to plot",
+        "type": "int",
+        "default": 40,
+        "min": 1
+      },
+      "visr.param.order_sets": {
+        "label": "Order sets by size",
+        "info": "Order sets by size or keep them in the order of input",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.group_by": {
+        "label": "Group intersections by",
+        "info": "How the intersections should be grouped",
+        "type": "string",
+        "items": [ "degree","sets" ]
+      },
+      "visr.param.order_by": {
+        "label": "Order intersections by",
+        "info": "How the intersections in the matrix should be ordered by",
+        "type": "string",
+        "items": [ "both","freq","degree" ],
+        "item-labels": [ "frequency & degree","frequency","degree" ]
+      },
+      "visr.param.decreasing_freq": {
+        "label": "Order intersection by decreasing frequency",
+        "info": "How the intersections should be ordered.",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "visr.param.order_by != 'degree'"
+      },
+      "visr.param.decreasing_degree": {
+        "label": "Order intersections by decreasing degree",
+        "info": "How the intersections should be ordered.",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.order_by != 'freq'"
+      }
+    }
+  },
+  {
+    "label": "Plot Options",
+    "info": "",
+    "collapsed": true,
+    "variables": {
+      "visr.param.line_size": {
+        "info": "Width of lines in matrix plot",
+        "type": "double",
+        "default": 0.7
+      },
+      "visr.param.point_size": {
+        "info": "Size of points in matrix plot",
+        "type": "double",
+        "default": 2.2
+      },
+      "visr.param.scale_intersections": {
+        "info": "The scale to be used for the intersection sizes",
+        "type": "string",
+        "items": [ "identity","log10","log2" ]
+      },
+      "visr.param.scale_sets": {
+        "info": "The scale to be used for the set sizes",
+        "type": "string",
+        "items": [ "identity","log10","log2" ]
+      }
+    }
+  },
+  {
+    "label": "Plot Labels",
+    "info": "",
+    "collapsed": true,
+    "variables": {
+      "visr.param.main_bar_y_label": {
+        "info": "The y-axis label of the, intersection size bar plot",
+        "type": "string",
+        "default": "Intersection Size"
+      },
+      "visr.param.sets_x_label": {
+        "info": "The x-axis label of the set size bar plot",
+        "type": "string",
+        "default": "Set Size"
+      },
+      "visr.param.intersection_size_title": {
+        "info": "Value to scale the text sizes",
+        "type": "double",
+        "default": 1
+      },
+      "visr.param.intersection_size_tick_labels": {
+        "info": "Value to scale the text sizes",
+        "type": "double",
+        "default": 1
+      },
+      "visr.param.set_size_title": {
+        "info": "Value to scale the text sizes",
+        "type": "double",
+        "default": 1
+      },
+      "visr.param.set_size_tick_labels": {
+        "info": "Value to scale the text sizes",
+        "type": "double",
+        "default": 1
+      },
+      "visr.param.set_names": {
+        "info": "Value to scale the text sizes",
+        "type": "double",
+        "default": 1
+      },
+      "visr.param.numbers_above_bars": {
+        "info": "Value to scale the text sizes",
+        "type": "double",
+        "default": 1
+      },
+      "visr.param.set_size_angles": {
+        "info": "Angle to rotate the set size plot x-axis text",
+        "type": "int",
+        "default": 0
+      },
+      "visr.param.show_numbers": {
+        "info": "Show numbers of intersection sizes above bars",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.number_angles": {
+        "info": "The angle of the numbers atop the intersection size bars",
+        "type": "int",
+        "default": 0,
+        "active-condition": "visr.param.show_numbers == true"
+      }
+    }
+  }]
+}

@@ -1,0 +1,14 @@
+{
+  "label": "RadarChart",
+  "info": "Drawing radar chart (a.k.a. spider plot)",
+  "input": "none",
+  "categories":[  {
+    "label": "Input",
+    "info": "",
+    "variables": {
+      "visr.param.input_columns": {
+        "type": "multi-column-numerical"
+      }
+    }
+  }]
+}
