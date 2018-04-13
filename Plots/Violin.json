@@ -1,76 +1,114 @@
 {
   "label": "Violin Plot",
   "info": "",
+  "input": "none",
   "categories":[  {
     "label": "",
     "info": "",
     "variables": {
       "visr.param.y": {
-        "label": "numeric variable (y)",
-        "type": "column-numerical"
+        "label": "Y value column(s)",
+        "type": "multi-column-numerical"
       },
       "visr.param.x": {
-        "label": "group (x)",
+        "label": "X grouping column",
         "type": "column"
       },
       "visr.param.factorx": {
-        "label": "treat group (x) as fator?",
+        "label": "Treat X group as fators",
         "type": "boolean",
         "default": true
       },
-      "visr.param.trim": {
-        "label": "trim?",
+      "visr.param.add_dot_plot": {
+        "label": "Add dots",
         "type": "boolean",
         "default": false
       },
-      "visr.param.vertical": {
-        "label": "vertical stacking?",
+      "visr.param.add_jitter": {
+        "label": "Add jitter points",
+        "info": "Adds a small amount of random variation to the location of each point, useful for handling overplotting.",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.add_dot_plot == true"
+      },
+      "visr.param.dot_binwidth": {
+        "label": "Dot bins size",
+        "info": "Size of the bins. Set to 0 to use 1/30th of data range as the bin size",
+        "type": "double",
+        "default": 0,
+        "min": 0,
+        "active-condition": "visr.param.add_jitter == false"
+      },
+      "visr.param.jitter_amount": {
+        "label": "Jitter amount",
+        "info": "Amount of jitter: added in both positive and negative directions, so the total spread is twice the value specified here.",
+        "type": "double",
+        "default": 0.05,
+        "min": 0,
+        "active-condition": "visr.param.add_jitter == true"
+      },
+      "visr.param.dot_size": {
+        "label": "Dot size",
+        "type": "double",
+        "default": 0.4,
+        "min": 0,
+        "active-condition": "visr.param.add_dot_plot == true"
+      },
+      "visr.param.trim": {
+        "label": "Trim the tails to data range",
         "type": "boolean",
         "default": false
       },
       "visr.param.boxplot": {
-        "label": "add boxplot?",
+        "label": "Add boxplot",
         "type": "boolean",
         "default": false
       },
       "visr.param.bpwidth": {
-        "label": "boxplot width",
+        "label": "Boxplot width",
         "type": "double",
-        "default": 0.1
+        "default": 0.1,
+        "min": 0,
+        "active-condition": "visr.param.boxplot == true"
       },
       "visr.param.mean_sdl": {
-        "label": "add mean +/- sd?",
+        "label": "Add mean +/- sd",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.vertical": {
+        "label": "Vertical stacking",
         "type": "boolean",
         "default": false
       },
       "visr.param.border": {
-        "label": "color border",
+        "label": "Colored borders",
         "type": "boolean",
         "default": true
       },
       "visr.param.fill": {
-        "label": "filled",
+        "label": "Collored fill",
         "type": "boolean",
         "default": false
       },
       "visr.param.legendpos": {
-        "label": "legend position",
+        "label": "Legend position",
         "type": "string",
         "default": "right",
         "items": [ "none","left","right","top","bottom" ]
       },
       "visr.param.xlabel": {
-        "label": "x label",
+        "label": "X label",
         "type": "string",
         "default": ""
       },
       "visr.param.ylabel": {
-        "label": "y label",
+        "label": "Y label",
         "type": "string",
         "default": ""
       },
       "visr.param.title": {
-        "label": "title",
+        "label": "Title",
         "type": "string",
         "default": ""
       }
