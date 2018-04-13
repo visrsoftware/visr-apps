@@ -6,8 +6,10 @@ visr.app.start("K-means Clustering", debugdata = iris)
 visr.category("clustering parameters")
 visr.param("columns", type = "multi-column-numerical")
 visr.param("k", label = "Number of Clusters (K)", default = 3L, min = 1L)
-visr.param("algorithm", label = "Algorithm", items = c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen"))
-visr.param("sortids", label="Sort cluster IDs by size",  default = TRUE)
+visr.param("algorithm", label = "Algorithm", items = c("Hartigan-Wong", "Lloyd", "MacQueen"))
+visr.param("sortids", label="Sort cluster IDs by size",
+           info = "Sort clusters based on cluster size before assigning IDs. So largest cluster will always get the cluster ID = 1",
+           default = TRUE)
 visr.category("output")
 visr.param("plottype", label = "Summary Plot", items = c("barplot", "splom"), item.labels = c("Barplot of Cluster Sizes", "Scatterplot Matrix"))
 visr.param("output.clusterid", label = "Column name to output cluster IDs", type = "output-column", default = "clusterid")

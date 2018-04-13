@@ -66,7 +66,6 @@ if (!input_advanced) {
   y <- y[keep,]
   dim(y)
 
-
   if(input_method == "exact test") {
     y <- calcNormFactors(y)
     y <- estimateCommonDisp(y)
@@ -85,10 +84,10 @@ if (!input_advanced) {
     fit <- glmFit(y,design)
     lrt <- glmLRT(fit,coef=2)
     de <- decideTestsDGE(lrt, p.value=input_pvalue, adjust.method=input_adjustmethod)
-    topTags(lrt)
+      print(topTags(lrt))
   }
 
-  summary(de)
+    print(summary(de))
 
   output_decide<-rep(0, length(keep))
   output_decide[keep]<-de

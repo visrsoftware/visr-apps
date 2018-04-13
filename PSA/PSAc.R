@@ -21,7 +21,7 @@ loadMDS<-function(path) {read.table(paste(path, "/allRunsMatrix.txt", sep=""), h
 
 paths = c(visr.param.directory, visr.param.directory2)
 paths = unique(paths[paths!=""])
-pathIndices = paste(paths, "/index.txt" ,sep="")
+pathIndices = paste(paths, "/runsInfo.txt" ,sep="")
 pathParamInfos = paste(paths, "/paramInfo.txt" ,sep="")
 inputTables = c()
 paramInfos = c()

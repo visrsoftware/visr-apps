@@ -1,6 +1,7 @@
 {
   "label": "K-means Clustering",
   "info": "",
+  "input": "none",
   "categories":[  {
     "label": "clustering parameters",
     "info": "",
@@ -17,10 +18,11 @@
       "visr.param.algorithm": {
         "label": "Algorithm",
         "type": "string",
-        "items": [ "Hartigan-Wong","Lloyd","Forgy","MacQueen" ]
+        "items": [ "Hartigan-Wong","Lloyd","MacQueen" ]
       },
       "visr.param.sortids": {
         "label": "Sort cluster IDs by size",
+        "info": "Sort clusters based on cluster size before assigning IDs. So largest cluster will always get the cluster ID = 1",
         "type": "boolean",
         "default": true
       }

@@ -1,0 +1,40 @@
+{
+  "label": "Dimensionality Reduction",
+  "info": "t-Distributed Stochastic Neighbor Embedding (t-SNE)",
+  "input": "none",
+  "categories":[  {
+    "label": "Input",
+    "info": "",
+    "variables": {
+      "visr.param.input_columns": {
+        "type": "multi-column-numerical"
+      },
+      "visr.param.method": {
+        "type": "string",
+        "items": [ "PCA","MDS","TSNE" ]
+      },
+      "visr.param.tsne_perplexity": {
+        "type": "double",
+        "default": 30,
+        "active-condition": "visr.param.method=='TSNE'"
+      },
+      "visr.param.tsne_pca_scale": {
+        "info": "Should data be scaled before pca is applied?",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.method=='TSNE'"
+      }
+    }
+  },
+  {
+    "label": "Dimensionality Reduction Output",
+    "info": "",
+    "variables": {
+      "visr.param.output_column_prefix": {
+        "label": "Column name prefix for output",
+        "type": "output-multi-column",
+        "default": "Coord"
+      }
+    }
+  }]
+}
