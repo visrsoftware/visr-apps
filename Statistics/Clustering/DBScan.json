@@ -1,0 +1,59 @@
+{
+  "label": "DBScan",
+  "info": "DBSCAN (Density-based spatial clustering of applications with noise) clustering algorithm. DBSCAN estimates the density around each data point by counting the number of points in a user-specified eps-neighborhood and applies a used-specified minPts thresholds to identify core, border and noise points. In a second step, core points are joined into a cluster if they are density-reachable (i.e., there is a chain of core points where one falls inside the eps-neighborhood of the next). Finally, border points are assigned to clusters.",
+  "input": "none",
+  "categories":[  {
+    "label": "Input",
+    "info": "",
+    "variables": {
+      "visr.param.input_columns": {
+        "type": "multi-column-numerical"
+      }
+    }
+  },
+  {
+    "label": "Algorithm Parameters",
+    "info": "",
+    "variables": {
+      "visr.param.epsilon_distance": {
+        "info": "Size of the epsilon neighborhood",
+        "type": "double",
+        "default": 1,
+        "min": 0,
+        "max": 1000
+      },
+      "visr.param.min_points": {
+        "info": "number of minimum points in the eps region (for core points)",
+        "type": "double",
+        "default": 5,
+        "min": 2,
+        "max": 1000
+      },
+      "visr.param.assign_border_points": {
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  {
+    "label": "Output",
+    "info": "",
+    "variables": {
+      "visr.param.plot_type": {
+        "type": "string",
+        "items": [ "2D scatter plot: PCA","2D scatter plot: MDS","2D scatter plot: t-SNE" ]
+      },
+      "visr.param.plot_covex_hull": {
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.cluster_ids": {
+        "type": "output-column"
+      },
+      "visr.param.quality_criteria": {
+        "type": "output-table",
+        "options": "importRowNames=false"
+      }
+    }
+  }]
+}
