@@ -18,6 +18,7 @@ visr.param("Path_to_seurat_object", type="filename",filename.mode = "load",
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/DN88DF.Robj",
            active.condition = "visr.param.Import_method == 'load_seurat'")
 
+visr.app.category("Output")
 visr.param("Output_plots", type="filename",filename.mode = "save", 
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/visr_seurat.pdf")
 
@@ -28,6 +29,7 @@ visr.param("Output_object", type="filename",filename.mode = "save",
            active.condition = "visr.param.Save_output_object == true")
 
 #options
+visr.app.category("Options")
 visr.param("Filter_Cells", default = F, debugvalue = F)
 visr.param("Find_Variable_Genes", default = F, debugvalue = F)
 visr.param("Run_PCA", default = F, debugvalue = F)
@@ -35,8 +37,8 @@ visr.param("elbow", label = "Draw Elbow Plot", default = F, debugvalue = F)
 visr.param("jackstraw", label = "Run Jackstraw", default = F, debugvalue = F)
 visr.param("jackstrawRep",label = "number of replicates", default = 100,
             active.condition = "visr.param.jackstraw == true")
-visr.param("Run_tSNE", default = F, debugvalue = F)
-visr.param("Cluster_Cells", default = F, debugvalue = T)
+visr.param("Cluster_Cells", default = F, debugvalue = F)
+visr.param("Run_tSNE", default = F, debugvalue = T)
 
 #filter cells
 visr.app.category("Filter cells", active.condition = "visr.param.Filter_Cells == true")
@@ -53,18 +55,18 @@ visr.param("Mean_exp_high",default = 3.0, debugvalue = 3.0)
 visr.param("Dispersion_low",default = 0.5, debugvalue = 0.5)
 #visr.param("Dispersion_high")
 
-#tsne
-visr.app.category("Run tSNE", active.condition = "visr.param.Run_tSNE == true")
-visr.param("specify_tsne_nPC", label = "Manually specify PC number", default = F, debug = T)
-visr.param("tsne_nPC", label = "Number of PCs", default = 10, 
-           active.condition = "visr.param.specify_tsne_nPC == true")
-
 #cluster cells
 visr.app.category("Cluster Cells", active.condition = "visr.param.Cluster_Cells == true")
-visr.param("specify_cluster_nPC", label = "Manually specify PC number", default = F, debug = T)
+visr.param("calculate_cluster_nPC", label = "Automatically calculate number of PCs", default = T, debug = T)
 visr.param("cluster_nPC", label = "Number of PCs", default = 10, 
-           active.condition = "visr.param.specify_cluster_nPC == true")
+           active.condition = "visr.param.calculate_cluster_nPC == false")
 visr.param("cluster_resolution", label = "resolution", default = 0.6, debugvalue = 0.6) #increase for large dataset
+
+#tsne
+visr.app.category("Run tSNE", active.condition = "visr.param.Run_tSNE == true")
+visr.param("calculate_tsne_nPC", label = "Automatically calculate number of PCs", default = T, debug = T)
+visr.param("tsne_nPC", label = "Number of PCs", default = 10, 
+           active.condition = "visr.param.calculate_tsne_nPC == false")
 
 visr.app.end(printjson=TRUE, writefile=TRUE)
 visr.applyParameters()
@@ -109,8 +111,14 @@ if (visr.param.Import_method == "load_raw"){
   project_name <- gbmData@project.name
 }
 
+# shut off exisiting device
+if (exists("seurat_app_pdf_dev") && !is.null(seurat_app_pdf_dev)){
+  dev.off(which = seurat_app_pdf_dev)
+}
+
 # save plots to this location
 pdf(file=visr.param.Output_plots)
+seurat_app_pdf_dev <- dev.cur()
 
 # filter out cells with excessive mitochondrial genes
 if (visr.param.Filter_Cells){
@@ -185,11 +193,12 @@ if (!(is.null(gbmData@dr$pca))){
 
 # Cluster cells
 if (visr.param.Cluster_Cells){
-  if (visr.param.specify_cluster_nPC){
-    num_pc_to_use <- visr.param.cluster_nPC
-  } else {
+  if (visr.param.calculate_cluster_nPC){
     num_pc_to_use <- auto_num_pc_to_use
+  }else{
+    num_pc_to_use <- visr.param.cluster_nPC
   }
+  print(num_pc_to_use)
   print(paste(project_name,":","Clustering cells"))
   gbmData <- FindClusters(object = gbmData, reduction.type = "pca", dims.use = 1:num_pc_to_use, resolution = visr.param.cluster_resolution, print.output = 0, save.SNN = TRUE)
   # PrintFindClustersParams(object = gbmData)
@@ -197,19 +206,20 @@ if (visr.param.Cluster_Cells){
 
 # tSNE
 if (visr.param.Run_tSNE) {
-  if (visr.param.specify_tsne_nPC){
-    num_pc_to_use <- visr.param.tsne_nPC
-  } else {
+  if (visr.param.calculate_tsne_nPC){
     num_pc_to_use <- auto_num_pc_to_use
+  }else{
+    num_pc_to_use <- visr.param.tsne_nPC
   }
+  print(num_pc_to_use)
   print(paste(project_name,":","Running tSNE"))
   gbmData <- RunTSNE(object = gbmData, dims.use = 1:num_pc_to_use, do.fast = TRUE)
   TSNEPlot(object = gbmData)
 }
 
-
 #
-dev.off()
+dev.off(which=seurat_app_pdf_dev)
+rm(seurat_app_pdf_dev)
 
 if (visr.param.Save_output_object){
   print(paste(project_name,":","Saving object"))
