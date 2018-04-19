@@ -2,7 +2,7 @@ source("visrutils.R")
 
 visr.app.start("Basic_Seurat2", debugdata=mtcars)
 
-#parameters
+###parameters
 
 #input
 visr.app.category("Input")
@@ -30,17 +30,17 @@ visr.param("Output_object", type="filename",filename.mode = "save",
 
 #options
 visr.app.category("Options")
-visr.param("Filter_Cells", default = F, debugvalue = T)
-visr.param("Find_Variable_Genes", default = F, debugvalue = T)
-visr.param("Run_PCA", default = F, debugvalue = T)
+visr.param("Filter_Cells", default = F, debugvalue = F)
+visr.param("Find_Variable_Genes", default = F, debugvalue = F)
+visr.param("Run_PCA", default = F, debugvalue = F)
 visr.param("nPC_compute", default = 20, debugvalue = 20,label = "Number of PC to compute",
            active.condition = "visr.param.Run_PCA == true")
 visr.param("elbow", label = "Draw Elbow Plot", default = F, debugvalue = F)
 visr.param("jackstraw", label = "Run Jackstraw", default = F, debugvalue = F)
 visr.param("jackstrawRep",label = "number of replicates", default = 100,
             active.condition = "visr.param.jackstraw == true")
-visr.param("Cluster_Cells", default = F, debugvalue = T)
-visr.param("Run_tSNE", default = F, debugvalue = T)
+visr.param("Cluster_Cells", default = F, debugvalue = F)
+visr.param("Run_tSNE", default = F, debugvalue = F)
 
 #filter cells
 visr.app.category("Filter cells", active.condition = "visr.param.Filter_Cells == true")
@@ -59,30 +59,44 @@ visr.param("Dispersion_low",default = 0.5, debugvalue = 0.5)
 
 #cluster cells
 visr.app.category("Cluster Cells", active.condition = "visr.param.Cluster_Cells == true")
-visr.param("calculate_cluster_nPC", label = "Automatically calculate number of PCs", default = T, debug = T)
+visr.param("calculate_cluster_nPC", label = "Automatically calculate number of PCs", default = T, debug = F)
 visr.param("cluster_nPC", label = "Number of PCs", default = 10, 
            active.condition = "visr.param.calculate_cluster_nPC == false")
 visr.param("cluster_resolution", label = "resolution", default = 0.6, debugvalue = 0.6) #increase for large dataset
 
 #tsne
 visr.app.category("Run tSNE", active.condition = "visr.param.Run_tSNE == true")
-visr.param("calculate_tsne_nPC", label = "Automatically calculate number of PCs", default = T, debug = T)
+visr.param("calculate_tsne_nPC", label = "Automatically calculate number of PCs", default = T, debug = F)
 visr.param("tsne_nPC", label = "Number of PCs", default = 10, 
            active.condition = "visr.param.calculate_tsne_nPC == false")
 
 #Differential expression
 visr.app.category("Differential Expression")
-visr.param("Find Marker Genes", default = F, debug = T)
-visr.param("group_1", type = "character", default = "0,1")
-visr.param("group_2", type = "character", default = "2,3")
-
+visr.param("Find_Marker_Genes", default = F, debug = T)
+visr.param("group_1", type = "character", default = "0,1",active.condition = "visr.param.Find_Marker_Genes==true")
+visr.param("group_2", type = "character", default = "2,3",active.condition = "visr.param.Find_Marker_Genes==true")
 
 visr.app.end(printjson=TRUE, writefile=TRUE)
 visr.applyParameters()
 
 
-###
 ### check path here
+
+
+plot_output_dir <- paste( head(strsplit(visr.param.Output_plots,split="/")[[1]],-1), collapse = "/")
+object_output_dir <- paste( head(strsplit(visr.param.Output_object,split="/")[[1]],-1), collapse = "/")
+
+if (visr.param.Import_method == "load_raw"){
+  if (!dir.exists(visr.param.Path_to_outs)){stop("Path to outs directory is not found")}
+} else {
+  if (!file.exists(visr.param.Path_to_seurat_object)){stop("Path to seurat object is not found")}
+}
+if (!dir.exists(plot_output_dir)){print(plot_output_dir);stop("Path to plot output directory is not found")}
+if (visr.param.Save_output_object){
+  if (!dir.exists(object_output_dir)){stop("Path to object output directory is not found")}
+}
+
+### 
 
 library(Seurat)
 library(dplyr)
@@ -261,7 +275,7 @@ if (visr.param.Run_tSNE) {
 }
 
 #DE analysis
-visr.param.group_1
+#visr.param.group_1
 
 
 # close current device
