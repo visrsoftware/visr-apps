@@ -8,7 +8,7 @@ visr.app.start("Basic_Seurat2", debugdata=mtcars)
 visr.app.category("Input")
 visr.param("Import_method",items = c("load_raw","load_seurat"),
            item.labels = c("Load from cellRanger outs","Load Seurat Object"),default = "load_raw", 
-           debugvalue = "load_seurat")
+           debugvalue = "load_raw")
 visr.param("Path_to_outs", type="filename",filename.mode = "dir", 
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/",
            active.condition = "visr.param.Import_method == 'load_raw'")
@@ -22,7 +22,7 @@ visr.app.category("Output")
 visr.param("Output_plots", type="filename",filename.mode = "save", 
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/visr_seurat.pdf")
 
-visr.param("Save_output_object", default = T, debugvalue = T)
+visr.param("Save_output_object", default = T, debugvalue = F)
 visr.param("Output_object", type="filename",filename.mode = "save", 
            #debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/sample.Robj",
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/DN88DF.delete.Robj",
@@ -39,7 +39,7 @@ visr.param("elbow", label = "Draw Elbow Plot", default = F, debugvalue = F)
 visr.param("jackstraw", label = "Run Jackstraw", default = F, debugvalue = F)
 visr.param("jackstrawRep",label = "number of replicates", default = 100,
             active.condition = "visr.param.jackstraw == true")
-visr.param("Cluster_Cells", default = F, debugvalue = F)
+visr.param("Cluster_Cells", default = F, debugvalue = T)
 visr.param("Run_tSNE", default = F, debugvalue = F)
 
 #filter cells
@@ -104,7 +104,7 @@ library(Matrix)
 
 ### functions
 
-filter_Cells <- function(){
+filter_Cells <- function(gbmData){
   print(paste(project_name,":","Filtering cells"))
   max_number_of_genes <- visr.param.max_nGenes
   max_fraction_of_mito <- visr.param.max_percent_mito
@@ -125,7 +125,10 @@ filter_Cells <- function(){
   return(gbmData)
 }
 
-find_variable_Genes <- function(){
+find_variable_genes <- function(gbmData){
+  if (is.null(gbmData@meta.data$percent.mito)){
+    gbmData <- filter_Cells(gbmData)
+  }
   print(paste(project_name,":","Finding variable genes"))
   x.low.cutoff <- visr.param.Mean_exp_low
   x.high.cutoff <- visr.param.Mean_exp_high
@@ -133,22 +136,37 @@ find_variable_Genes <- function(){
   
   gbmData <- FindVariableGenes(object = gbmData, mean.function = ExpMean, dispersion.function = LogVMR, x.low.cutoff = x.low.cutoff, x.high.cutoff = x.high.cutoff, y.cutoff = y.cutoff)
   print(paste(project_name,":",paste("Number of variable genes: ", toString(length(x = gbmData@var.genes)), sep = "")))
+  if (length(gbmData@var.genes) == 0){
+    stop("No variable genes found")
+  }
   return(gbmData)
 }
 
-run_PCA <- function(){
+run_PCA <- function(gbmData){
+  if (length(gbmData@var.genes) == 0){
+    gbmData <- find_variable_genes(gbmData)
+  }
+  
   # Scale data (regression)
   print(paste(project_name,":","Scaling data"))
   gbmData <- ScaleData(object = gbmData, vars.to.regress = c("nUMI", "percent.mito"))
-  # if (is.null(gbmData@meta.data$percent.mito)){
-  #   filter_Cells()
-  # }
+  
   print(paste(project_name,":","Running PCA"))
   gbmData <- RunPCA(object = gbmData, pc.genes = gbmData@var.genes, do.print=F, 
                     pcs.compute = visr.param.nPC_compute)
+  return(gbmData)
 }
 
-calculate_nPC <- function(){
+draw_elbow <- function(gbmData){
+  if (is.null(gbmData@dr$pca)){
+    gbmData <- run_PCA(gbmData)
+  }
+  print(paste(project_name,":","Drawing elbow plot"))
+  print(PCElbowPlot(object = gbmData))
+  return(gbmData)
+}
+
+calculate_nPC <- function(gbmData){
   variance <- gbmData@dr$pca@sdev^2
   mean_var <- sum(variance)/length(variance)
   percent.var <- variance/sum(variance)
@@ -164,9 +182,13 @@ calculate_nPC <- function(){
   return(auto_num_pc_to_use)
 }
 
-cluster_cells <- function(){
+cluster_cells <- function(gbmData){
+  if (is.null(gbmData@dr$pca)){
+    gbmData <- run_PCA(gbmData)
+  }
+  
   if (visr.param.calculate_cluster_nPC){
-    num_pc_to_use <- calculate_nPC()
+    num_pc_to_use <- calculate_nPC(gbmData)
   }else{
     num_pc_to_use <- visr.param.cluster_nPC
   }
@@ -176,13 +198,16 @@ cluster_cells <- function(){
                           resolution = visr.param.cluster_resolution, print.output = 0, save.SNN = TRUE, 
                           temp.file.location = visr.param.Output_object)
   # PrintFindClustersParams(object = gbmData)
-  print("DONE")
   return(gbmData)
 }
 
-run_tSNE <- function(){
+run_tSNE <- function(gbmData){
+  if (is.null(gbmData@dr$pca)){
+    gbmData <- run_PCA(gbmData)
+  }
+  
   if (visr.param.calculate_tsne_nPC){
-    num_pc_to_use <- calculate_nPC()
+    num_pc_to_use <- calculate_nPC(gbmData)
   }else{
     num_pc_to_use <- visr.param.tsne_nPC
   }
@@ -226,9 +251,7 @@ if (visr.param.Import_method == "load_raw"){
 }
 
 # shut off exisiting device
-if (exists("seurat_app_pdf_dev") && !is.null(seurat_app_pdf_dev)){
-  dev.off(which = seurat_app_pdf_dev)
-}
+if (exists("seurat_app_pdf_dev") && !is.null(seurat_app_pdf_dev)){dev.off(which = seurat_app_pdf_dev)}
 
 # save plots to this location
 pdf(file=visr.param.Output_plots)
@@ -238,23 +261,22 @@ seurat_app_pdf_dev <- dev.cur()
 
 # filter out cells with excessive mitochondrial genes
 if (visr.param.Filter_Cells){
-  gbmData <- filter_Cells()
+  gbmData <- filter_Cells(gbmData)
 }
 
 # Find variable genes
 if (visr.param.Find_Variable_Genes){
-  gbmData <- find_variable_Genes()
+  gbmData <- find_variable_genes(gbmData)
 }
 
 #PCA
 if (visr.param.Run_PCA){
-  gbmData <- run_PCA()
+  gbmData <- run_PCA(gbmData)
 }
 
 #elbow plot
 if (visr.param.elbow){
-  print(paste(project_name,":","Drawing elbow plot"))
-  print(PCElbowPlot(object = gbmData)) 
+  gbmData <- draw_elbow()
 }
 
 # Jackstraw
@@ -266,12 +288,12 @@ if (visr.param.jackstraw){
 
 # Cluster cells
 if (visr.param.Cluster_Cells){
-  gbmData <- cluster_cells()
+  gbmData <- cluster_cells(gbmData)
 }
 
 # tSNE
 if (visr.param.Run_tSNE) {
-  gbmData <- run_tSNE()
+  gbmData <- run_tSNE(gbmData)
 }
 
 #DE analysis
