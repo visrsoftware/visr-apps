@@ -1,6 +1,6 @@
 source("visrutils.R")
 
-visr.app.start("Basic_Seurat2", debugdata=mtcars)
+visr.app.start("Basic_Seurat2", debugdata=mtcars, input.type = "none")
 
 ###parameters
 
@@ -33,48 +33,53 @@ visr.app.category("Options")
 visr.param("Filter_Cells", default = F, debugvalue = F)
 visr.param("Find_Variable_Genes", default = F, debugvalue = F)
 visr.param("Run_PCA", default = F, debugvalue = F)
-visr.param("nPC_compute", default = 20, debugvalue = 20,label = "Number of PC to compute",
+visr.param("nPC_compute", min = 1, default = 20, debugvalue = 20,label = "Number of PC to compute",
            active.condition = "visr.param.Run_PCA == true")
 visr.param("elbow", label = "Draw Elbow Plot", default = F, debugvalue = F)
 visr.param("jackstraw", label = "Run Jackstraw", default = F, debugvalue = F)
-visr.param("jackstrawRep",label = "number of replicates", default = 100,
+visr.param("jackstrawRep",label = "number of replicates", min = 1, default = 100,
             active.condition = "visr.param.jackstraw == true")
-visr.param("Cluster_Cells", default = F, debugvalue = T)
+visr.param("Cluster_Cells", default = F, debugvalue = F)
 visr.param("Run_tSNE", default = F, debugvalue = F)
 
 #filter cells
 visr.app.category("Filter cells", active.condition = "visr.param.Filter_Cells == true")
-visr.param("max_nGenes",default = 2500, debugvalue = 2500)
-visr.param("min_nGenes",default = 200, debugvalue = 200)
-visr.param("max_percent_mito",default = 0.05,debugvalue = 0.05)
+visr.param("max_nGenes",min = 0, default = 2500, debugvalue = 2500,items = c("Inf"))
+visr.param("min_nGenes",min=0,default = 200, debugvalue = 200)
+visr.param("max_percent_mito",min = 0, max = 1,default = 0.05,debugvalue = 0.05)
 
 #Find variable genes
 visr.app.category("Variable gene detection", active.condition = "visr.param.Find_Variable_Genes == true")
-visr.param("Normalization_scale_factor", default = 10000,
-           debugvalue = 10000)
-visr.param("Mean_exp_low",default = 0.0125,debugvalue = 0.0125)
-visr.param("Mean_exp_high",default = 3.0, debugvalue = 3.0)
-visr.param("Dispersion_low",default = 0.5, debugvalue = 0.5)
-#visr.param("Dispersion_high")
+visr.param("Normalization_scale_factor", min = 1, default = 10000, debugvalue = 10000)
+visr.param("Mean_exp_low",min = 0, default = 0.0125,debugvalue = 0.0125)
+visr.param("Mean_exp_high",min = 0, default = 3.0, debugvalue = 3.0)
+visr.param("Dispersion_low", min = 0, default = 0.5, debugvalue = 0.5)
+visr.param("Dispersion_high",min = 0, default = 100, debugvalue = Inf, items = c(Inf))
 
 #cluster cells
 visr.app.category("Cluster Cells", active.condition = "visr.param.Cluster_Cells == true")
 visr.param("calculate_cluster_nPC", label = "Automatically calculate number of PCs", default = T, debug = F)
-visr.param("cluster_nPC", label = "Number of PCs", default = 10, 
+visr.param("cluster_nPC", label = "Number of PCs", min = 1, default = 10,
            active.condition = "visr.param.calculate_cluster_nPC == false")
-visr.param("cluster_resolution", label = "resolution", default = 0.6, debugvalue = 0.6) #increase for large dataset
+visr.param("cluster_resolution", label = "resolution", min = 0.1, default = 0.6, debugvalue = 0.6) #increase for large dataset
 
 #tsne
 visr.app.category("Run tSNE", active.condition = "visr.param.Run_tSNE == true")
 visr.param("calculate_tsne_nPC", label = "Automatically calculate number of PCs", default = T, debug = F)
-visr.param("tsne_nPC", label = "Number of PCs", default = 10, 
+visr.param("tsne_nPC", label = "Number of PCs", min = 1, default = 10, 
            active.condition = "visr.param.calculate_tsne_nPC == false")
 
 #Differential expression
 visr.app.category("Differential Expression")
-visr.param("Find_Marker_Genes", default = F, debug = T)
-visr.param("group_1", type = "character", default = "0,1",active.condition = "visr.param.Find_Marker_Genes==true")
-visr.param("group_2", type = "character", default = "2,3",active.condition = "visr.param.Find_Marker_Genes==true")
+visr.param("Find_Marker_Genes", default = F, debug = F)
+visr.param("Choose_Clusters",
+           items=c("all","selected"), 
+           item.labels = c("Compare each group to the rest of the cells","Select sepcific group of clusters"),
+           default = "all", active.condition = "visr.param.Find_Marker_Genes == true")
+visr.param("group_1", type = "character", default = "0,1",
+           active.condition = "visr.param.Choose_Clusters == 'selected'")
+visr.param("group_2", type = "character", default = "2,3",
+           active.condition = "visr.param.Choose_Clusters == 'selected'")
 
 visr.app.end(printjson=TRUE, writefile=TRUE)
 visr.applyParameters()
@@ -111,10 +116,12 @@ filter_Cells <- function(gbmData){
   mito.genes <- grep(pattern = "^MT-", x = rownames(x = gbmData@data), value = TRUE)
   percent.mito <- Matrix::colSums(gbmData@raw.data[mito.genes, ])/Matrix::colSums(gbmData@raw.data)
   gbmData <- AddMetaData(object = gbmData, metadata = percent.mito, col.name = "percent.mito")
+  
   print(VlnPlot(object = gbmData, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3))
-  # par(mfrow = c(1, 2))
-  # GenePlot(object = gbmData, gene1 = "nUMI", gene2 = "percent.mito")
-  # GenePlot(object = gbmData, gene1 = "nUMI", gene2 = "nGene")
+  
+  par(mfrow = c(1, 2))
+  GenePlot(object = gbmData, gene1 = "nUMI", gene2 = "percent.mito")
+  GenePlot(object = gbmData, gene1 = "nUMI", gene2 = "nGene")
   
   gbmData <- FilterCells(object = gbmData, subset.names = c("nGene", "percent.mito"), low.thresholds = c(min_number_of_genes, -Inf), high.thresholds = c(max_number_of_genes, max_fraction_of_mito))
   
@@ -134,7 +141,7 @@ find_variable_genes <- function(gbmData){
   x.high.cutoff <- visr.param.Mean_exp_high
   y.cutoff <- visr.param.Dispersion_low
   
-  gbmData <- FindVariableGenes(object = gbmData, mean.function = ExpMean, dispersion.function = LogVMR, x.low.cutoff = x.low.cutoff, x.high.cutoff = x.high.cutoff, y.cutoff = y.cutoff)
+  gbmData <- FindVariableGenes(object= gbmData, mean.function = ExpMean, dispersion.function = LogVMR, x.low.cutoff = x.low.cutoff, x.high.cutoff = x.high.cutoff, y.cutoff = y.cutoff)
   print(paste(project_name,":",paste("Number of variable genes: ", toString(length(x = gbmData@var.genes)), sep = "")))
   if (length(gbmData@var.genes) == 0){
     stop("No variable genes found")
@@ -198,6 +205,9 @@ cluster_cells <- function(gbmData){
                           resolution = visr.param.cluster_resolution, print.output = 0, save.SNN = TRUE, 
                           temp.file.location = visr.param.Output_object)
   # PrintFindClustersParams(object = gbmData)
+  if (length(levels(gbmData@ident)) == 1){
+    stop("Cells cannot be clustered")
+  }
   return(gbmData)
 }
 
@@ -298,7 +308,25 @@ if (visr.param.Run_tSNE) {
 
 #DE analysis
 #visr.param.group_1
-
+if (visr.param.Find_Marker_Genes){
+  if (length(levels(gbmData@ident)) == 1){
+    gbmData <- cluster_cells(gbmData)
+  }
+  if (visr.param.Choose_Clusters == "selected"){
+    all.clusters <- as.numeric(levels(gbmData@ident))
+    group_1 <- eval(parse(text=paste("c(",visr.param.group_1,")")))
+    if (is.null(visr.param.group_2)){
+      group_2 <- (all.clusters+1)[group_1+1]-1
+    }else{
+      group_2 <- eval(parse(text=paste("c(",visr.param.group_2,")")))
+    }
+    group_1.markers <- FindMarkers(object = gbmData, ident.1 = group_1, ident.2 = group_2)
+    print(head(group_1.markers,n=5))
+  }else{
+    DE.markers <- FindAllMarkers(object = gbmData, min.pct = 0.25)
+    print(DE.markers %>% group_by(cluster) %>% top_n(2, avg_logFC))
+  }
+}
 
 # close current device
 dev.off(which=seurat_app_pdf_dev)
