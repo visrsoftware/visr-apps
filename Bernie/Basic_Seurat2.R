@@ -80,6 +80,15 @@ visr.param("group_1", type = "character", default = "0,1",
            active.condition = "visr.param.Choose_Clusters == 'selected'")
 visr.param("group_2", type = "character", default = "2,3",
            active.condition = "visr.param.Choose_Clusters == 'selected'")
+visr.param("DE_test_method", items = c("wilcox","bimod","roc","t","tobit","poisson","negbinom"),
+           active.condition = "visr.param.Find_Marker_Genes == true")
+visr.param("de_analysis_table", label="Output DE Genes to table", type="output-table",
+           info="Name of the genes output table to appear in VisR",
+           options = "importRowNames=false", active.condition = "visr.param.Find_Marker_Genes == true")
+visr.param("Top_gene_n", default = 2, min = 0, items = c(Inf), item.labels = c("All genes"),
+           info = "Number of top genes per cluster in the output table",
+           active.condition = "visr.param.Find_Marker_Genes == true")
+
 
 visr.app.end(printjson=TRUE, writefile=TRUE)
 visr.applyParameters()
@@ -261,6 +270,8 @@ if (visr.param.Import_method == "load_raw"){
 }
 
 # shut off exisiting device
+visr.dev <- dev.cur()
+
 if (exists("seurat_app_pdf_dev") && !is.null(seurat_app_pdf_dev)){dev.off(which = seurat_app_pdf_dev)}
 
 # save plots to this location
@@ -286,7 +297,10 @@ if (visr.param.Run_PCA){
 
 #elbow plot
 if (visr.param.elbow){
-  gbmData <- draw_elbow()
+  gbmData <- draw_elbow(gbmData)
+  dev.set(which = visr.dev)
+  gbmData <- draw_elbow(gbmData)
+  dev.set(which = seurat_app_pdf_dev)
 }
 
 # Jackstraw
@@ -312,21 +326,26 @@ if (visr.param.Find_Marker_Genes){
   if (length(levels(gbmData@ident)) == 1){
     gbmData <- cluster_cells(gbmData)
   }
+  top_genes_n <- min(visr.param.Top_gene_n,nrow(gbmData@raw.data))
   if (visr.param.Choose_Clusters == "selected"){
     all.clusters <- as.numeric(levels(gbmData@ident))
     group_1 <- eval(parse(text=paste("c(",visr.param.group_1,")")))
-    if (is.null(visr.param.group_2)){
-      group_2 <- (all.clusters+1)[group_1+1]-1
-    }else{
-      group_2 <- eval(parse(text=paste("c(",visr.param.group_2,")")))
-    }
-    group_1.markers <- FindMarkers(object = gbmData, ident.1 = group_1, ident.2 = group_2)
+    if (is.null(group_1)){stop("Enter clusters of interest")}
+    
+    group_2 <- eval(parse(text=paste("c(",visr.param.group_2,")")))
+    group_1.markers <- FindMarkers(object = gbmData, ident.1 = group_1, ident.2 = group_2, 
+                                   test.use = visr.param.DE_test_method)
     print(head(group_1.markers,n=5))
+    table <- data(head(group_1.markers,n=top_genes_n))
+    
   }else{
-    DE.markers <- FindAllMarkers(object = gbmData, min.pct = 0.25)
-    print(DE.markers %>% group_by(cluster) %>% top_n(2, avg_logFC))
+    DE.markers <- FindAllMarkers(object = gbmData, test.use = visr.param.DE_test_method,min.pct = 0.25)
+    table <- data.frame(DE.markers %>% group_by(cluster) %>% top_n(top_genes_n, avg_logFC))
+    visr.param.de_analysis_table <- table
   }
 }
+
+
 
 # close current device
 dev.off(which=seurat_app_pdf_dev)
@@ -338,3 +357,4 @@ if (visr.param.Save_output_object){
   print(paste(project_name,":","Saving object"))
   saveRDS(gbmData, file = visr.param.Output_object)
 }
+
