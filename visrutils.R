@@ -38,16 +38,19 @@ visr.applyParameters <- function() {
 }
 
 readline.orig <- base::readline
-visr.readline <- function(prompt = "") {
-    if (!visr.isGUI()) {
-        return (readline.orig(prompt))
-    } else {
-        visr.message(prompt, "prompt")
-        return("\n")
-    }
+visr.readline <- function(prompt = "", ...) {
+  cat("visr.readline")
+  if (!visr.isGUI()) {
+    return (readline.orig(prompt, ...))
+  } else {
+    visr.message(prompt, "prompt")
+    return("\n")
+  }
 }
 
 if (visr.isGUI()) {
+    # disable readline when running inside visr
+
     #unlockBinding("readline", .GlobalEnv)
     #readline <- visr.readline
     assign("readline", visr.readline, .GlobalEnv)
@@ -90,22 +93,25 @@ visr.message<-function(text, type=c("error","warning", "prompt"))
   }
 }
 
+visr.require <- function(pkg) {
+  return (suppressWarnings(require(pkg, character.only = TRUE, quietly = TRUE)))
+}
 
 # Loads a CRAN package. If not already installed, tries to install the package from CRAN.
 visr.library<-function (pkg) {
   visr.logProgress(paste("Loading package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing cran package:", pkg))
     install.packages(pkg, repos = "http://cran.us.r-project.org", dependencies=TRUE)
     #update.packages(ask = TRUE)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
@@ -118,17 +124,17 @@ visr.library<-function (pkg) {
 
 visr.libraryURL<-function (pkg,url) {
   visr.logProgress(paste("Loading package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing package", pkg,"from", url))
     install.packages(url, repos = NULL, type="source", dependencies=TRUE)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
@@ -142,17 +148,17 @@ visr.libraryURL<-function (pkg,url) {
 
 visr.librarySource<-function (pkg, url) {
   visr.logProgress(paste("Loading package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing package", pkg,"from", url))
     source(url)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
@@ -169,7 +175,7 @@ visr.librarySource<-function (pkg, url) {
 #' @param pkg package name
 visr.biocLite<-function (pkg) {
   visr.logProgress(paste("Loading bioconductor package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing bioconductor package:", pkg))
     source("http://bioconductor.org/biocLite.R")
     biocLite(pkg,
@@ -177,12 +183,12 @@ visr.biocLite<-function (pkg) {
              suppressAutoUpdate=FALSE,  # whether the BiocInstaller package updates itself.
              ask=FALSE)                 # whether to prompt user before installed packages are updated
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
@@ -616,7 +622,8 @@ visr.param <- function(name, label = NULL, info = NULL,
 
   # check that type matches default
   if (!is.null(default)) {
-    if (((type=="int" || type=="double") && !is.numeric(default)) ||
+    defaultNotInItems <- !is.null(items) && !(default %in% items)
+    if (((type=="int" || type=="double") && !is.numeric(default) && defaultNotInItems) ||
           ( type=="boolean" && !is.logical(default)) ||
           ( type=="string" && !is.character(default)))
       stop ("default value does not match the type")

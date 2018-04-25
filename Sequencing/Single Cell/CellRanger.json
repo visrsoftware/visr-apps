@@ -122,7 +122,7 @@
         "label": "Gene list to export (comma separated)",
         "info": "Comma separated list of genes to export to the output table",
         "type": "string",
-        "active-condition": "visr.param.include_genecounts == true"
+        "active-condition": "visr.param.include_genecounts == TRUE"
       },
       "visr.param.gene_value_normalization": {
         "label": "Normalization",
@@ -131,7 +131,7 @@
         "default": "norm_log10_median_sum",
         "items": [ "norm_none","norm_median_sum","norm_log10_median_sum" ],
         "item-labels": [ "None: raw values","Sum over median sum","log10 (Sum over median sum)" ],
-        "active-condition": "visr.param.include_genecounts == true"
+        "active-condition": "visr.param.include_genecounts == TRUE"
       }
     }
   },
@@ -152,13 +152,13 @@
         "default": 5,
         "min": 2,
         "max": 10,
-        "active-condition": "visr.param.enable_de == true"
+        "active-condition": "visr.param.enable_de == TRUE"
       },
       "visr.param.vis_show_de_heatmap": {
         "label": "show heatmap of significant genes",
         "type": "boolean",
         "default": false,
-        "active-condition": "visr.param.enable_de == true"
+        "active-condition": "visr.param.enable_de == TRUE"
       },
       "visr.param.cluster_heatmap_n_genes": {
         "label": "number of genes in heatmap",
@@ -167,27 +167,27 @@
         "default": 3,
         "min": 1,
         "max": 100,
-        "active-condition": "visr.param.vis_show_de_heatmap == true"
+        "active-condition": "visr.param.vis_show_de_heatmap == TRUE"
       },
       "visr.param.cluster_heatmap_min": {
         "label": "heatmap min value",
         "info": "min saturate value on the color bar",
         "type": "double",
         "default": -1,
-        "active-condition": "visr.param.vis_show_de_heatmap == true"
+        "active-condition": "visr.param.vis_show_de_heatmap == TRUE"
       },
       "visr.param.cluster_heatmap_max": {
         "label": "heatmap max value",
         "info": "max saturate value on the color bar",
         "type": "double",
         "default": 2,
-        "active-condition": "visr.param.vis_show_de_heatmap == true"
+        "active-condition": "visr.param.vis_show_de_heatmap == TRUE"
       },
       "visr.param.de_analysis_table": {
         "label": "Output DE Genes to table",
         "info": "Name of the genes output table to appear in VisR",
         "type": "output-table",
-        "active-condition": "visr.param.enable_de == true",
+        "active-condition": "visr.param.enable_de == TRUE",
         "options": "importRowNames=false"
       },
       "visr.param.de_only_significant": {
