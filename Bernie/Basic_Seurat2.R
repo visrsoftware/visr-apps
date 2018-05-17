@@ -1,8 +1,8 @@
 source("visrutils.R")
 
-visr.app.start("Basic_Seurat2", debugdata=mtcars, input.type = "none")
+# Parameters --------------------------------------------------------------
 
-###parameters
+visr.app.start("Basic_Seurat2", debugdata=mtcars, input.type = "none")
 
 #input
 visr.app.category("Input")
@@ -20,14 +20,9 @@ visr.param("Path_to_seurat_object", type="filename",filename.mode = "load",
            active.condition = "visr.param.Import_method == 'load_seurat'")
 
 visr.app.category("Output")
-visr.param("Output_plots", type="filename",filename.mode = "save", 
-           debugvalue = "C:/Users/Yiwei Zhao/Desktop/visr_seurat.pdf")
 
-visr.param("Save_output_object", default = T, debugvalue = F)
-visr.param("Output_object", type="filename",filename.mode = "save", 
-           #debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/sample.Robj",
-           debugvalue = "C:/Users/Yiwei Zhao/Desktop/DN88DF.delete.Robj",
-           active.condition = "visr.param.Save_output_object == true")
+visr.param("Output_directory", type = "filename", filename.mode="dir", 
+           debugvalue="C:/Users/Yiwei Zhao/Desktop/")
 
 #options
 visr.app.category("Options")
@@ -117,27 +112,20 @@ visr.param("Top_gene_n",label = "Number of top genes", default = 2, min = 1, ite
 visr.app.end(printjson=TRUE, writefile=TRUE)
 visr.applyParameters()
 
-### check path here
 
-plot_output_dir <- paste( head(strsplit(visr.param.Output_plots,split="/")[[1]],-1), collapse = "/")
-object_output_dir <- paste( head(strsplit(visr.param.Output_object,split="/")[[1]],-1), collapse = "/")
-
+# Check Path --------------------------------------------------------------
 if (visr.param.Import_method == "load_raw"){
   if (!dir.exists(visr.param.Path_to_outs)){visr.message("Path to outs directory is not found")}
 } else {
   if (!file.exists(visr.param.Path_to_seurat_object)){visr.message("Path to seurat object is not found")}
 }
-if (!dir.exists(plot_output_dir)){print(plot_output_dir);visr.message("Path to plot output directory is not found")}
-if (visr.param.Save_output_object){
-  if (!dir.exists(object_output_dir)){visr.message("Path to object output directory is not found")}
-}
 
-### 
+# Load Packages -----------------------------------------------------------
 
 library(Seurat)
 library(dplyr)
 
-### functions
+# Functions ---------------------------------------------------------------
 
 filter_Cells <- function(gbmData){
   print(paste(project_name,":","Filtering cells"))
@@ -278,7 +266,8 @@ run_tSNE <- function(gbmData){
   return(gbmData)
 }
 
-### load data
+
+# Load Data ---------------------------------------------------------------
 
 min_fraction_of_cells <- 0.001
 min_number_of_genes <- visr.param.min_nGenes
@@ -307,16 +296,24 @@ if (visr.param.Import_method == "load_raw"){
   project_name <- gbmData@project.name
 }
 
+
+# Create PDF --------------------------------------------------------------
+
 # shut off exisiting device
 visr.dev <- dev.cur()
-
 if (exists("seurat_app_pdf_dev") && !is.null(seurat_app_pdf_dev)){dev.off(which = seurat_app_pdf_dev)}
 
 # save plots to this location
-pdf(file=visr.param.Output_plots)
+subfolder <- Sys.time()
+subfolder <- gsub(" ","_",subfolder)
+subfolder <- gsub(":","-",subfolder)
+output_folder <- paste(visr.param.Output_directory,subfolder,sep = "/")
+dir.create(output_folder)
+
+pdf(file = paste(output_folder,"All_plots.pdf",sep="/"))
 seurat_app_pdf_dev <- dev.cur()
 
-### Analysis
+# Analysis ----------------------------------------------------------------
 
 # filter out cells with excessive mitochondrial genes
 if (visr.param.Filter_Cells){
@@ -444,9 +441,7 @@ if (visr.param.Find_Marker_Genes){
 dev.off(which=seurat_app_pdf_dev)
 rm(seurat_app_pdf_dev)
 
-# save object
-if (visr.param.Save_output_object){
-  print(paste(project_name,":","Saving object"))
-  saveRDS(gbmData, file = visr.param.Output_object)
-}
 
+# Save Object -------------------------------------------------------------
+print(paste(project_name,":","Saving object"))
+saveRDS(gbmData, file = paste(output_folder,"Seurat.Robj",sep = "/"))
