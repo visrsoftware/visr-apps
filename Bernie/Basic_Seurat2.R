@@ -6,26 +6,28 @@ visr.app.start("Basic_Seurat2", debugdata=mtcars, input.type = "none")
 
 #input
 visr.app.category("Input")
-visr.param("Import_method",items = c("load_raw","load_seurat"),
-           item.labels = c("Load from cellRanger outs","Load Seurat Object"),default = "load_raw", 
+visr.param("Import_method", label = "Choose Import Method",
+           items = c("load_raw","load_seurat"),
+           item.labels = c("Load CellRanger Output","Load Seurat Object"),default = "load_raw", 
            debugvalue = "load_raw")
 visr.param("Path_to_outs", type="filename",filename.mode = "dir", 
-           info = "Path to the directory containing outs",
+           info="Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/",
            active.condition = "visr.param.Import_method == 'load_raw'")
 
 visr.param("Path_to_seurat_object", type="filename",filename.mode = "load",
+           info = "Path to the Seurat object file.",
            #debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/sample.Robj",
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/DN88DF.raw.Robj",
            active.condition = "visr.param.Import_method == 'load_seurat'")
 
 visr.app.category("Output")
-
 visr.param("Output_directory", type = "filename", filename.mode="dir", 
+           info = "Inside this directory, a new directory containg all analysis results will be created.",
            debugvalue="C:/Users/Yiwei Zhao/Desktop/")
 
 #options
-visr.app.category("Options")
+visr.app.category("Options",label = "Select the analysis steps to run")
 visr.param("Filter_Cells", default = F, debugvalue = F)
 visr.param("Find_Variable_Genes", default = F, debugvalue = F)
 visr.param("Dim_Reduction", label = "Dimensionality Reduction", default = F, debugvalue = F)
@@ -34,17 +36,25 @@ visr.param("Find_Marker_Genes", default = F, debug = F)
 
 #filter cells
 visr.app.category("Filter cells", active.condition = "visr.param.Filter_Cells == true")
-visr.param("max_nGenes", type = "int", min = 0, debugvalue = 2500,items = c("Inf"), default = "Inf")
-visr.param("min_nGenes",min=0,default = 0, debugvalue = 200)
-visr.param("max_percent_mito",min = 0, max = 1,default = 0.05,debugvalue = 0.05)
+visr.param("max_nGenes", type = "int", min = 0, debugvalue = 2500,items = c("Inf"), default = "Inf",
+           info = "High cutoff for the number of genes expressed in a cell")
+visr.param("min_nGenes",min=0,default = 0, debugvalue = 200,
+           info = "Low cutoff for the number of genes expressed in a cell")
+visr.param("max_percent_mito",min = 0, max = 1,default = 0.05,debugvalue = 0.05,
+           info = "High cutoff for the proportion of UMIs from mitochondrial genes; Enter a value between 0 and 1")
 
 #Find variable genes
 visr.app.category("Variable gene detection", active.condition = "visr.param.Find_Variable_Genes == true")
-visr.param("Normalization_scale_factor", min = 1, default = 10000, debugvalue = 10000)
-visr.param("Mean_exp_low",min = 0, default = 0.0125,debugvalue = 0.0125)
-visr.param("Mean_exp_high", type = "int", min = 0, default = 3.0, debugvalue = 3.0, items = c("Inf"))
-visr.param("Dispersion_low", min = 0, default = 0.5, debugvalue = 0.5)
-visr.param("Dispersion_high", type = "int", min = 0, debugvalue = Inf, items = c("Inf"),default="Inf")
+visr.param("Normalization_scale_factor", min = 1, default = 10000, debugvalue = 10000,
+           info = "Sets the scale factor for cell-level normalization")
+visr.param("Mean_exp_low",min = 0, default = 0.0125,debugvalue = 0.0125,
+           info = "Low cutoff on x-axis (mean expression) for identifying variable genes")
+visr.param("Mean_exp_high", type = "int", min = 0, default = 3.0, debugvalue = 3.0, items = c("Inf"),
+           info = "High cutoff on x-axis (mean expression) for identifying variable genes")
+visr.param("Dispersion_low", min = 0, default = 0.5, debugvalue = 0.5,
+           info = "Low cutoff on y-axis (standard deviation) for identifying variable genes")
+visr.param("Dispersion_high", type = "int", min = 0, debugvalue = Inf, items = c("Inf"),default="Inf",
+           info = "High cutoff on y-axis (standard deviation) for identifying variable genes")
 
 #Dim Reduction
 visr.app.category("Dimensionality Reduction",active.condition = "visr.param.Dim_Reduction == true")
@@ -109,6 +119,10 @@ visr.param("Top_gene_n",label = "Number of top genes", default = 2, min = 1, ite
            item.labels = c("All genes"),info = "Number of top genes per cluster in the output table",
            active.condition = "visr.param.de_analysis_table != ''")
 
+visr.app.category("Test Color")
+visr.param("gene_name", default = "MS4A1", debugvalue = "MS4A1")
+visr.param("vis_colormap_sequential", label = "Color map", type = "multi-color", default="BuPu 7", debugvalue = "gray, red")
+
 visr.app.end(printjson=TRUE, writefile=TRUE)
 visr.applyParameters()
 
@@ -124,6 +138,7 @@ if (visr.param.Import_method == "load_raw"){
 
 library(Seurat)
 library(dplyr)
+library(reshape2)
 
 # Functions ---------------------------------------------------------------
 
@@ -142,11 +157,6 @@ filter_Cells <- function(gbmData){
   GenePlot(object = gbmData, gene1 = "nUMI", gene2 = "nGene")
   
   gbmData <- FilterCells(object = gbmData, subset.names = c("nGene", "percent.mito"), low.thresholds = c(min_number_of_genes, -Inf), high.thresholds = c(max_number_of_genes, max_fraction_of_mito))
-  
-  # Normalization
-  print(paste(project_name,":","Performing normalization"))
-  normalization_scale_factor <- visr.param.Normalization_scale_factor
-  gbmData <- NormalizeData(object = gbmData, normalization.method = "LogNormalize", scale.factor = normalization_scale_factor)
   return(gbmData)
 }
 
@@ -154,12 +164,19 @@ find_variable_genes <- function(gbmData){
   if (is.null(gbmData@meta.data$percent.mito)){
     gbmData <- filter_Cells(gbmData)
   }
+  # Normalization
+  print(paste(project_name,":","Performing normalization"))
+  normalization_scale_factor <- visr.param.Normalization_scale_factor
+  gbmData <- NormalizeData(object = gbmData, normalization.method = "LogNormalize", scale.factor = normalization_scale_factor)
+  
+  # Find variable genes
   print(paste(project_name,":","Finding variable genes"))
   x.low.cutoff <- visr.param.Mean_exp_low
   x.high.cutoff <- visr.param.Mean_exp_high
   y.cutoff <- visr.param.Dispersion_low
-  
-  gbmData <- FindVariableGenes(object= gbmData, mean.function = ExpMean, dispersion.function = LogVMR, x.low.cutoff = x.low.cutoff, x.high.cutoff = x.high.cutoff, y.cutoff = y.cutoff)
+  y.high.cutoff <- visr.param.Dispersion_high
+  gbmData <- FindVariableGenes(object= gbmData, mean.function = ExpMean, dispersion.function = LogVMR, 
+                               x.low.cutoff = x.low.cutoff, x.high.cutoff = x.high.cutoff, y.cutoff = y.cutoff, y.high.cutoff = y.high.cutoff)
   print(paste(project_name,":",paste("Number of variable genes: ", toString(length(x = gbmData@var.genes)), sep = "")))
   if (length(gbmData@var.genes) == 0){
     visr.message("No variable genes found")
@@ -267,6 +284,7 @@ run_tSNE <- function(gbmData){
 }
 
 
+
 # Load Data ---------------------------------------------------------------
 
 min_fraction_of_cells <- 0.001
@@ -297,6 +315,12 @@ if (visr.param.Import_method == "load_raw"){
 }
 
 
+# Analysis result file names ----------------------------------------------
+
+plot_output <- "All_plots.pdf"
+cell_info_output <- "QC_Clustering_Result.tsv"
+DE_output <- "Differential_Expression_Analysis_result.tsv"
+
 # Create PDF --------------------------------------------------------------
 
 # shut off exisiting device
@@ -310,7 +334,7 @@ subfolder <- gsub(":","-",subfolder)
 output_folder <- paste(visr.param.Output_directory,subfolder,sep = "/")
 dir.create(output_folder)
 
-pdf(file = paste(output_folder,"All_plots.pdf",sep="/"))
+pdf(file = paste(output_folder,plot_output,sep="/"))
 seurat_app_pdf_dev <- dev.cur()
 
 # Analysis ----------------------------------------------------------------
@@ -437,6 +461,7 @@ if (visr.param.Find_Marker_Genes){
   }
 }
 
+
 # close current device
 dev.off(which=seurat_app_pdf_dev)
 rm(seurat_app_pdf_dev)
@@ -445,3 +470,47 @@ rm(seurat_app_pdf_dev)
 # Save Object -------------------------------------------------------------
 print(paste(project_name,":","Saving object"))
 saveRDS(gbmData, file = paste(output_folder,"Seurat.Robj",sep = "/"))
+
+
+
+# Plot gene ---------------------------------------------------------------
+
+
+plot_genes <- function (gbm, gene_probes, projection, limits = c(0, 10), marker_size = 0.1, title = NULL) 
+{
+  #gene_values <- t(as.matrix(gbm@data[gene_probes,]))
+  #gene_values <- cbind(numeric(0),gene_values)
+  gene_values <- t(as.matrix(rbind(numeric(0),gbm@data[gene_probes,])))
+  gene_values[gene_values < limits[1]] <- limits[1]
+  gene_values[gene_values > limits[2]] <- limits[2]
+  print("1")
+  print(gene_probes)
+  print(dim(gene_values))
+  colnames(gene_values) <- gene_probes
+  print(2)
+  projection_names <- colnames(projection)
+  print(3)
+  colnames(projection) <- c("Component.1", "Component.2")
+  print(4)
+  proj_gene <- data.frame(cbind(projection, gene_values))
+  proj_gene_melt <- melt(proj_gene, id.vars = c("Component.1", 
+                                                "Component.2"))
+  p <- ggplot(proj_gene_melt, aes(Component.1, Component.2)) + 
+    geom_point(aes(colour = value), size = marker_size) + 
+    facet_wrap(~variable) + scale_colour_gradient(low = "grey", 
+                                                  high = "red", name = "val") + labs(x = projection_names[1], 
+                                                                                     y = projection_names[2])
+  if (!is.null(title)) {
+    p <- p + ggtitle(title)
+  }
+  p <- p + theme_bw() + theme(plot.title = element_text(hjust = 0.5), 
+                              panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  return(p)
+}
+
+p <- plot_genes(gbm = gbmData,gene_probes = c("MS4A1"),projection = gbmData@dr$tsne@cell.embeddings)
+p <- p + visr.util.scale_color_gradient(visr.param.vis_colormap_sequential, label="log10(UMI_counts)")
+dev.set(which = visr.dev)
+print(p)
+
+
