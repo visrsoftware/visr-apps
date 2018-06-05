@@ -1,6 +1,6 @@
 source("visrutils.R")
 
-if (!visr.isGUI()) {
+if (!visr.isGUI()) {# debug only
   visr.input <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"),
            header = T, sep = ";")
 }
@@ -64,7 +64,7 @@ visr.param("numbers_above_bars", info = "Value to scale the text sizes", default
 visr.param("set_size_angles", info = "Angle to rotate the set size plot x-axis text", default = 0L)
 visr.param("show_numbers", info = "Show numbers of intersection sizes above bars", default = T)
 visr.param("number_angles", info = "The angle of the numbers atop the intersection size bars", default = 0L,
-           active.condition = "visr.param.show_numbers == true")
+           active.condition = "visr.param.show_numbers")
 
 visr.app.end()
 

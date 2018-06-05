@@ -22,18 +22,18 @@ visr.param("add_dot_plot", label = "Add dots", default=FALSE, debugvalue = TRUE)
 visr.param("add_jitter", label = "Add jitter points",
            info = "Adds a small amount of random variation to the location of each point, useful for handling overplotting.",
            default=FALSE, debugvalue = TRUE,
-           active.condition = "visr.param.add_dot_plot == true")
+           active.condition = "visr.param.add_dot_plot")
 
 visr.param("dot_binwidth", label = "Dot bins size", default=0, min = 0,
            info = "Size of the bins. Set to 0 to use 1/30th of data range as the bin size",
-           active.condition = "visr.param.add_jitter == false")
+           active.condition = "!visr.param.add_jitter")
 
 visr.param("jitter_amount", label = "Jitter amount", default=0.05, min = 0,
            info = "Amount of jitter: added in both positive and negative directions, so the total spread is twice the value specified here.",
-           active.condition = "visr.param.add_jitter == true")
+           active.condition = "visr.param.add_jitter")
 
 visr.param("dot_size", label = "Dot size", default=0.4, min = 0,
-           active.condition = "visr.param.add_dot_plot == true")
+           active.condition = "visr.param.add_dot_plot")
 
 
 visr.param("trim", label = "Trim the tails to data range", default=FALSE, debugvalue = TRUE)
@@ -41,7 +41,7 @@ visr.param("trim", label = "Trim the tails to data range", default=FALSE, debugv
 visr.param("boxplot", label = "Add boxplot", default=FALSE, debugvalue = TRUE)
 
 visr.param("bpwidth", label = "Boxplot width", default=0.1, min = 0, debugvalue = 0.2,
-           active.condition = "visr.param.boxplot == true")
+           active.condition = "visr.param.boxplot")
 
 visr.param("mean_sdl", label = "Add mean +/- sd", default = FALSE, debugvalue = TRUE)
 
