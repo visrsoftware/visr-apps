@@ -1,10 +1,12 @@
 {
   "label": "ModEx",
   "info": "A general purpose system for exploration of computational models",
+  "instructions": "",
   "input": "none",
   "categories":[  {
     "label": "Input",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.directory": {
         "label": "Runs directory",
@@ -16,6 +18,7 @@
   {
     "label": "Derived output",
     "info": "",
+    "collapsed": false,
     "active-condition": "visr.param.directory != ''",
     "variables": {
       "visr.param.derivationMethod": {
@@ -27,17 +30,19 @@
         "label": "Table to Use for Derivatives",
         "type": "string",
         "items": [ "","quality_criteria" ],
-        "active-condition": "visr.param.derivationMethod != No derived output"
+        "active-condition": "visr.param.derivationMethod != 'No derived output'"
       },
       "visr.param.columnsForDerivatives": {
         "label": "Column to Use for Derivatives",
-        "type": "string"
+        "type": "string",
+        "active-condition": "visr.param.derivationMethod != 'No derived output' && visr.param.derivationMethod != 'Take first row'"
       }
     }
   },
   {
     "label": "View Options",
     "info": "",
+    "collapsed": false,
     "active-condition": "visr.param.directory != ''",
     "variables": {
       "visr.param.launchExplorer": {
