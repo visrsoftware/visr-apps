@@ -1,0 +1,286 @@
+{
+  "label": "Monocle",
+  "info": "",
+  "instructions": "",
+  "input": "none",
+  "categories":[  {
+    "label": "Input",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.input_type": {
+        "info": "Specify the format of your input data. Whether it is a 10X cell ranger dataset or a normal or sparse an expression matrix",
+        "type": "string",
+        "items": [ "10X single cell dataset","Count matrix (.txt)","Sparse matrix" ]
+      },
+      "visr.param.data_dir_10x": {
+        "label": "10X dataset directory",
+        "info": "10X Cell Ranger dataset directory. It should contain a sub-directory named 'outs'",
+        "type": "filename",
+        "filename.mode": "dir",
+        "active-condition": "visr.param.input_type == '10X single cell dataset'"
+      },
+      "visr.param.expression_matrix": {
+        "info": "Numeric matrix of expression values, where rows are genes, and columns are cells",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "(visr.param.input_type == 'Count matrix (.txt)') || (visr.param.input_type == 'Sparse matrix')"
+      },
+      "visr.param.sample_sheet": {
+        "info": "Pheno data where rows are cells, and columns are cell attributes (such as cell type, culture condition, day captured, etc.). It should have same number of rows as the number of columns in expression value matrix.",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "(visr.param.input_type == 'Count matrix (.txt)') || (visr.param.input_type == 'Sparse matrix')"
+      },
+      "visr.param.gene_annotation": {
+        "info": "Feature data where rows are features (e.g. genes), and columns are gene attributes (such as biotype, gc content, etc.). It should have same number of rows as the number of rows in expression value matrix.",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "(visr.param.input_type == 'Count matrix (.txt)') || (visr.param.input_type == 'Sparse matrix')"
+      },
+      "visr.param.data_type": {
+        "label": "Data type",
+        "info": "Specify the appropriate data type. Monocle works well with both count-based measures (e.g. UMIs) and relative expression data.",
+        "type": "string",
+        "items": [ "UMIs, Raw transcript counts","FPKM, TPM","log FPKM/TPMs, Ct values from SC qPCR" ],
+        "active-condition": "(visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != '')"
+      }
+    }
+  },
+  {
+    "label": "Output",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "(visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != '')",
+    "variables": {
+      "visr.param.output_dir": {
+        "label": "Output Directory to save the results",
+        "info": "Output directory where the analysis results will be saved to",
+        "type": "filename",
+        "filename.mode": "dir"
+      },
+      "visr.param.create_subdir": {
+        "label": "Create new sub-direcory",
+        "info": "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)",
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  {
+    "label": "Analysis steps",
+    "info": "Different analysis steps",
+    "collapsed": false,
+    "active-condition": "visr.param.output_dir != '' && ((visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != ''))",
+    "variables": {
+      "visr.param.enable_subsetting": {
+        "label": "Subsetting and dimensionality reduction",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.enable_clustering": {
+        "label": "Clustering",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "visr.param.enable_subsetting"
+      },
+      "visr.param.enable_de_analysis": {
+        "label": "Differential expression analysis",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.enable_subsetting && visr.param.enable_clustering"
+      },
+      "visr.param.enable_trajectories": {
+        "label": "Single-cell trajectories",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.enable_subsetting && visr.param.enable_clustering && visr.param.enable_de_analysis"
+      }
+    }
+  },
+  {
+    "label": "Subsetting and dimensionality reduction",
+    "info": "Values used to reduce dimensionality of data (Genes and Cells)",
+    "collapsed": false,
+    "active-condition": "visr.param.output_dir != '' && visr.param.enable_subsetting",
+    "variables": {
+      "visr.param.min_expr": {
+        "label": "Expression threshold",
+        "info": "The expression threshold to be used to tally the number of cells expressing a gene and the number of genes expressed among all cells. A gene is 'expressed' if there is at least the specified count",
+        "type": "int",
+        "default": 1
+      },
+      "visr.param.gene_subset_method": {
+        "label": "Gene subsetting method",
+        "info": "Strategy used to subset genes",
+        "type": "string",
+        "items": [ "Based on mean expression","Based on number of expressed cells" ]
+      },
+      "visr.param.min_mean_expression": {
+        "label": "Subset genes: Minimum mean expression",
+        "info": "Select genes which have a mean expression of specified value",
+        "type": "double",
+        "default": 0.1,
+        "min": 0,
+        "active-condition": "visr.param.gene_subset_method == 'Based on mean expression'"
+      },
+      "visr.param.min_expressed_cells": {
+        "label": "Subset genes: Minimum percentage of expressed cells",
+        "info": "Select genes which have a minimum percentage of expressed cells",
+        "type": "double",
+        "default": 0.05,
+        "min": 0,
+        "max": 1,
+        "active-condition": "visr.param.gene_subset_method == 'Based on number of expressed cells'"
+      },
+      "visr.param.reduce_num_dim": {
+        "label": "Number of reduced dimensions",
+        "type": "int",
+        "default": 50,
+        "min": 2
+      },
+      "visr.param.reduction_method": {
+        "label": "Algorithm for dimensionality reduction",
+        "info": "Algorithm to use for dimensionality reduction",
+        "type": "string",
+        "default": "tSNE",
+        "items": [ "DDRTree","ICA","tSNE","SimplePPT","L1-graph","SGL-tree" ]
+      }
+    }
+  },
+  {
+    "label": "Clustering",
+    "info": "Identify new (and possibly rare) subtypes of cells in Single-cell RNA-Seq experiments.",
+    "collapsed": false,
+    "active-condition": "visr.param.output_dir != '' && visr.param.enable_clustering",
+    "variables": {
+      "visr.param.cluster_method": {
+        "info": "Method for clustering cells. For big datasets (like data with 50 k cells or so), we recommend using the 'louvain' clustering algorithm.",
+        "type": "string",
+        "items": [ "densityPeak","louvain","DDRTree" ]
+      },
+      "visr.param.num_clusters": {
+        "label": "Number of clusters",
+        "info": "Number of clusters. When auto, Use 0.95 of the delta and 0.95 of the rho as the cutoff for assigning density peaks and clusters",
+        "type": "int",
+        "default": "NULL",
+        "min": 1,
+        "items": [ "NULL" ],
+        "item-labels": [ "auto" ],
+        "active-condition": "visr.param.cluster_method == 'densityPeak'"
+      },
+      "visr.param.skip_rho_sigma": {
+        "info": "skip the calculation of rho / sigma",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.cluster_method == 'densityPeak'"
+      },
+      "visr.param.rho_threshold": {
+        "label": "rho (cell's local density) threshod",
+        "info": "The threshold of cell's local density (rho) used to select the density peaks",
+        "type": "double",
+        "default": "NULL",
+        "min": 0,
+        "items": [ "NULL" ],
+        "item-labels": [ "auto" ],
+        "active-condition": "visr.param.cluster_method == 'densityPeak'"
+      },
+      "visr.param.delta_threshold": {
+        "label": "delta (local distance) threshod",
+        "info": "The threshold of local distance (nearest distance of a cell to another cell with higher distance) used to select the density peaks",
+        "type": "double",
+        "default": "NULL",
+        "min": 0,
+        "items": [ "NULL" ],
+        "item-labels": [ "auto" ],
+        "active-condition": "visr.param.cluster_method == 'densityPeak'"
+      },
+      "visr.param.gaussian": {
+        "label": "Use gaussian kernel?",
+        "info": "Whether or not Gaussian kernel will be used for calculating the local density in densityClust function",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "visr.param.cluster_method == 'densityPeak'"
+      },
+      "visr.param.num_centers": {
+        "label": "Number of centroids",
+        "info": "Number of number of centroids passed to DDRTree ('Dimensionality Reduction via Graph Structure Learning' by Qi Mao, et al)",
+        "type": "int",
+        "default": 3,
+        "min": 1,
+        "active-condition": "visr.param.cluster_method == 'DDRTree'"
+      },
+      "visr.param.louvain_k": {
+        "info": "number of kNN used in creating the k nearest neighbor graph for Louvain clustering. The number of kNN is related to the resolution of the clustering result, bigger number of kNN gives low resolution and vice versa.",
+        "type": "int",
+        "default": 50,
+        "active-condition": "visr.param.cluster_method == 'louvain'"
+      },
+      "visr.param.louvain_iter": {
+        "info": "number of iterations used for Louvain clustering. The clustering result gives the largest modularity score will be used as the final clustering result.",
+        "type": "int",
+        "default": 1,
+        "active-condition": "visr.param.cluster_method == 'louvain'"
+      },
+      "visr.param.louvain_weight": {
+        "info": "Use Jaccard coefficent for two nearest neighbors (based on the overlapping of their kNN) as the weight used for Louvain clustering.",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.cluster_method == 'louvain'"
+      }
+    }
+  },
+  {
+    "label": "Differential expression analysis",
+    "info": "A sophisticated but easy to use system for differential expression, to characterize new cell types and states by comparing them to other",
+    "collapsed": false,
+    "active-condition": "visr.param.output_dir != '' && visr.param.enable_de_analysis",
+    "variables": {
+      "visr.param.de_formula": {
+        "label": "Perform DE by",
+        "type": "string",
+        "items": [ "Cluster","Phenotype (cell attribute)" ]
+      },
+      "visr.param.de_cluster_id": {
+        "label": "Perform DE on which Cluster id?",
+        "type": "int",
+        "default": 1,
+        "min": 1,
+        "items": [ "Inf" ],
+        "item-labels": [ "All (slow)" ],
+        "active-condition": "visr.param.de_formula == 'Cluster'"
+      },
+      "visr.param.de_phenotype_name": {
+        "label": "Phenotype (cell attribute) name",
+        "type": "string",
+        "active-condition": "visr.param.de_formula == 'Phenotype (cell attribute)'"
+      },
+      "visr.param.de_subset_by_marker_genes": {
+        "label": "Subset using known marker genes",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.marker_genes_list": {
+        "label": "Marker genes (comma separated)",
+        "info": "Optional comma separated list of short gene names to use as marker genes.",
+        "type": "string",
+        "active-condition": "visr.param.de_subset_by_marker_genes"
+      },
+      "visr.param.num_plot_genes_jitter": {
+        "label": "Draw level of expression for how many top genes?",
+        "info": "Plots the level of expression for each group of cells per gene,\nfor the specified number of most statistically significant genes.",
+        "type": "int",
+        "default": 9
+      }
+    }
+  },
+  {
+    "label": "Single-cell trajectories",
+    "info": "Discover cells transition from one state to another, in development, disease, and throughout life.",
+    "collapsed": false,
+    "active-condition": "visr.param.output_dir != '' && visr.param.enable_trajectories",
+    "variables": {
+
+    }
+  }]
+}
