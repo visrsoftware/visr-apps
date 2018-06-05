@@ -37,20 +37,15 @@ visr.category("Analysis steps",
               info = "Different analysis steps",
               active.condition = "visr.param.output_dir != '' && visr.param.data_dir_10x != ''")
 
-visr.param("enable_clustering", label = "Output clustering results", default = T)
+visr.param("enable_cells_table", label = "Output cells table", default = T)
 
-visr.param("enable_de", "Enable differential expression analysis", default = F, debugvalue = T)
+visr.param("enable_de", "Differential expression analysis", default = F, debugvalue = T)
 
 ################################ Precomputed analysis results
 
-visr.app.category(label="Export precomputed clustering results",
-                  active.condition = "visr.param.output_dir != '' && visr.param.data_dir_10x != '' && visr.param.enable_clustering",
+visr.app.category(label="Output cells table",
+                  active.condition = "visr.param.output_dir != '' && visr.param.data_dir_10x != '' && visr.param.enable_cells_table",
                   info="The analysis table of cells together with precomputed dimensionality reduction and clustering results.")
-
-visr.param("analysis_table", label="Name for table to output barcodes to", type="output-table",
-           info="Name of the output table to appear in VisR",
-           options = "importRowNames=FALSE",
-           debugvalue = "cell_ranger_analysis")
 
 visr.param("include_umi_counts", label="Include total UMI counts", type="boolean", default=T, debugvalue = T,
            info="Include a column with total number of UMIs for each cell in the output table?")
@@ -65,9 +60,9 @@ visr.param("include_kmeans", label="Include k-means results", type="boolean", de
            info="Include precomputed kmeans clusterings in the output table (9 columns: kmeans.2 to kmeans.10)?")
 
 visr.param("include_genecounts", label="Include counts for genes", type="boolean", default=FALSE, debugvalue = TRUE,
-           info="Include gene counts for the genes specified below.")
+           info="Include counts for the genes specified below.")
 
-visr.param("analysis_table_gene_list", label="Gene list to export (comma separated)", info="Comma separated list of genes to export to the output table",
+visr.param("gene_list", label="Gene list to export and plot (comma separated)", info="Comma separated list of genes to export to the output table and plot",
            active.condition = "visr.param.include_genecounts",
            debugvalue = "CD79A, NKG7, CD3D, CST3, CD8A, PF4")
 
@@ -75,7 +70,7 @@ visr.param("gene_value_normalization", label="Normalization", info = "Normalizat
            items = c("norm_none", "norm_median_sum", "norm_log10_median_sum"),
            item.labels = c("None: raw values", "Sum over median sum", "log10 (Sum over median sum)"),
            default = "norm_log10_median_sum",
-           active.condition = "visr.param.include_genecounts")
+           active.condition = "visr.param.include_genecounts && visr.param.gene_list != ''")
 
 ################################ Differential expression analysis
 
@@ -93,17 +88,19 @@ visr.param('de_only_significant', label="Export significant genes only", default
 visr.param('all_de_columns', label = "Include all columns in DE output table", default = T,
            info = "Whether to specify columns you want to be exported to the DE analysis output table. By default all columns are selected")
 
-de_genes_fields = list(list('sum_a', 'Include sum of inside cluster values', T),
-                       list('sum_b', 'Include sum of outside cluster values', T),
-                       list('common_mean', 'Include common mean', T),
-                       list('dispersion', 'Include dispersion', T),
-                       list('mean_a_sizenorm', 'Include mean A size norm', T),
-                       list('mean_b_sizenorm', 'Include mean B size norm', T),
-                       list('log2fc', 'Include log2 fold change', T),
-                       list('p', 'Include P', T),
-                       list('p_adj', 'Include P (adjusted)', T),
-                       list('order', 'Include significance order', T),
-                       list('significant', 'Include significance condition', T))
+de_genes_fields = list(
+  list('significant', 'Include significance condition', T),
+  list('p', 'Include raw P value (exact test)', T),
+  list('p_adj', 'Include adjusted P value (BH method)', T),
+  list('log2fc', 'Include log2 fold change', T),
+  list('order', 'Include order by significance', T),
+  list('sum_a', 'Include sum of inside cluster counts (A)', T),
+  list('sum_b', 'Include sum of outside cluster counts (B)', T),
+  list('mean_a_sizenorm', 'Include mean of inside cluster counts (A)', T),
+  list('mean_b_sizenorm', 'Include mean of outside cluster counts (B)', T),
+  list('common_mean', 'Include common mean', T),
+  list('dispersion', 'Include common dispersion (shrunken dispersion estimate)', T)
+)
 
 
 for (f in de_genes_fields) {
@@ -115,49 +112,46 @@ for (f in de_genes_fields) {
 
 visr.app.category(label="Visualization Options",
                   active.condition = "visr.param.data_dir_10x != '' && visr.param.output_dir != ''",
-                  info="Visualization of pre-computed results under a 2D t-SNE projection")
+                  info="Visualization of pre-computed results under a 2D t-SNE projection",
+                  collapsed = T)
 
 visr.param("visualize_tsne_kmeans", label="Plot t-SNE for ClusterIDs", default = T)
 
-visr.param("visualize_tsne_umi", label="Plot t-SNE for total UMI count", default = T)
+visr.param("visualize_tsne_umi", label="Plot t-SNE for total UMI count (log10)", default = T)
 
-visr.param("vis_umi_min_value", type="double", label="min saturate value", info = "min saturate value on the color bar", default = 3,
+visr.param("vis_umi_min_value", type="double", label="UMI min saturate value", info = "min saturate UMI value on the color bar", default = 3,
            active.condition = "visr.param.visualize_tsne_umi")
 
-visr.param("vis_umi_max_value", type="double", label="max saturate value", info = "max saturate value on the color bar", default = 4,
+visr.param("vis_umi_max_value", type="double", label="UMI max saturate value", info = "max saturate UMI value on the color bar", default = 4,
            active.condition = "visr.param.visualize_tsne_umi")
 
-visr.param("vis_colormap_tsne_umi", label = "Color map", type = "multi-color", default="BuPu 7", debugvalue = "gray, red",
+visr.param("vis_colormap_tsne_umi", label = "UMI Color map", type = "multi-color", default="BuPu 7", debugvalue = "gray, red",
            active.condition = "visr.param.visualize_tsne_umi")
 
 visr.param("visualize_tsne_markers", label="Plot t-SNE for gene markers", default = T)
 
-visr.param("vis_gene_list", label="Gene list to visualize (comma separated)", info="Comma separated list of genes to visualize",
-           active.condition = "visr.param.visualize_tsne_markers",
-           debugvalue = "CD79A, NKG7, CD3D, CST3, CD8A, PF4")
-
-visr.param("vis_min_value", type="double", label="min saturate value", info = "min saturate value on the color bar", default = 0.0,
+visr.param("vis_min_value", type="double", label="Gene min saturate value", info = "min saturate value on the color bar for gene marker plots", default = 0.0,
            active.condition = "visr.param.visualize_tsne_markers")
 
-visr.param("vis_max_value", type="double", label="max saturate value", info = "max saturate value on the color bar", default = 1.5,
+visr.param("vis_max_value", type="double", label="Gene max saturate value", info = "max saturate value on the color bar for gene marker plots", default = 1.5,
            active.condition = "visr.param.visualize_tsne_markers")
 
-visr.param("vis_colormap_tsne_markers", label = "Color map", type = "multi-color", default="BuPu 7", debugvalue = "gray, red",
+visr.param("vis_colormap_tsne_markers", label = "Gene value color map", type = "multi-color", default="BuPu 7", debugvalue = "gray, red",
            active.condition = "visr.param.visualize_tsne_markers")
 
-visr.param("vis_show_de_heatmap", label = "show heatmap of significant genes",
+visr.param("vis_show_de_heatmap", label = "Plot heatmap of significant genes",
            default = FALSE, debugvalue = TRUE,
            active.condition = "visr.param.enable_de")
 
-visr.param("cluster_heatmap_n_genes", label = "number of genes per cluster", default = 3L, min = 1L, max = 100L,
+visr.param("cluster_heatmap_n_genes", label = "Number of genes to show per cluster", default = 3L, min = 1L, max = 100L,
            info = "Number of top differentially expressed genes to show per cluster in the heatmap",
            active.condition = "visr.param.enable_de && visr.param.vis_show_de_heatmap")
 
-visr.param("cluster_heatmap_min", default = -1.0, label = "heatmap min value",
+visr.param("cluster_heatmap_min", default = -1.0, label = "Heatmap min saturate value",
            info = "min saturate value on the color bar",
            active.condition = "visr.param.enable_de && visr.param.vis_show_de_heatmap")
 
-visr.param("cluster_heatmap_max", default = 2.0, label= "heatmap max value",
+visr.param("cluster_heatmap_max", default = 2.0, label= "Heatmap max saturate value",
            info = "max saturate value on the color bar",
            active.condition = "visr.param.enable_de && visr.param.vis_show_de_heatmap")
 
@@ -225,10 +219,6 @@ visr.logProgress("Loading Cell Ranger matrix")
 # gbm is based on the ExpressionSet class and stores the barcode filtered gene expression matrix and metadata (gene symbols and cell barcode IDs)
 gbm <- cellrangerRkit::load_cellranger_matrix(visr.param.data_dir_10x)
 
-gbm_summary <- cbind(rownames(t(gbm@summary)), t(gbm@summary))
-colnames(gbm_summary) <- c("name", "value")
-visr.writeDataTable(gbm_summary, file = paste0(visr.param.output_dir, "/gbm_summary.txt"))
-
 visr.logProgress("Loading Cell Ranger analysis results")
 analysis_results <- cellrangerRkit::load_cellranger_analysis_results(visr.param.data_dir_10x)
 
@@ -260,60 +250,56 @@ get_genes_from_string <- function(comma_string) {
 #  Output table
 ############################################################
 
-enable_analysis_table <- TRUE
-
-if (enable_analysis_table) {
+if (visr.param.enable_cells_table) {
   analysis_table <- data.frame(analysis_results$tsne$Barcode)
   colnames(analysis_table) <- "Barcode"
-}
 
-## total UMI counts
-if (enable_analysis_table && visr.param.include_umi_counts) {
-  umi_counts <- data.frame(colSums(exprs(gbm)))
-  umi_counts <- cbind(umi_counts, log(umi_counts[,1], base = 10))
-  colnames(umi_counts) <- c("UMI.counts", "Log10.UMI.counts")
-  analysis_table <- cbind(analysis_table, umi_counts)
-}
+  ## total UMI counts
+  if (visr.param.include_umi_counts) {
+    umi_counts <- data.frame(colSums(exprs(gbm)))
+    umi_counts <- cbind(umi_counts, log(umi_counts[,1], base = 10))
+    colnames(umi_counts) <- c("UMI.counts", "Log10.UMI.counts")
+    analysis_table <- cbind(analysis_table, umi_counts)
+  }
 
-## t-SNE results
-if (enable_analysis_table && visr.param.include_tsne) {
-  analysis_table <- cbind(analysis_table, analysis_results$tsne[,-1])
-}
+  ## t-SNE results
+  if (visr.param.include_tsne) {
+    analysis_table <- cbind(analysis_table, analysis_results$tsne[,-1])
+  }
 
-## PCA results
-if (enable_analysis_table && visr.param.include_pca) {
-  analysis_table <- cbind(analysis_table, analysis_results$pca[,-1])
-}
+  ## PCA results
+  if (visr.param.include_pca) {
+    analysis_table <- cbind(analysis_table, analysis_results$pca[,-1])
+  }
 
-## k-means results
-if (enable_analysis_table && visr.param.include_kmeans) {
-  n_clu <- 2:10
-  km_res <- analysis_results$clustering # load pre-computed kmeans results
-  clu_res <- sapply(n_clu, function(x) as.character(km_res[[paste("kmeans",x,"clusters",sep="_")]]$Cluster))
-  colnames(clu_res) <- sapply(n_clu, function(x) paste("kmeans",x,sep="."))
-  analysis_table <- cbind(analysis_table, clu_res)
-}
+  ## k-means results
+  if (visr.param.include_kmeans) {
+    n_clu <- 2:10
+    km_res <- analysis_results$clustering # load pre-computed kmeans results
+    clu_res <- sapply(n_clu, function(x) as.character(km_res[[paste("kmeans",x,"clusters",sep="_")]]$Cluster))
+    colnames(clu_res) <- sapply(n_clu, function(x) paste("kmeans",x,sep="."))
+    analysis_table <- cbind(analysis_table, clu_res)
+  }
 
-## gene counts
-if (enable_analysis_table && visr.param.include_genecounts) {
-    genes <- get_genes_from_string(visr.param.analysis_table_gene_list)
-    if (length(genes) > 0) {
-        gbm_norm <- gbm
-        if (visr.param.gene_value_normalization == "norm_median_sum"  || visr.param.gene_value_normalization == "norm_log10_median_sum") {
-            use_genes <- cellrangerRkit::get_nonzero_genes(gbm)
-            gbm_norm <- cellrangerRkit::normalize_barcode_sums_to_median(gbm[use_genes,]) # Normalize barcodes by sum to the median barcode by sum
-            if (visr.param.gene_value_normalization == "norm_log10_median_sum") {
-                gbm_norm <- log_gene_bc_matrix(gbm_norm, base=10)
-            }
-        }
-        gbm_trunc <- cellrangerRkit::trunc_gbm_by_genes(gbm_norm, genes)
-        gene_values <- t(as.matrix(exprs(gbm_trunc)))
-        colnames(gene_values) <- genes
-        analysis_table <- cbind(analysis_table, gene_values)
-    }
-}
+  ## gene counts
+  if (visr.param.include_genecounts) {
+      genes <- get_genes_from_string(visr.param.gene_list)
+      if (length(genes) > 0) {
+          gbm_norm <- gbm
+          if (visr.param.gene_value_normalization == "norm_median_sum"  || visr.param.gene_value_normalization == "norm_log10_median_sum") {
+              use_genes <- cellrangerRkit::get_nonzero_genes(gbm)
+              gbm_norm <- cellrangerRkit::normalize_barcode_sums_to_median(gbm[use_genes,]) # Normalize barcodes by sum to the median barcode by sum
+              if (visr.param.gene_value_normalization == "norm_log10_median_sum") {
+                  gbm_norm <- log_gene_bc_matrix(gbm_norm, base=10)
+              }
+          }
+          gbm_trunc <- cellrangerRkit::trunc_gbm_by_genes(gbm_norm, genes)
+          gene_values <- t(as.matrix(exprs(gbm_trunc)))
+          colnames(gene_values) <- genes
+          analysis_table <- cbind(analysis_table, gene_values)
+      }
+  }
 
-if (enable_analysis_table) {
   row.names(analysis_table) <- NULL
   visr.writeDataTable(analysis_table, paste0(visr.param.output_dir, "/cells.txt"))
 }
@@ -322,6 +308,22 @@ if (enable_analysis_table) {
 #  Visualization
 ############################################################
 
+plot_gbm_summary <- function(gbm) {
+  gbm_summary <- cbind(rownames(t(gbm@summary)), t(gbm@summary))
+  colnames(gbm_summary) <- c("name", "value")
+  rownames(gbm_summary) <- NULL
+
+  plot.new()
+  mtext(text="Input data summary", adj=0.5, side=3, line = 1)
+  mtext(text=gbm_summary[,1], adj=0, col=c("gray10","gray60"), side=3, line=c(1:nrow(gbm_summary))*-1)
+  mtext(text=gbm_summary[,2], adj=1, col=c("gray10","gray60"), side=3, line=c(1:nrow(gbm_summary))*-1)
+
+  return(gbm_summary)
+}
+
+gbm_summary <- plot_gbm_summary(gbm)
+visr.writeDataTable(gbm_summary, file = paste0(visr.param.output_dir, "/data_summary.txt"))
+
 ## visualize umi counts
 if (visr.param.visualize_tsne_umi) {
   p <- visualize_umi_counts(gbm, analysis_results$tsne[c("TSNE.1","TSNE.2")],
@@ -329,6 +331,11 @@ if (visr.param.visualize_tsne_umi) {
                             marker_size=0.05)
   p <- p + visr.util.scale_color_gradient(visr.param.vis_colormap_tsne_umi, label="log10(UMI_counts)")
   print(p)
+
+  #also display plot on screen
+  dev.set(which = visr.dev)
+  print(p)
+  dev.set(which = visr_app_pdf_dev)
 }
 
 ## visualize clusters
@@ -343,7 +350,7 @@ if (visr.param.visualize_tsne_kmeans) {
 
 ## visualize gene markers
 if (visr.param.visualize_tsne_markers) {
-  genes <- get_genes_from_string(visr.param.vis_gene_list)
+  genes <- get_genes_from_string(visr.param.gene_list)
   if (length(genes) > 0) {
     use_genes <- get_nonzero_genes(gbm)
     gbm_bcnorm <- cellrangerRkit::normalize_barcode_sums_to_median(gbm[use_genes,])
@@ -351,7 +358,8 @@ if (visr.param.visualize_tsne_markers) {
     print(dim(gbm_log))
     p <- cellrangerRkit::visualize_gene_markers(gbm_log, genes,
                                 analysis_results$tsne[c("TSNE.1","TSNE.2")],
-                                limits = c(visr.param.vis_min_value, visr.param.vis_max_value))
+                                limits = c(visr.param.vis_min_value, visr.param.vis_max_value),
+                                title = "Gene markers under t-SNE projection")
     p <- p + visr.util.scale_color_gradient(visr.param.vis_colormap_tsne_markers, label="normalized\nsums")
     print(p)
   }
@@ -428,7 +436,11 @@ if (visr.param.enable_de) {
     for (field in de_genes_fields) {
       field.name <- field[[1]]
       if (eval(parse(t=paste('visr.param.de_include_', field.name, sep = '')))) {
-        data_table_genes <- cbind(data_table_genes, genes_df[, field.name])
+        newcol <- genes_df[, field.name]
+        if (field.name == "significant") {
+          newcol[which(newcol)] <- 1 # convert from TRUE/FALSE to 1/0
+        }
+        data_table_genes <- cbind(data_table_genes, newcol)
         data_table_genes_colnames <- c(data_table_genes_colnames, paste("c", c, "_", field.name, sep=""))
       }
     }
