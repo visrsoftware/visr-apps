@@ -67,3 +67,72 @@ plotGBMSummary <- function(gbm) {
   return(gbm_summary)
 }
 
+extract_param <- function(path){
+  con <- file(path, open = "r")
+  lines <- readLines(con = con)
+  close(con = con)
+  
+  n <- length(lines)
+  i <- 1
+  op <- "\\("
+  cp <- ")"
+  params <- list()
+  
+  read_complete_line <- function(line,i,start){
+    while(!endsWith(line,cp)){
+      i <- i+1
+      line <- paste(line,lines[i],sep = "")
+    }
+    res <- list()
+    res$i <- i
+    start <- substr(start,1,nchar(start)-1)
+    line <- gsub(line,pattern = paste(start,op,sep = ""),replacement = "list(")
+    args <- eval(parse(text = line))
+    res$name <- args[[1]]
+    if (is.null(args$active.condition) || eval(parse(text = args$active.condition))){
+      res$active <- T
+    } else {
+      res$active <- F
+    }
+    if (is.null(args$label)){
+      res$label <- gsub(res$name,pattern = "_", replacement = " ")
+    } else {
+      res$label <- args$label
+    }
+    return(res)
+  }
+  while (T){
+    line <- lines[i]
+    if (startsWith(line,"visr.app.end")){
+      break
+    }
+    for (start in c("visr.app.category(","visr.category(")){
+      if (startsWith(line,start)){
+        res <- read_complete_line(line,i,start)
+        category <- res$name
+        i <- res$i
+        params[[category]] <- cbind(name = category, label = res$label, value = "",used = res$active)
+      }
+    }
+    if (startsWith(line,"visr.param(")){
+      res <- read_complete_line(line,i,"visr.param(")
+      param <- res$name
+      i <- res$i
+      value <- eval(parse(text = paste("visr.param",param,sep = ".")))
+      if (is.null(value)){
+        value <- ""
+      }
+      if (params[[category]][1,ncol(params[[category]])] == F){res$active <- F}
+      params[[category]] <- rbind(params[[category]],c(param, res$label, value,res$active))
+    }
+    i <- i+1
+  }
+  
+  # output <- rbind(c("Name","Label","Value","Used"))
+  # for (i in 1:length(params)){
+  #   output <- rbind(output, params[[i]], rep("",ncol(output)))
+  # }
+  return(params)
+}
+
+
