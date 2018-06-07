@@ -1,10 +1,12 @@
 {
   "label": "Violin Plot",
   "info": "",
+  "instructions": "",
   "input": "none",
   "categories":[  {
     "label": "",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.y": {
         "label": "Y value column(s)",
@@ -29,7 +31,7 @@
         "info": "Adds a small amount of random variation to the location of each point, useful for handling overplotting.",
         "type": "boolean",
         "default": false,
-        "active-condition": "visr.param.add_dot_plot == true"
+        "active-condition": "visr.param.add_dot_plot"
       },
       "visr.param.dot_binwidth": {
         "label": "Dot bins size",
@@ -37,7 +39,7 @@
         "type": "double",
         "default": 0,
         "min": 0,
-        "active-condition": "visr.param.add_jitter == false"
+        "active-condition": "!visr.param.add_jitter"
       },
       "visr.param.jitter_amount": {
         "label": "Jitter amount",
@@ -45,14 +47,14 @@
         "type": "double",
         "default": 0.05,
         "min": 0,
-        "active-condition": "visr.param.add_jitter == true"
+        "active-condition": "visr.param.add_jitter"
       },
       "visr.param.dot_size": {
         "label": "Dot size",
         "type": "double",
         "default": 0.4,
         "min": 0,
-        "active-condition": "visr.param.add_dot_plot == true"
+        "active-condition": "visr.param.add_dot_plot"
       },
       "visr.param.trim": {
         "label": "Trim the tails to data range",
@@ -69,7 +71,7 @@
         "type": "double",
         "default": 0.1,
         "min": 0,
-        "active-condition": "visr.param.boxplot == true"
+        "active-condition": "visr.param.boxplot"
       },
       "visr.param.mean_sdl": {
         "label": "Add mean +/- sd",

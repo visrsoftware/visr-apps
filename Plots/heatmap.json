@@ -149,14 +149,14 @@
                     "type": "int",
                     "default": 0,
                     "min": 0,
-                    "active-condition": "visr.param.label == specified"
+                    "active-condition": "visr.param.label != ''"
                 },
                 "visr.param.rowLabelSize":{
                     "label": "row label text size",
                     "type": "double",
                     "default": 1,
                     "min": 0.01,
-                    "active-condition": "visr.param.label == specified"
+                    "active-condition": "visr.param.label != ''"
                 },
                 "visr.param.labCol": {
                     "label": "show column labels",
@@ -256,7 +256,7 @@
                     "info": "gives the color for trace line",
                     "type": "color",
                     "default": "#00FFFF",
-                    "active-condition": "visr.param.trace == specified"
+                    "active-condition": "visr.param.trace != ''"
                 }
             }
         },

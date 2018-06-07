@@ -1,16 +1,21 @@
 assign("error_message", "", .GlobalEnv)
-#' Check if running in GUI (VisR)
+
+#' Check if running in VisR GUI
 #'
 #' Checks if running from within the VisR
 #' @return  Will return \code{TRUE} if the code is running from within VisR.
 #' @export
 visr.isGUI<-function(){
-  if (get0("visr.var.isGUI", ifnotfound = FALSE, envir = .GlobalEnv)) {
-      return(TRUE)
-  }
-  return(FALSE)
+  return (get0("visr.var.isGUI", ifnotfound = FALSE, envir = .GlobalEnv))
 }
 
+if (visr.isGUI()) {
+  # https://stat.ethz.ch/R-manual/R-devel/library/base/html/options.html
+  options(install.packages.check.source = "no") # "yes" "no"
+  options(install.packages.compile.from.source = "never") # "interactive", "never", "always"
+  options(pkgType = "both") # "both", "source", "binary", "mac.binary.el-capitan",  "win.binary"
+  # interactive() ?
+}
 
 visr.getSelectedRows<-function() {
   selected = get0("visr.input.selectedRows", ifnotfound = NULL, envir = .GlobalEnv)
@@ -35,19 +40,29 @@ visr.get <- function(paramName) {
 visr.applyParameters <- function() {
   #if (exists("visr.var.message.ignore")) rm(visr.var.message.ignore)
   dummylocalvar<-"dummyvalue"
+  if (!visr.isGUI()) {
+    print(visr.params)
+  }
+}
+
+visr.getParams <- function() {
+  return (get0("visr.params", ifnotfound = NULL, envir = .GlobalEnv))
 }
 
 readline.orig <- base::readline
-visr.readline <- function(prompt = "") {
-    if (!visr.isGUI()) {
-        return (readline.orig(prompt))
-    } else {
-        visr.message(prompt, "prompt")
-        return("\n")
-    }
+visr.readline <- function(prompt = "", ...) {
+  cat("visr.readline")
+  if (!visr.isGUI()) {
+    return (readline.orig(prompt, ...))
+  } else {
+    visr.message(prompt, "prompt")
+    return("\n")
+  }
 }
 
 if (visr.isGUI()) {
+    # disable readline when running inside visr
+
     #unlockBinding("readline", .GlobalEnv)
     #readline <- visr.readline
     assign("readline", visr.readline, .GlobalEnv)
@@ -58,24 +73,28 @@ if (visr.isGUI()) {
 #' Show message dialog
 #'
 #' Shows a message dialog to the user in VisR.
-#' @param text   Message text to be shown.
+#' @param msg   Message text to be shown.
 #' @param type   Message type. (\code{"error"} or \code{"warning"} or \code{"prompt"})
 #' @examples
 #' if (any(is.na(visr.input)))
 #'     visr.message("There are NA values in the input", type="error")
 #' @export
-visr.message<-function(text, type=c("error","warning", "prompt"))
+visr.message<-function(msg, type=c("error","warning", "prompt"))
 {
   #TODO: replace error_message with visr.var.message
   if (exists("error_message") && is.character(error_message) && nzchar(error_message)) {
     # There is an unhandled error message already. Concatenate this to it
     assign("error_message",
-           paste(error_message,"\n", match.arg(type), ": ", text, sep = ""),
+           paste(error_message,"\n", match.arg(type), ": ", msg, sep = ""),
            .GlobalEnv)
   } else {
     assign("error_message",
-           paste(match.arg(type),": ", text, sep = ""),
+           paste(match.arg(type),": ", msg, sep = ""),
            .GlobalEnv)
+  }
+
+  if (visr.isGUI() && type == "error") {
+      stop(msg)
   }
 
   if (!visr.isGUI() && !exists("visr.var.message.ignore")) {
@@ -90,51 +109,67 @@ visr.message<-function(text, type=c("error","warning", "prompt"))
   }
 }
 
+visr.require <- function(pkg) {
+  return (suppressWarnings(require(pkg, character.only = TRUE, quietly = TRUE)))
+}
 
 # Loads a CRAN package. If not already installed, tries to install the package from CRAN.
-visr.library<-function (pkg) {
-  visr.logProgress(paste("Loading package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
-    visr.logProgress(paste("Installing cran package:", pkg))
-    install.packages(pkg, repos = "http://cran.us.r-project.org", dependencies=TRUE)
+visr.library<-function (pkg, quiet = F, repos = NULL) {
+  if (!quiet)
+    visr.logProgress(paste("Loading package:", pkg))
+  if (!visr.require(pkg)) {
+    if (!quiet)
+      visr.logProgress(paste("Installing cran package:", pkg))
+    if (is.null(repos))
+      repos = "http://cran.us.r-project.org"
+    install.packages(pkg, repos = repos, dependencies=TRUE)
     #update.packages(ask = TRUE)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
-      visr.logProgress(paste("Failed loading package:", pkg))
+      if (!quiet)
+        visr.logProgress(paste("Failed loading package:", pkg))
     } else {
-      visr.logProgress("");
+      if (!quiet) {
+        visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
+        visr.logProgress("");
+      }
     }
   } else {
-    visr.logProgress("");
+    if (!quiet) {
+      visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
+      visr.logProgress("");
+    }
   }
 }
 
 visr.libraryURL<-function (pkg,url) {
   visr.logProgress(paste("Loading package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing package", pkg,"from", url))
     install.packages(url, repos = NULL, type="source", dependencies=TRUE)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
+      visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
       visr.logProgress("");
     }
   } else {
+    visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
     visr.logProgress("");
   }
 
@@ -142,23 +177,52 @@ visr.libraryURL<-function (pkg,url) {
 
 visr.librarySource<-function (pkg, url) {
   visr.logProgress(paste("Loading package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing package", pkg,"from", url))
     source(url)
     # adding some delay, since loading the package right after installation may not work.
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
+      visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
       visr.logProgress("");
     }
   } else {
+    visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
+    visr.logProgress("");
+  }
+}
+
+visr.libraryGithub<-function (pkg, repo) {
+  visr.logProgress(paste("Loading package:", pkg))
+  if (!visr.require(pkg)) {
+    visr.logProgress(paste("Installing package", pkg,"from github repo: ", repo))
+    visr.library("devtools")
+    install_github(repo) # https://github.com/cole-trapnell-lab/monocle-release/issues/118
+
+    # adding some delay, since loading the package right after installation may not work.
+    numtries=10
+    while (numtries > 0 && !visr.require(pkg)) {
+      Sys.sleep(0.1)
+      numtries=numtries-1
+    }
+
+    if (!visr.require(pkg)) {
+      visr.message(paste("Unable to load package", pkg))
+      visr.logProgress(paste("Failed loading package:", pkg))
+    } else {
+      visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
+      visr.logProgress("");
+    }
+  } else {
+    visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
     visr.logProgress("");
   }
 }
@@ -169,7 +233,7 @@ visr.librarySource<-function (pkg, url) {
 #' @param pkg package name
 visr.biocLite<-function (pkg) {
   visr.logProgress(paste("Loading bioconductor package:", pkg))
-  if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+  if (!visr.require(pkg)) {
     visr.logProgress(paste("Installing bioconductor package:", pkg))
     source("http://bioconductor.org/biocLite.R")
     biocLite(pkg,
@@ -177,21 +241,22 @@ visr.biocLite<-function (pkg) {
              suppressAutoUpdate=FALSE,  # whether the BiocInstaller package updates itself.
              ask=FALSE)                 # whether to prompt user before installed packages are updated
     numtries=10
-    while (numtries > 0 && !require(pkg, character.only = TRUE, quietly = TRUE)) {
+    while (numtries > 0 && !visr.require(pkg)) {
       Sys.sleep(0.1)
       numtries=numtries-1
     }
 
-    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+    if (!visr.require(pkg)) {
       visr.message(paste("Unable to load package", pkg))
       visr.logProgress(paste("Failed loading package:", pkg))
     } else {
+      visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
       visr.logProgress("");
     }
   } else {
+    visr.logProgress(paste(pkg, 'version', packageVersion(pkg)))
     visr.logProgress("");
   }
-
 }
 
 # used in tryCatch
@@ -274,6 +339,28 @@ visr.readDataTable <-function(file, delim = "\t") {
   return (t)
 }
 
+#' Write tables to tab-delimited output files
+#'
+#' Utility function to write tables to tab-delimited output files that correctly open in VisR
+#' @param x
+#' data table to write
+#' @param filename
+#' path output filename
+#' @param row.names
+#' either logical to indicate outputting row names, or a character vector of row names to be written.
+visr.writeDataTable <- function(x, filename, row.names = FALSE) {
+  if (isTRUE(row.names) || is.character(row.names)) {
+    cn <- colnames(x)
+    if (is.character(row.names))
+      x <- cbind(row.names, x)
+    else
+      x <- cbind(rownames(x), x)
+    colnames(x) <- c("name", cn)
+  }
+  write.table(x, file = filename, quote = FALSE, sep="\t", row.names = FALSE)
+}
+
+
 #' Sets the log directory.
 #'
 #' Sets the current log directory where the R output should be diverted to.
@@ -354,19 +441,19 @@ visr.internal.dev_set_safe <- function(devName) {
 #' Prints the session info and installed packages (useful for diagnosis)
 #' @export
 visr.printSessionInfo <- function() {
-  print("sessionInfo()")
+  cat("\nsessionInfo()\n")
   print(sessionInfo())
 
-  print(".libPaths()")
+  cat("\n.libPaths()\n")
   print(.libPaths())
 
-  print("installed.packages()")
+  cat("\ninstalled.packages()\n")
   ip <- as.data.frame(installed.packages()[,c(1,3:4)])
   rownames(ip) <- NULL
   ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
   print(ip, row.names=FALSE)
 
-  print("capabilities()")
+  cat("\ncapabilities()\n")
   print(capabilities())
 }
 
@@ -419,6 +506,7 @@ visr.app.start <- function(name, info = "", input.type=c("none", "dragAndDrop"),
 
   assign("visr.input", debugdata, .GlobalEnv)
   assign("input_table", debugdata, .GlobalEnv)
+  assign("visr.params", list(), .GlobalEnv)
 }
 
 #' End app definition
@@ -476,12 +564,15 @@ visr.category <- function(label, info = "", collapsed = FALSE, active.condition 
   if (visr.var.definedCategory)
     visr.internal.appendJSON('\n    }\n  },\n')
 
+  if (!is.null(active.condition))
+    eval(parse(text=active.condition)) # to make sure it is valid
+
   visr.internal.appendJSON(paste('  {\n',
                                  '    "label": "', gsub('"', '\\\\"', label), '",\n',
                                  '    "info": "', gsub('"', '\\\\"', gsub('\n', '\\\\n', info)), '",\n',
                                  '    "collapsed": ', ifelse(collapsed, "true", "false"), ',\n',
-                                 ifelse(is.null(active.condition), '', paste(
-                                 '    "active-condition": "', active.condition, '",\n', sep='')),
+                                 if (is.null(active.condition)) {''} else {paste(
+                                 '    "active-condition": "', active.condition, '",\n', sep='')},
                                  '    "variables": {\n', sep=""))
   assign("visr.var.definedCategory", TRUE, .GlobalEnv)
   assign("visr.var.definedParam", FALSE, .GlobalEnv)
@@ -513,19 +604,15 @@ visr.app.setParamNamePrefix <- function(prefix = "visr.param.") {
 #' @param type    Parameter type
 #' @param default Initial default value for the parameter.
 #' @param min     Minimum value for numerical type parameters
-#'                (\code{"int"}, \code{"double"})
+#'                (\code{"int"}, \code{"range-int"}, \code{"double"}, \code{"range-double"})
 #' @param max     Maximum value for numerical type parameters
-#'                (\code{"int"}, \code{"double"})
-#' @param items   Specify a vector of items for a \code{"string"} variable to select from.
+#'                (\code{"int"}, \code{"range-int"}, \code{"double"}, \code{"range-double"})
+#' @param items   Specify a vector of items for a \code{"string"} or \code{"multi-string"} variable to select from.
 #' @param item.labels Specify a vector of items to be used as the labels for \code{items} argument.
 #' @param filename.mode  Specify the file dialog mode
 #'                (file load, file save or directory) for a
 #'                \code{"filename"} type parameter
 #' @param active.condition  A logical expression to control when this parameter will be visible.
-#'                    Should be in the form of "PARAMETER OP VALUE"
-#'                    where PARAMETER is name of a previously declared parameter (visr.param...),
-#'                    VALUE is a string, boolean or number,
-#'                    and OP is a logical operator: ==, !=, <=, <, >=, >.
 #'                    e.g. visr.param("title_font", active.condition = "visr.param.title != ''")
 #' @param options     various options to control the specific behaviors of the parameters.
 #'                    Should be specified in the form of "option1=value, option2=value, ..."
@@ -550,46 +637,50 @@ visr.app.setParamNamePrefix <- function(prefix = "visr.param.") {
 #' visr.param("columns", type = "multi-column-numerical")
 #' visr.param("output.clusterid", type = "output-column") # column appended to input table
 #' @export
-visr.param <- function(name, label = NULL, info = NULL,
-                       type = c("string", "character", "int", "integer",
-                                "double", "boolean", "logical", "multi-string",
+visr.param <- function(name, label, info,
+                       type = c("string", "character",
+                                "int", "integer", "double",
+                                "range-int", "range-double",
+                                "boolean", "logical", "multi-string",
                                 "column", "multi-column",
                                 "column-numerical", "multi-column-numerical",
                                 "color", "multi-color", "filename",
                                 "output-column", "output-multi-column", "output-table"),
-                       default = NULL, min = NULL, max = NULL,
-                       items = NULL, item.labels = NULL,
+                       default, min, max,
+                       items, item.labels,
                        filename.mode = c("load", "save", "dir"),
-                       active.condition = NULL,
-                       options = NULL,
-                       debugvalue = NULL) {
+                       active.condition,
+                       options,
+                       debugvalue) {
   if (visr.isGUI()) # don't generate parameters when running within VisR
     return()
 
   paramname = paste0(visr.app.paramNamePrefix, name) #full parameter name
 
-  if (missing(type)) {
-    if (!is.null(default)) {
-      #guess type from the default value
-      if (is.numeric(default) && is.integer(default)) {
+  if (missing(default) && !missing(min) && !missing(max) && !missing(type) &&
+      (type == 'range-int' || type == 'range-double'))
+    default <- c(min, max)
+
+  if (missing(default) && !missing(min)) # guess default from min
+    default <- min
+
+  if (missing(default) && !missing(max)) # guess default from max
+    default <- max
+
+  if (missing(type) && !missing(default)) { # try to guess type from default
+    #guess type from the default value
+    if (is.numeric(default) && is.integer(default)) {
+      if (length(default) == 2)
+        type <- "range-int"
+      else
         type <- "int"
-      } else if (is.numeric(default)) {
+    } else if (is.numeric(default)) {
+      if (length(default) == 2)
+        type <- "range-double"
+      else
         type <- "double"
-      } else if (is.logical(default)) {
-        type <- "boolean"
-      }
-    } else if (!is.null(min)) {
-      if (is.numeric(min) && is.integer(min)) {
-        type <- "int"
-      } else if (is.numeric(min)) {
-        type <- "double"
-      }
-    } else if (!is.null(max)) {
-      if (is.numeric(max) && is.integer(max)) {
-        type <- "int"
-      } else if (is.numeric(max)) {
-        type <- "double"
-      }
+    } else if (is.logical(default)) {
+      type <- "boolean"
     }
   }
   type <- match.arg(type)
@@ -598,10 +689,10 @@ visr.param <- function(name, label = NULL, info = NULL,
   type <- if (type == "logical") {"boolean"} else {type}
   type <- if (type == "integer") {"int"} else {type}
 
-  if (!is.null(min) && !is.numeric(min))
+  if (!missing(min) && !is.numeric(min))
     stop("argument min should be numeric")
 
-  if (!is.null(max) && !is.numeric(max))
+  if (!missing(max) && !is.numeric(max))
     stop("argument max should be numeric")
 
   if (type == "filename") {
@@ -609,14 +700,13 @@ visr.param <- function(name, label = NULL, info = NULL,
   } else {
     if (!missing(filename.mode)) {
       warning("filename.mode is ignored when type != 'filename'")
-    } else {
-      filename.mode <- NULL
     }
   }
 
   # check that type matches default
-  if (!is.null(default)) {
-    if (((type=="int" || type=="double") && !is.numeric(default)) ||
+  if (!missing(default)) {
+    defaultNotInItems <- !missing(items) && !(default %in% items)
+    if (((type=="int" || type=="range-int" || type=="double" || type=="range-double") && !is.numeric(default) && defaultNotInItems) ||
           ( type=="boolean" && !is.logical(default)) ||
           ( type=="string" && !is.character(default)))
       stop ("default value does not match the type")
@@ -628,40 +718,70 @@ visr.param <- function(name, label = NULL, info = NULL,
   }
 
   # try to guess a debug value from the other properties
-  if (is.null(debugvalue)) {
-    if (!is.null(default)) {
+  if (missing(debugvalue)) {
+    if (!missing(default)) {
       debugvalue <- default
-    } else if (!is.null(items)) {
+    } else if (!missing(items)) {
       debugvalue <- items[1]
+    } else if (type == "column" && !is.null(visr.input)) {
+      debugvalue <- colnames(visr.input)[1]
+    } else if (type == "column-numerical" && !is.null(visr.input)) {
+      debugvalue <- colnames(visr.input)[which(sapply(visr.input, is.numeric))][1]
     } else if (type == "multi-column" && !is.null(visr.input)) {
       debugvalue <- colnames(visr.input)
     } else if (type == "multi-column-numerical" && !is.null(visr.input)) {
       debugvalue <- colnames(visr.input)[which(sapply(visr.input, is.numeric))]
     } else if (type == "multi-color") {
       debugvalue <- "#d73027,#fc8d59,#fee090,#ffffbf,#e0f3f8,#91bfdb,#4575b4"
+    } else if (type == "int") {
+      debugvalue = if (!missing(min)) min else 0L
+    } else if (type == "double") {
+      debugvalue = if (!missing(min)) min else 0
+    } else if (type == "range-int") {
+      debugvalue = if (!missing(min) && !missing(max)) c(min, max) else c(0L, 10L)
+    } else if (type == "range-double") {
+      debugvalue = if (!missing(min) && !missing(max)) c(min, max) else c(0, 1)
+    } else if (type == "boolean") {
+      debugvalue = F
+    } else {
+      debugvalue = ''
     }
   }
-  assign(paramname, debugvalue, envir = .GlobalEnv)
 
-  default.ischar <- is.character(default)
-  if (type == "boolean" && !is.null(default))
-    default <- tolower(default)
+  assign(paramname, debugvalue, envir = .GlobalEnv)
+  if (!is.null(debugvalue))
+    visr.params[[paramname]] <<- debugvalue
+  else
+    visr.params[paramname] <<- list(NULL)
+
+  default.ischar <- !missing(default) && is.character(default)
+
+  if (type == "boolean" && !missing(default))
+    default <- tolower(default) # TRUE -> "true"
+
+  if (!missing(active.condition))
+    eval(parse(text=active.condition)) # evaluate to make sure it is valid
 
   properties <- c(
-    if (!is.null(label))    {paste('"label": ',   gsub('"', '\\\\"', label),    '', sep='"')} else {NULL},
-    if (!is.null(info))     {paste('"info": ',    gsub('"', '\\\\"', gsub('\n', '\\\\n', info)),     '', sep='"')} else {NULL},
-    if (!is.null(type))     {paste('"type": ',    type,     '', sep='"')} else {NULL},
-    if (!is.null(default))  {paste('"default": ', default , '', sep = ifelse(default.ischar, '"', ''))} else {NULL},
-    if (!is.null(min))      {paste('"min": ',     min,          sep='')} else {NULL},
-    if (!is.null(max))      {paste('"max": ',     max,          sep='')} else {NULL},
-    if (!is.null(items))       {paste('"items": ',       paste('[', paste('"', items,       '"', sep="", collapse=",") ,"]"), sep='')} else {NULL},
-    if (!is.null(item.labels)) {paste('"item-labels": ', paste('[', paste('"', item.labels, '"', sep="", collapse=",") ,"]"), sep='')} else {NULL},
-    if (!is.null(filename.mode)) {paste('"filename.mode": ', filename.mode, '', sep='"')} else {NULL},
-    if (!is.null(active.condition))     {paste('"active-condition": ',    active.condition,     '', sep='"')} else {NULL},
-    if (!is.null(options))     {paste('"options": ',    options,     '', sep='"')} else {NULL}
+    if (!missing(label))    {paste('"label": ',   gsub('"', '\\\\"', label),    '', sep='"')} else {NULL},
+    if (!missing(info))     {paste('"info": ',    gsub('"', '\\\\"', gsub('\n', '\\\\n', info)),     '', sep='"')} else {NULL},
+    if (!missing(type))     {paste('"type": ',    type,     '', sep='"')} else {NULL},
+    if (!missing(default))  {
+      if (length(default) == 1)
+        paste('"default": ', default , '', sep = ifelse(default.ischar, '"', ''))
+      else
+        paste0('"default": ', paste0('[', paste('', default,       '', sep = ifelse(default.ischar, '"', ''), collapse=", ") ,"]")) # range-int, range-double or multi-string
+    } else {NULL},
+    if (!missing(min))      {paste('"min": ',     min,          sep='')} else {NULL},
+    if (!missing(max))      {paste('"max": ',     max,          sep='')} else {NULL},
+    if (!missing(items))       {paste0('"items": ',       paste0('[', paste('"', items,       '"', sep="", collapse=", ") ,"]"))} else {NULL},
+    if (!missing(item.labels)) {paste0('"item-labels": ', paste0('[', paste('"', item.labels, '"', sep="", collapse=", ") ,"]"))} else {NULL},
+    if (!missing(filename.mode)) {paste('"filename.mode": ', filename.mode, '', sep='"')} else {NULL},
+    if (!missing(active.condition))     {paste('"active-condition": ',    active.condition,     '', sep='"')} else {NULL},
+    if (!missing(options))     {paste('"options": ',    options,     '', sep='"')} else {NULL}
   )
 
-  properties <- properties[which(!is.na(properties))]
+  #properties <- properties[which(!is.na(properties))]
 
   jsonstr <- paste(
     paste('"', paramname,'": {\n', sep=''),
@@ -674,6 +794,7 @@ visr.param <- function(name, label = NULL, info = NULL,
 
   if (visr.var.definedParam)
     visr.internal.appendJSON(",\n")
+
   visr.internal.appendJSON(visr.internal.indent(jsonstr, 6))
   assign("visr.var.definedParam", TRUE, .GlobalEnv)
 }
@@ -766,3 +887,30 @@ todo_things_to_try <- function() {
     setTimeLimit()
     withTimeout(expr)
 }
+
+visr.library("assertthat", quiet = T)
+
+#' Utility function
+#' TODO
+#'
+visr.assert_that <- function(..., env = parent.frame(), msg = NULL) {
+  if (visr.isGUI()) {
+    res <- assertthat::see_if(..., env = env, msg = msg)
+    if (res)
+      return(TRUE)
+    visr.message(attr(res, "msg"))
+  } else {
+    return (assertthat::assert_that(..., env = env, msg = msg))
+  }
+}
+
+#' Utility function
+#' TODO
+#'
+visr.assert_file_exists <- function(filename, parameterName) {
+  visr.assert_that(!is.null(filename), msg = paste0("Parameter '", parameterName, "' is not specified"))
+  visr.assert_that(filename != "", msg = paste0("Parameter '", parameterName, "' is not specified"))
+  visr.assert_that(file.exists(filename), msg = paste0("Unable to find the path '", filename, "'"))
+  return(TRUE)
+}
+

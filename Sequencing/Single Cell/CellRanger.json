@@ -1,137 +1,109 @@
 {
-  "label": "Cell Ranger",
-  "info": "Simple secondary analysis of the gene-barcode matrix output of Cell Ranger",
+  "label": "10X Cell Ranger",
+  "info": "Simple secondary analysis of the gene-barcode matrix output of 10X Cell Ranger pipeline",
   "instructions": " - Specify the Cell Ranger data directory\n - Specify the desired workflow and parameters\n - Click [ Run ]",
   "input": "none",
   "categories":[  {
     "label": "Input",
-    "info": "Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
+    "info": "10X Cell Ranger pipeline dataset directory. It should contain a sub-directory named 'outs'",
     "collapsed": false,
     "variables": {
-      "visr.param.pipestance_path": {
-        "label": "Cell Ranger data directory",
-        "info": "Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
+      "visr.param.data_dir_10x": {
+        "label": "10X dataset directory",
+        "info": "10X Cell Ranger dataset directory. It should contain a sub-directory named 'outs'",
         "type": "filename",
         "filename.mode": "dir"
       }
     }
   },
   {
-    "label": "Preliminary Visualization",
-    "info": "Visualization of pre-computed results under a 2D projection",
+    "label": "Output",
+    "info": "",
     "collapsed": false,
-    "active-condition": "visr.param.pipestance_path != ''",
+    "active-condition": "visr.param.data_dir_10x != ''",
     "variables": {
-      "visr.param.precomputed_visualization": {
-        "label": "Visualization",
-        "type": "string",
-        "default": "tsne_kmeans",
-        "items": [ "tsne_umi","tsne_kmeans","tsne_markers" ],
-        "item-labels": [ "t-SNE colored by total UMI count","t-SNE colored by ClusterID","t-SNE colored by signatures of gene markers" ]
+      "visr.param.output_dir": {
+        "label": "Output Directory to save the results",
+        "info": "Output directory where the analysis results will be saved to",
+        "type": "filename",
+        "filename.mode": "dir"
       },
-      "visr.param.vis_gene_list": {
-        "label": "Gene list to visualize (comma separated)",
-        "info": "Comma separated list of genes",
-        "type": "string",
-        "active-condition": "visr.param.precomputed_visualization == 'tsne_markers'"
-      },
-      "visr.param.vis_umi_min_value": {
-        "label": "min value",
-        "info": "min saturate value on the color bar",
-        "type": "double",
-        "default": 3,
-        "active-condition": "visr.param.precomputed_visualization == 'tsne_umi'"
-      },
-      "visr.param.vis_umi_max_value": {
-        "label": "max value",
-        "info": "max saturate value on the color bar",
-        "type": "double",
-        "default": 4,
-        "active-condition": "visr.param.precomputed_visualization == 'tsne_umi'"
-      },
-      "visr.param.vis_min_value": {
-        "label": "min value",
-        "info": "min saturate value on the color bar",
-        "type": "double",
-        "default": 0,
-        "active-condition": "visr.param.precomputed_visualization == 'tsne_markers'"
-      },
-      "visr.param.vis_max_value": {
-        "label": "max value",
-        "info": "max saturate value on the color bar",
-        "type": "double",
-        "default": 1.5,
-        "active-condition": "visr.param.precomputed_visualization == 'tsne_markers'"
-      },
-      "visr.param.vis_colormap_sequential": {
-        "label": "Color map",
-        "type": "multi-color",
-        "default": "BuPu 7",
-        "active-condition": "visr.param.precomputed_visualization != 'tsne_kmeans'"
+      "visr.param.create_subdir": {
+        "label": "Create new sub-direcory",
+        "info": "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)",
+        "type": "boolean",
+        "default": true
       }
     }
   },
   {
-    "label": "Export precomputed analysis results",
+    "label": "Analysis steps",
+    "info": "Different analysis steps",
+    "collapsed": false,
+    "active-condition": "visr.param.output_dir != '' && visr.param.data_dir_10x != ''",
+    "variables": {
+      "visr.param.enable_cells_table": {
+        "label": "Output cells table",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.enable_de": {
+        "label": "Differential expression analysis",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  {
+    "label": "Output cells table",
     "info": "The analysis table of cells together with precomputed dimensionality reduction and clustering results.",
     "collapsed": false,
-    "active-condition": "visr.param.pipestance_path != ''",
+    "active-condition": "visr.param.output_dir != '' && visr.param.data_dir_10x != '' && visr.param.enable_cells_table",
     "variables": {
-      "visr.param.analysis_table": {
-        "label": "Name for table to output barcodes to",
-        "info": "Name of the output table to appear in VisR",
-        "type": "output-table",
-        "options": "importRowNames=false"
-      },
       "visr.param.include_umi_counts": {
         "label": "Include total UMI counts",
         "info": "Include a column with total number of UMIs for each cell in the output table?",
         "type": "boolean",
-        "default": true,
-        "active-condition": "visr.param.analysis_table != ''"
+        "default": true
       },
       "visr.param.include_tsne": {
         "label": "Include t-SNE projection",
         "info": "Include t-SNE projections (2 columns) in the output table?",
         "type": "boolean",
-        "default": true,
-        "active-condition": "visr.param.analysis_table != ''"
+        "default": true
       },
       "visr.param.include_pca": {
         "label": "Include PCA projection",
         "info": "Include PCA projections in the output table (10 columns: PCA.1 to PCA.10)?",
         "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.analysis_table != ''"
+        "default": true
       },
       "visr.param.include_kmeans": {
         "label": "Include k-means results",
         "info": "Include precomputed kmeans clusterings in the output table (9 columns: kmeans.2 to kmeans.10)?",
         "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.analysis_table != ''"
+        "default": true
       },
       "visr.param.include_genecounts": {
         "label": "Include counts for genes",
-        "info": "Include gene counts for the genes specified below.",
+        "info": "Include counts for the genes specified below.",
         "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.analysis_table != ''"
+        "default": false
       },
-      "visr.param.analysis_table_gene_list": {
-        "label": "Gene list to export (comma separated)",
-        "info": "Comma separated list of genes to export to the output table",
+      "visr.param.gene_list": {
+        "label": "Gene list to export and plot (comma separated)",
+        "info": "Comma separated list of genes to export to the output table and plot",
         "type": "string",
-        "active-condition": "visr.param.include_genecounts == true"
+        "active-condition": "visr.param.include_genecounts"
       },
       "visr.param.gene_value_normalization": {
         "label": "Normalization",
         "info": "Normalization of gene values",
         "type": "string",
         "default": "norm_log10_median_sum",
-        "items": [ "norm_none","norm_median_sum","norm_log10_median_sum" ],
-        "item-labels": [ "None: raw values","Sum over median sum","log10 (Sum over median sum)" ],
-        "active-condition": "visr.param.include_genecounts == true"
+        "items": ["norm_none", "norm_median_sum", "norm_log10_median_sum"],
+        "item-labels": ["None: raw values", "Sum over median sum", "log10 (Sum over median sum)"],
+        "active-condition": "visr.param.include_genecounts && visr.param.gene_list != ''"
       }
     }
   },
@@ -139,129 +111,185 @@
     "label": "Differential expression analysis",
     "info": "The analysis table of genes together with the differential expression analysis results",
     "collapsed": false,
-    "active-condition": "visr.param.pipestance_path != ''",
+    "active-condition": "visr.param.data_dir_10x != '' && visr.param.output_dir != '' && visr.param.enable_de",
     "variables": {
-      "visr.param.enable_de": {
-        "label": "Enable differential expression analysis",
-        "type": "boolean",
-        "default": false
-      },
       "visr.param.de_cluster_k": {
         "label": "Use k-means clustering of k",
         "type": "int",
         "default": 5,
         "min": 2,
         "max": 10,
-        "active-condition": "visr.param.enable_de == true"
-      },
-      "visr.param.vis_show_de_heatmap": {
-        "label": "show heatmap of significant genes",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.enable_de == true"
-      },
-      "visr.param.cluster_heatmap_n_genes": {
-        "label": "number of genes in heatmap",
-        "info": "Number of genes to include in the heatmap",
-        "type": "int",
-        "default": 3,
-        "min": 1,
-        "max": 100,
-        "active-condition": "visr.param.vis_show_de_heatmap == true"
-      },
-      "visr.param.cluster_heatmap_min": {
-        "label": "heatmap min value",
-        "info": "min saturate value on the color bar",
-        "type": "double",
-        "default": -1,
-        "active-condition": "visr.param.vis_show_de_heatmap == true"
-      },
-      "visr.param.cluster_heatmap_max": {
-        "label": "heatmap max value",
-        "info": "max saturate value on the color bar",
-        "type": "double",
-        "default": 2,
-        "active-condition": "visr.param.vis_show_de_heatmap == true"
-      },
-      "visr.param.de_analysis_table": {
-        "label": "Output DE Genes to table",
-        "info": "Name of the genes output table to appear in VisR",
-        "type": "output-table",
-        "active-condition": "visr.param.enable_de == true",
-        "options": "importRowNames=false"
+        "active-condition": "visr.param.enable_de"
       },
       "visr.param.de_only_significant": {
         "label": "Export significant genes only",
         "info": "Only export genes that were significant in atleast one of the clusters. Uncheck to export all genes.",
         "type": "boolean",
-        "default": true,
-        "active-condition": "visr.param.de_analysis_table != ''"
+        "default": true
       },
-      "visr.param.de_include_sum_a": {
-        "label": "Include sum of inside cluster values",
+      "visr.param.all_de_columns": {
+        "label": "Include all columns in DE output table",
+        "info": "Whether to specify columns you want to be exported to the DE analysis output table. By default all columns are selected",
         "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_sum_b": {
-        "label": "Include sum of outside cluster values",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_common_mean": {
-        "label": "Include common mean",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_dispersion": {
-        "label": "Include dispersion",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_mean_a_sizenorm": {
-        "label": "Include mean A size norm",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_mean_b_sizenorm": {
-        "label": "Include mean B size norm",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_log2fc": {
-        "label": "Include log2 fold change",
-        "type": "boolean",
-        "default": true,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_p": {
-        "label": "Include P",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_p_adj": {
-        "label": "Include P (adjusted)",
-        "type": "boolean",
-        "default": true,
-        "active-condition": "visr.param.de_analysis_table != ''"
-      },
-      "visr.param.de_include_order": {
-        "label": "Include significance order",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.de_analysis_table != ''"
+        "default": true
       },
       "visr.param.de_include_significant": {
-        "label": "Include significance condition",
+        "label": "    Include significance condition",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.de_analysis_table != ''"
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_p": {
+        "label": "    Include raw P value (exact test)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_p_adj": {
+        "label": "    Include adjusted P value (BH method)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_log2fc": {
+        "label": "    Include log2 fold change",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_order": {
+        "label": "    Include order by significance",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_sum_a": {
+        "label": "    Include sum of inside cluster counts (A)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_sum_b": {
+        "label": "    Include sum of outside cluster counts (B)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_mean_a_sizenorm": {
+        "label": "    Include mean of inside cluster counts (A)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_mean_b_sizenorm": {
+        "label": "    Include mean of outside cluster counts (B)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_common_mean": {
+        "label": "    Include common mean",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      },
+      "visr.param.de_include_dispersion": {
+        "label": "    Include common dispersion (shrunken dispersion estimate)",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "!visr.param.all_de_columns"
+      }
+    }
+  },
+  {
+    "label": "Visualization Options",
+    "info": "Visualization of pre-computed results under a 2D t-SNE projection",
+    "collapsed": true,
+    "active-condition": "visr.param.data_dir_10x != '' && visr.param.output_dir != ''",
+    "variables": {
+      "visr.param.visualize_tsne_kmeans": {
+        "label": "Plot t-SNE for ClusterIDs",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.visualize_tsne_umi": {
+        "label": "Plot t-SNE for total UMI count (log10)",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.vis_umi_min_value": {
+        "label": "UMI min saturate value",
+        "info": "min saturate UMI value on the color bar",
+        "type": "double",
+        "default": 3,
+        "active-condition": "visr.param.visualize_tsne_umi"
+      },
+      "visr.param.vis_umi_max_value": {
+        "label": "UMI max saturate value",
+        "info": "max saturate UMI value on the color bar",
+        "type": "double",
+        "default": 4,
+        "active-condition": "visr.param.visualize_tsne_umi"
+      },
+      "visr.param.vis_colormap_tsne_umi": {
+        "label": "UMI Color map",
+        "type": "multi-color",
+        "default": "BuPu 7",
+        "active-condition": "visr.param.visualize_tsne_umi"
+      },
+      "visr.param.visualize_tsne_markers": {
+        "label": "Plot t-SNE for gene markers",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.vis_min_value": {
+        "label": "Gene min saturate value",
+        "info": "min saturate value on the color bar for gene marker plots",
+        "type": "double",
+        "default": 0,
+        "active-condition": "visr.param.visualize_tsne_markers"
+      },
+      "visr.param.vis_max_value": {
+        "label": "Gene max saturate value",
+        "info": "max saturate value on the color bar for gene marker plots",
+        "type": "double",
+        "default": 1.5,
+        "active-condition": "visr.param.visualize_tsne_markers"
+      },
+      "visr.param.vis_colormap_tsne_markers": {
+        "label": "Gene value color map",
+        "type": "multi-color",
+        "default": "BuPu 7",
+        "active-condition": "visr.param.visualize_tsne_markers"
+      },
+      "visr.param.vis_show_de_heatmap": {
+        "label": "Plot heatmap of significant genes",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "visr.param.enable_de"
+      },
+      "visr.param.cluster_heatmap_n_genes": {
+        "label": "Number of genes to show per cluster",
+        "info": "Number of top differentially expressed genes to show per cluster in the heatmap",
+        "type": "int",
+        "default": 3,
+        "min": 1,
+        "max": 100,
+        "active-condition": "visr.param.enable_de && visr.param.vis_show_de_heatmap"
+      },
+      "visr.param.cluster_heatmap_min": {
+        "label": "Heatmap min saturate value",
+        "info": "min saturate value on the color bar",
+        "type": "double",
+        "default": -1,
+        "active-condition": "visr.param.enable_de && visr.param.vis_show_de_heatmap"
+      },
+      "visr.param.cluster_heatmap_max": {
+        "label": "Heatmap max saturate value",
+        "info": "max saturate value on the color bar",
+        "type": "double",
+        "default": 2,
+        "active-condition": "visr.param.enable_de && visr.param.vis_show_de_heatmap"
       }
     }
   }]

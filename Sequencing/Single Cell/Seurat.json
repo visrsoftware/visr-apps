@@ -1,0 +1,406 @@
+{
+  "label": "Seurat",
+  "info": "",
+  "instructions": "",
+  "input": "none",
+  "categories":[  {
+    "label": "Input",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.Import_method": {
+        "label": "Choose Import Method",
+        "type": "string",
+        "default": "load_raw",
+        "items": ["load_raw", "load_seurat"],
+        "item-labels": ["Load CellRanger Output", "Load Seurat Object"]
+      },
+      "visr.param.Path_to_outs": {
+        "info": "Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
+        "type": "filename",
+        "filename.mode": "dir",
+        "active-condition": "visr.param.Import_method == 'load_raw'"
+      },
+      "visr.param.Path_to_seurat_object": {
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.Import_method == 'load_seurat'"
+      }
+    }
+  },
+  {
+    "label": "Output",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))",
+    "variables": {
+      "visr.param.Output_directory": {
+        "label": "Output directory to save the results",
+        "info": "Output directory where the analysis results will be saved to",
+        "type": "filename",
+        "filename.mode": "dir"
+      },
+      "visr.param.create_subdir": {
+        "label": "Create new sub-direcory",
+        "info": "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)",
+        "type": "boolean",
+        "default": true
+      }
+    }
+  },
+  {
+    "label": "Create Seurat Object",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')&&(visr.param.Output_directory != ''))",
+    "variables": {
+      "visr.param.max_nGenes": {
+        "label": "Maximum number of genes per cell",
+        "info": "High cutoff for the number of genes expressed in a cell",
+        "type": "int",
+        "default": "Inf",
+        "min": 0,
+        "items": ["Inf"]
+      },
+      "visr.param.min_nGenes": {
+        "label": "Minimum number of genes per cell",
+        "info": "Low cutoff for the number of genes expressed in a cell",
+        "type": "double",
+        "default": 200,
+        "min": 0
+      },
+      "visr.param.max_percent_mito": {
+        "label": "Maximum fraction of mitocondrial genes",
+        "info": "High cutoff for the proportion of UMIs from mitochondrial genes; Enter a value between 0 and 1",
+        "type": "double",
+        "default": 0.05,
+        "min": 0,
+        "max": 1
+      },
+      "visr.param.min_fraction_cells": {
+        "label": "Minimum fraction of cells per gene",
+        "info": "Low cutoff for the fraction of cells that a gene is expressed",
+        "type": "double",
+        "default": 0.001,
+        "min": 0,
+        "max": 1
+      }
+    }
+  },
+  {
+    "label": "Analysis steps",
+    "info": "Select the analysis steps to run",
+    "collapsed": false,
+    "active-condition": "(((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))",
+    "variables": {
+      "visr.param.Find_Variable_Genes": {
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.Dim_Reduction": {
+        "label": "Dimensionality Reduction",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.Cluster_Cells": {
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.Find_Marker_Genes": {
+        "label": "Differential Expression Analysis",
+        "type": "boolean",
+        "default": false
+      }
+    }
+  },
+  {
+    "label": "Find Variable Genes",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Find_Variable_Genes == T))",
+    "variables": {
+      "visr.param.Normalization_scale_factor": {
+        "info": "Sets the scale factor for cell-level normalization",
+        "type": "double",
+        "default": 10000,
+        "min": 1
+      },
+      "visr.param.Mean_exp_low": {
+        "label": "Minimum Mean Expression",
+        "info": "Low cutoff on x-axis (mean expression) for identifying variable genes",
+        "type": "double",
+        "default": 0.0125,
+        "min": 0
+      },
+      "visr.param.Mean_exp_high": {
+        "label": "Maximum Mean Expression",
+        "info": "High cutoff on x-axis (mean expression) for identifying variable genes",
+        "type": "int",
+        "default": 3,
+        "min": 0,
+        "items": ["Inf"]
+      },
+      "visr.param.Dispersion_low": {
+        "label": "Minimum Dispersin",
+        "info": "Low cutoff on y-axis (standard deviation) for identifying variable genes",
+        "type": "double",
+        "default": 0.5,
+        "min": 0
+      },
+      "visr.param.Dispersion_high": {
+        "label": "Maximum Dispersion",
+        "info": "High cutoff on y-axis (standard deviation) for identifying variable genes",
+        "type": "int",
+        "default": "Inf",
+        "min": 0,
+        "items": ["Inf"]
+      }
+    }
+  },
+  {
+    "label": "Dimensionality Reduction",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Dim_Reduction == T))",
+    "variables": {
+      "visr.param.Run_PCA": {
+        "info": "Run a PCA dimensionality reduction",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.nPC_compute": {
+        "label": "Number of PCs to compute",
+        "info": "Total Number of PCs to compute and store",
+        "type": "double",
+        "default": 20,
+        "min": 2,
+        "active-condition": "visr.param.Run_PCA == T"
+      },
+      "visr.param.jackstraw": {
+        "label": "Run Jackstraw",
+        "info": "Randomly permutes a subset of data, and calculates projected PCA scores for these 'random' genes. Then compares the PCA scores for the 'random' genes with the observed PCA scores to determine statistical signifance. End result is a p-value for each gene's association with each principal component.",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.jackstrawRep": {
+        "label": "Number of replicates",
+        "info": "Number of replicate samplings to perform",
+        "type": "double",
+        "default": 100,
+        "min": 10,
+        "active-condition": "visr.param.jackstraw == T"
+      },
+      "visr.param.nPC_jackstraw": {
+        "label": "Number of PCs to compute signigicance for",
+        "info": "Number of PCs to include on jackstraw plot",
+        "type": "double",
+        "default": 12,
+        "active-condition": "visr.param.jackstraw == T"
+      },
+      "visr.param.elbow": {
+        "label": "Draw Elbow Plot",
+        "info": "Plots the standard deviation of each principle component",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.PC_heatmap": {
+        "label": "Plot PC Heatmap",
+        "info": "Draws a heatmap focusing on each principal component. Both cells and genes are sorted by their principal component scores. Allows for nice visualization of sources of heterogeneity in the dataset.",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.nPC_PCheatmap": {
+        "label": "Number of PCs to plot",
+        "info": "Number of PCs to include on PC heatmap",
+        "type": "double",
+        "default": 12,
+        "active-condition": "visr.param.PC_heatmap == T"
+      },
+      "visr.param.nGene_PCHeatmap": {
+        "label": "Number of Genes to plot",
+        "info": "Number of top genes to plot for each PC",
+        "type": "double",
+        "default": 30,
+        "active-condition": "visr.param.PC_heatmap == T"
+      },
+      "visr.param.nCell_PCHeatmap": {
+        "label": "Number of Cells to plot",
+        "info": "Number of top cells to plot for each PC",
+        "type": "double",
+        "default": 500,
+        "active-condition": "visr.param.PC_heatmap == T"
+      },
+      "visr.param.Run_tSNE": {
+        "info": "Run t-SNE dimensionality reduction on selected PCs",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T"
+      },
+      "visr.param.calculate_tsne_nPC": {
+        "label": "Automatically calculate number of PCs",
+        "info": "Automatically calculate number of PCs selected for tSNE. Uncheck to specify the number of PCs to use.",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "visr.param.Run_tSNE == T"
+      },
+      "visr.param.tsne_nPC": {
+        "label": "Number of PCs for calculating tSNE",
+        "type": "double",
+        "default": 10,
+        "min": 1,
+        "active-condition": "visr.param.calculate_tsne_nPC == F && visr.param.Run_tSNE == T"
+      }
+    }
+  },
+  {
+    "label": "Cluster Cells",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Cluster_Cells == T))",
+    "variables": {
+      "visr.param.calculate_cluster_nPC": {
+        "label": "Automatically calculate number of PCs",
+        "info": "Automatically calculate number of PCs selected for clustring cells. Uncheck to specify the number of PCs to use.",
+        "type": "boolean",
+        "default": true
+      },
+      "visr.param.cluster_nPC": {
+        "label": "Number of PCs for clustering",
+        "type": "double",
+        "default": 10,
+        "min": 1,
+        "active-condition": "visr.param.calculate_cluster_nPC == F"
+      },
+      "visr.param.cluster_resolution": {
+        "label": "resolution",
+        "info": "Value of the resolution parameter, use a value above (below) 1.0 if you want to obtain a larger (smaller) number of communities.",
+        "type": "double",
+        "default": 0.6,
+        "min": 0.1
+      }
+    }
+  },
+  {
+    "label": "Differential Expression Anlysis",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Find_Marker_Genes == T))",
+    "variables": {
+      "visr.param.Choose_Clusters": {
+        "type": "string",
+        "default": "all",
+        "items": ["all", "selected"],
+        "item-labels": ["Compare each cluster to the rest of the cells", "Select sepcific group of clusters"]
+      },
+      "visr.param.group_1": {
+        "label": "Group 1 cluster ids (comma separated)",
+        "info": "Group of clusters to define markers for",
+        "type": "string",
+        "default": "0,1",
+        "active-condition": "visr.param.Choose_Clusters == 'selected'"
+      },
+      "visr.param.group_2": {
+        "label": "Group 2 cluster ids (comma separated)",
+        "info": "Group of clusters for comparison. If empty, assume all clusters that are not in group 1.",
+        "type": "string",
+        "default": "2,3",
+        "active-condition": "visr.param.Choose_Clusters == 'selected'"
+      },
+      "visr.param.DE_test_method": {
+        "info": "Denotes which test to use",
+        "type": "string",
+        "default": "wilcox",
+        "items": ["wilcox", "bimod", "roc", "t", "tobit", "poisson", "negbinom"]
+      },
+      "visr.param.min_pct": {
+        "label": "Min percent of cells",
+        "info": "Only test genes that are detected in more than the specified fraction of cells in either of the two populations",
+        "type": "double",
+        "default": 0.1
+      },
+      "visr.param.min_logfc": {
+        "label": "LogFC threshold",
+        "info": "Limit testing to genes which show, on average, at least X-fold difference (log-scale) between the two groups of cells.",
+        "type": "double",
+        "default": 0.25
+      },
+      "visr.param.Top_gene_n": {
+        "label": "Number of top genes to export",
+        "info": "Number of top genes for each target group in the output file",
+        "type": "double",
+        "default": 5,
+        "min": 1,
+        "items": ["Inf"],
+        "item-labels": ["All genes"]
+      },
+      "visr.param.top_gene_hm": {
+        "label": "Number of top genes to plot",
+        "info": "Number of top genes for each target group in the heatmap",
+        "type": "double",
+        "default": 5,
+        "min": 0,
+        "active-condition": "visr.param.Choose_Clusters == 'all'"
+      }
+    }
+  },
+  {
+    "label": "Additional Output",
+    "info": "",
+    "collapsed": false,
+    "active-condition": "(((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))",
+    "variables": {
+      "visr.param.export_results": {
+        "label": "Export analysis results",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.include_id": {
+        "label": "Include cluster id",
+        "type": "boolean",
+        "default": true,
+        "active-condition": "visr.param.export_results == T"
+      },
+      "visr.param.include_umi": {
+        "label": "Include total UMI",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_results == T"
+      },
+      "visr.param.include_pc": {
+        "label": "Include PCA projection",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_results == T"
+      },
+      "visr.param.nPC_export": {
+        "label": "Number of PCs to export",
+        "type": "double",
+        "default": 2,
+        "min": 1,
+        "active-condition": "visr.param.export_results == T && visr.param.include_pc"
+      },
+      "visr.param.include_tsne": {
+        "label": "Include t-SNE projection",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_results == T"
+      },
+      "visr.param.plot_genes": {
+        "label": "Visualize selected genes (requires t-SNE)",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.gene_name": {
+        "label": "Gene list ot visualize (comma separated)",
+        "type": "string",
+        "active-condition": "visr.param.plot_genes == T"
+      },
+      "visr.param.gene_plot_color": {
+        "label": "Color map of gene expression",
+        "type": "multi-color",
+        "default": "BuPu 7",
+        "active-condition": "visr.param.plot_genes == T"
+      }
+    }
+  }]
+}

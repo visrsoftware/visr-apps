@@ -2,7 +2,8 @@ source("visrutils.R")
 
 visr.app.start("ModEx", info = "A general purpose system for exploration of computational models")
 visr.category("Input")
-visr.param("directory", label = "Runs directory", type = "filename", filename.mode = "dir")
+visr.param("directory", label = "Runs directory", type = "filename", filename.mode = "dir",
+           debugvalue = "~/SFU/Datasets/TestData/ModEx_edgeR/")
 
 DERIVATION_NONE <- "No derived output"
 DERIVATION_FIRST_ROW <- "Take first row"
@@ -24,25 +25,29 @@ visr.param("derivationMethod", label =  "Derivation Method",
              "Dimensionality Reduction: PCA",#TODO
              "Dimensionality Reduction: MDS",#TODO
              "Dimensionality Reduction: tSNE"#TODO
-           ))
+           ),
+           debugvalue = DERIVATION_COUNT_PER_CLASS)
 visr.param("tableForDerivatives", label = "Table to Use for Derivatives",
            items = c("", "quality_criteria"), #TODO: these items should be populated with proper table names in PSA java code
-           active.condition = paste0("visr.param.derivationMethod != ",DERIVATION_NONE))
+           active.condition = sprintf("visr.param.derivationMethod != '%s'", DERIVATION_NONE))
 
-visr.param("columnsForDerivatives", label = "Column to Use for Derivatives")
+visr.param("columnsForDerivatives", label = "Column to Use for Derivatives",
+           active.condition = sprintf("visr.param.derivationMethod != '%s' && visr.param.derivationMethod != '%s'", DERIVATION_NONE, DERIVATION_FIRST_ROW),
+           debugvalue = "edgeR_is.de")
 
 # visr.param("derivativePCA", label = "Calculate PCA on Derivatives", default = FALSE, # TODO
-#           active.condition = paste0("visr.param.derivationMethod != ",DERIVATION_NONE))
+#           active.condition = paste0("visr.param.derivationMethod != '", DERIVATION_NONE, "'"))
 #visr.param("derivativeMDA", label = "Calculate MDS on Derivatives", default = FALSE, # TODO
-#           active.condition = paste0("visr.param.derivationMethod != ",DERIVATION_NONE))
+#           active.condition = paste0("visr.param.derivationMethod != '", DERIVATION_NONE, "'"))
 #visr.param("derivativeTSNE", label = "Calculate tSNE on Derivatives", default = FALSE, # TODO
-#           active.condition = paste0("visr.param.derivationMethod != ",DERIVATION_NONE))
+#           active.condition = paste0("visr.param.derivationMethod != '", DERIVATION_NONE, "'"))
 
 visr.category("View Options", active.condition = "visr.param.directory != ''")
 visr.param("launchExplorer", label = "Start Exploration", default = TRUE)
 visr.param("output_showOutputDist", label = "Show Derived Output Filters", default = TRUE)
 visr.param("impactSort", label = "Sort Parameters by impact", default = FALSE)
 
+'
 #TODO: remove, since this is handled through specifying derivationMethod
 if (TRUE) {
   visr.param.output_mds <- FALSE
@@ -55,7 +60,7 @@ if (TRUE) {
   visr.param("mdsColumnIndex", label = "Column index for MDS",
              info = "Index of output column to compute MDS and summary for. (1 = first column of output)",
              default = 1L, min = 1L,
-             active.condition = "visr.param.output_mds == true")
+             active.condition = "visr.param.output_mds == TRUE")
   #TODO: remove
   visr.param("mdsMethod", label = "distance metric for MDS",
              default = "manhattan",
@@ -68,25 +73,25 @@ if (TRUE) {
                "minkowski",
                "hamming"
              ),
-             active.condition = "visr.param.output_mds == true"
+             active.condition = "visr.param.output_mds == TRUE"
              )
   visr.param("summaryMDS", label = "MDS column name",
              type = "output-multi-column",
              default = "mds_",
-             active.condition = "visr.param.output_mds == true"
+             active.condition = "visr.param.output_mds == TRUE"
   )
 
 }
-
+'
 
 visr.app.end(printjson = TRUE, writefile = TRUE)
 visr.applyParameters()
 
 visr.param.recalc <- FALSE # not controlled by user for now
-
+'
 if (!visr.isGUI()) {
   ### FOR TESTING in RStudio ONLY - apply variables manually
-  # Hamid's DEBUG:
+  # Hamids DEBUG:
   .libPaths(c("~/VisR/RLibs", .libPaths()))
   #visr.param.directory <- "/Users/hyounesy/Downloads/spiral_25"
   visr.param.directory <- "~/SFU/visrseq-prototypes/Data/joy_clustering_all_300"
@@ -106,29 +111,31 @@ if (!visr.isGUI()) {
   visr.param.tableForDerivatives <- "" # "quality_criteria" # "" #TODO: user input: string
   visr.param.derivationMethod <- DERIVATION_COUNT_PER_CLASS #DERIVATION_FIRST_ROW # "Count Levels"
 }
+'
 
 path <- visr.param.directory
 
-visr.print("loading the index files")
-pathInput               <- paste(path, "/input.txt", sep = "")
-pathIndex               <- paste(path, "/runsInfo.txt", sep="")
-if (!file.exists(pathIndex)) {
-  pathIndexOld               <- paste(path, "/index.txt", sep="")
+# initializing the file paths
+pathInput    <- paste0(path, "/input.txt")
+pathRunsInfo <- paste0(path, "/runsInfo.txt")
+if (!file.exists(pathRunsInfo)) {
+  pathIndexOld <- paste0(path, "/index.txt") # previous name for runsInfo
   if (file.exists(pathIndexOld)) {
-    file.rename(pathIndexOld, pathIndex)
+    file.rename(pathIndexOld, pathRunsInfo)
   }
 }
 
-pathParamInfo           <- paste(path, "/paramInfo.txt", sep="")
-pathParamViewInfo       <- paste(path, "/paramViewInfo.txt", sep="")
-pathAllRunsMatrixRData  <- paste(path, "/allRunsMatrix.RData", sep="")
-pathAllRunsMatrixTxt    <- paste(path, "/allRunsMatrix.txt", sep="")
-pathDistanceMatrix      <- paste(path, "/distanceMatrix.txt" ,sep="")
-pathDistanceMatrixRData <- paste(path, "/distanceMatrix.RData" ,sep="")
-pathImpact              <- paste(path, "/impact.txt", sep="")
+pathParamInfo           <- paste0(path, "/paramInfo.txt")
+pathParamViewInfo       <- paste0(path, "/paramViewInfo.txt")
+pathAllRunsMatrixRData  <- paste0(path, "/allRunsMatrix.RData")
+pathAllRunsMatrixTxt    <- paste0(path, "/allRunsMatrix.txt")
+pathDistanceMatrix      <- paste0(path, "/distanceMatrix.txt")
+pathDistanceMatrixRData <- paste0(path, "/distanceMatrix.RData")
+pathImpact              <- paste0(path, "/impact.txt")
 
 allRunsMatrix <- NULL
 distanceMatrix <- NULL
+
 
 exportRunFilesFromAllRunsMatrix <- function() {
   numRuns = nrow(allRunsMatrix)
@@ -188,30 +195,27 @@ calculateMode=function(x){
 storeMinDistColumns <- FALSE
 
 ###############################################################################
-# Setting paths and loading crucial index files
+# Setting paths and loading needed files
 ###############################################################################
 
-visr.print("loading the index files")
-if (!file.exists(pathInput))
-  visr.message(paste("File not found", pathInput), "error")
-if (!file.exists(pathParamInfo))
-  visr.message(paste("File not found", pathParamInfo), "error")
-if (!file.exists(pathIndex))
-  visr.message(paste("File not found", pathIndex), "error")
+visr.logProgress("Loading the runs files")
+visr.assert_file_exists(pathInput, "input")
+visr.assert_file_exists(pathParamInfo, "paramInfo")
+visr.assert_file_exists(pathRunsInfo, "runsInfo")
 
-inputTable <- read.table(pathInput, header=TRUE,sep="\t", check.names = F)
-paramInfo  <- read.table(pathParamInfo, header=TRUE,sep = "\t", stringsAsFactors = FALSE, check.names = F)
-indexTable <- read.table(pathIndex, header=TRUE, sep = "\t", check.names = F)
-if ("succeded" %in% colnames(indexTable)) {
+inputTable <- read.table(pathInput, header=TRUE, sep="\t", check.names = F)
+paramInfo  <- read.table(pathParamInfo, header=TRUE, sep = "\t", stringsAsFactors = FALSE, check.names = F)
+runsInfoTable <- read.table(pathRunsInfo, header=TRUE, sep = "\t", check.names = F)
+if ("succeded" %in% colnames(runsInfoTable)) {
   # only take the runs that succeeded.
   # TODO: better way of handling the failed runs. e.g. to show which parameter combinations were problematic.
-  indexTable <- indexTable[which(indexTable$succeded == "true"),]
+  runsInfoTable <- runsInfoTable[which(runsInfoTable$succeded == "true"),]
 }
 
 if (visr.param.tableForDerivatives == "") {
-  fileNames <- paste0(path, "/runs/", (indexTable[,"ID"]), ".txt")
+  fileNames <- paste0(path, "/runs/", (runsInfoTable[,"ID"]), ".txt")
 } else {
-  fileNames <- paste0(path, "/runs/", visr.param.tableForDerivatives, "_", (indexTable[,"ID"]), ".txt")
+  fileNames <- paste0(path, "/runs/", visr.param.tableForDerivatives, "_", (runsInfoTable[,"ID"]), ".txt")
 }
 
 numRuns <- length(fileNames)
@@ -221,12 +225,13 @@ for (name in names(inputTable)) {
     inputTable[,name] <- NULL
   }
 }
-visr.print("[DONE] loading the index files")
+visr.print("[DONE] loading the runs files")
 
 ###############################################################################
 # Generate paramViewInfo if doesn't exist
 ###############################################################################
 if (!file.exists(pathParamViewInfo)) {
+  visr.print("creating paramViewInfo")
   viewParams <- c()
   for (i in 1: nrow(paramInfo)) {
     if( !grepl("output", paramInfo$type[i]) ) { # skip the output parameters
@@ -244,13 +249,11 @@ if (!file.exists(pathParamViewInfo)) {
 if (visr.param.derivationMethod != DERIVATION_NONE) {
   visr.print(paste("Calculating derivative results:", visr.param.derivationMethod))
 
-
   #if (visr.param.recalc || (!file.exists(pathAllRunsMatrixRData) && !file.exists(pathAllRunsMatrixTxt)))
 
   if (numRuns > 0) {
     for (i in 1:numRuns) {
       visr.logProgress(paste("reading",fileNames[i]))
-      visr.print(paste("reading",fileNames[i]))
       tt <- read.table(fileNames[i], header=TRUE,sep="\t", check.names = F)
       if (visr.param.derivationMethod == DERIVATION_FIRST_ROW) {
         if (i == 1) {
@@ -262,39 +265,48 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
         if (i == 1) {
           dOutput <- matrix(nrow=numRuns, ncol=0) # matrix of derivations
         }
-        tt_table <- table(tt)
-        for (n1 in names(tt_table)) {
-          colName <- paste0("count(", n1, ")") # e.g. "count(-1)"
-          if (!colName %in% colnames(dOutput)) {
-            # seeing the factor level for the first time
-            newColnames <- c(colnames(dOutput), colName)
-            dOutput <- cbind(dOutput, rep(0, numRuns))
-            colnames(dOutput) <- newColnames
+        for (derivCol in visr.param.columnsForDerivatives) {
+          tt_col <- tt[,derivCol]
+          tt_table <- table(tt_col)
+          for (n1 in names(tt_table)) {
+            colName <- paste0(derivCol, "(", n1, ")") # e.g. "is.de(-1)"
+            if (!colName %in% colnames(dOutput)) {
+              # seeing the factor level for the first time
+              newColnames <- c(colnames(dOutput), colName)
+              dOutput <- cbind(dOutput, rep(0, numRuns))
+              colnames(dOutput) <- newColnames
+            }
+            dOutput[i, colName] <- tt_table[n1]
           }
-          dOutput[i, colName] <- tt_table[n1]
         }
+        '
         if (i == 1) {
           allRunsMatrix <- matrix(nrow = numRuns, ncol=nrow(tt))
         }
         allRunsMatrix[i,] <- tt[, visr.param.mdsColumnIndex]
+        '
+      } else {
+        visr.message(msg = sprintf("The derivation method '%s' cannot be computed", visr.param.derivationMethod), type = "error")
       }
+      #else if (visr.param.derivationMethod == DERIVATION_MDS) { #TODO
+      #}
     }
 
     # post-process
-    if (visr.param.derivationMethod == DERIVATION_FIRST_ROW) {
+    #if (visr.param.derivationMethod == DERIVATION_FIRST_ROW) {
       # take the numeric columns and transpose
-      allRunsMatrix <- as.matrix(dOutput[, which(apply(dOutput, 2, is.numeric))])
-    }
+    allRunsMatrix <- as.matrix(dOutput[, which(apply(dOutput, 2, is.numeric))])
+    #}
   }
 
   save(allRunsMatrix, file = pathAllRunsMatrixRData)
 
   if (exists("dOutput") && ncol(dOutput) > 0) {
     for (c1 in colnames(dOutput)) {
-      indexTable[[c1]] <- dOutput[,c1]
+      runsInfoTable[[c1]] <- dOutput[,c1]
     }
     # writing the table, in case of a crash, etc...
-    write.table(indexTable, file=pathIndex, row.names = FALSE, col.names = TRUE, sep = "\t", quote=FALSE)
+    write.table(runsInfoTable, file=pathRunsInfo, row.names = FALSE, col.names = TRUE, sep = "\t", quote=FALSE)
 
     # Add missing meta info to the parameter information file
     for (c1 in colnames(dOutput)) {
@@ -310,12 +322,21 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
 # Calculate Distance matrix (distance between runs)
 ###############################################################################
 if (visr.param.derivationMethod != DERIVATION_NONE) {
+  loadAllRunsMatrixIfNull()
+  visr.logProgress("computing the distance matrix. may take some time...")
+  distanceMeasure <- "euclidean" # , "maximum", "manhattan", "canberra", "binary" or "minkowski"
+  distanceMatrix <- as.matrix(dist(allRunsMatrix, method = distanceMeasure)) #  distances between the rows
+  # save distanceMatrix to a file
+  # write.table(distanceMatrix, file=pathDistanceMatrix, col.names = F, row.names = F, sep = "\t")
+  visr.print(paste("saving", pathDistanceMatrixRData))
+  save(distanceMatrix, file = pathDistanceMatrixRData)
+
+  '
   if ((!file.exists(pathDistanceMatrixRData) && !file.exists(pathDistanceMatrix)) || # whether the distance matrix was already computed and saved
       visr.param.recalc) # forcing the recalculation
   {
     loadAllRunsMatrixIfNull()
     visr.logProgress("computing the distance matrix. may take some time...")
-    visr.print("compute the distance matrix")
     # recompute the distance matrix
     if (visr.param.mdsMethod == "hamming")
     { # hamming ditance not supported in dist() function. need to calculate manually
@@ -340,16 +361,17 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
     # delay loading this until needed (performance optimization):
     #distanceMatrix <- read.table(pathDistanceMatrix, sep="\t", check.names = F)
   }
-
+  '
   ###############################################################################
-  # perform MDS on the distance matrix and add it to the index table
+  # perform MDS on the distance matrix and add it to the runsInfo table
   ###############################################################################
+  '
   if (visr.param.output_mds) {
     mdsDims <- 2
     mdsColNames <- paste(visr.param.summaryMDS, "coord" , 1:mdsDims, sep = "")
     c1ColName   <- paste(visr.param.summaryMDS, "coord1", sep = "")
     c2ColName <- paste(visr.param.summaryMDS, "coord2", sep = "")
-    if ( !all(mdsColNames %in% colnames(indexTable)) || visr.param.recalc == TRUE) {
+    if ( !all(mdsColNames %in% colnames(runsInfoTable)) || visr.param.recalc == TRUE) {
       visr.logProgress("computing the MDS. may take some time...")
       visr.print("perform MDS on the distance matrix")
       loadDistanceMatrixIfNull()
@@ -359,7 +381,7 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
       # colnames(visr.param.summaryMDS)<-c("coord1","coord2")
 
       for(i in 1:mdsDims) {
-        indexTable[[mdsColNames[i]]] <- fit$points[,i]
+        runsInfoTable[[mdsColNames[i]]] <- fit$points[,i]
 
         # Add missing mds_coordinate meta info to the parameter information file
         if(! (mdsColNames[i] %in% paramInfo$label) ) {
@@ -369,6 +391,7 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
       visr.print("[Done] perform MDS on the distance matrix")
     }
   }
+  '
 }
 ###############################################################################
 # Calculate Parameters' significance/impact score
@@ -383,12 +406,12 @@ if(visr.param.recalc ||
   }
   visr.logProgress("Calculating Parameters' significance/impact score")
   visr.print("Calculate Parameters' significance/impact score")
-  # find columns of the index table, that are input parameters with more than 1 value
+  # find columns of the runsInfo table, that are input parameters with more than 1 value
   numlevels<-function(x) {
     length(levels(as.factor(x)))
   }
 
-  coolParameters <- match(names(which(lapply(indexTable, numlevels) > 1)), paramInfo$label)
+  coolParameters <- match(names(which(lapply(runsInfoTable, numlevels) > 1)), paramInfo$label)
   coolParameters <- coolParameters[!is.na(coolParameters)]
   inputParams <- c()
   # visr.print( coolParameters)
@@ -405,7 +428,7 @@ if(visr.param.recalc ||
   if (length(inputParams) > 0) {
     for (vp in 1: length(inputParams)) {
       # iterate through input parameters to calculate impact score
-      #paramName<-colnames(indexTable)[inputParams[vp]]
+      #paramName<-colnames(runsInfoTable)[inputParams[vp]]
       visr.logProgress(paste("Calculating Parameters' significance/impact score:", vp, "of", length(inputParams)))
       paramName<-paramInfo$label[inputParams[vp]]
       visr.print(paste("processing", paramName))
@@ -417,7 +440,7 @@ if(visr.param.recalc ||
 
       # Binning for numerical parameters that have more than 10 values
       binned <- FALSE
-      paramValues<-levels(as.factor(indexTable[, paramName]))
+      paramValues<-levels(as.factor(runsInfoTable[, paramName]))
       numParamValues<-length(paramValues)
       MAX_NUMERIC_PARAM_CATEGORIES = 10
       NUMERIC_PARAM_BIN_COUNTS = 10
@@ -425,7 +448,7 @@ if(visr.param.recalc ||
           (grepl("double", paramInfo$type[inputParams[vp]]) ||
            grepl("int", paramInfo$type[inputParams[vp]]))) {
         binned <- TRUE
-        bins <- tapply(indexTable[, paramName], cut(indexTable[, paramName], NUMERIC_PARAM_BIN_COUNTS))
+        bins <- tapply(runsInfoTable[, paramName], cut(runsInfoTable[, paramName], NUMERIC_PARAM_BIN_COUNTS))
         paramValues <- levels(as.factor(bins))
         numParamValues <- length(paramValues)
       }
@@ -442,7 +465,7 @@ if(visr.param.recalc ||
             if (binned) {
               v1Rows <- which(bins == paramValues[v1]) # index of rows with their parameter value in paramValues[v1] bin
             } else {
-              v1Rows <- which(indexTable[, paramName]==paramValues[v1]) # index of rows with their parameter value == paramValues[v1]
+              v1Rows <- which(runsInfoTable[, paramName]==paramValues[v1]) # index of rows with their parameter value == paramValues[v1]
             }
 
             if (visr.param.derivationMethod == DERIVATION_COUNT_PER_CLASS) {
@@ -466,7 +489,7 @@ if(visr.param.recalc ||
               if (binned) {
                 v2Rows <- which(bins == paramValues[v2]) # index of rows with their parameter value in paramValues[v2] bin
               } else {
-                v2Rows <- which(indexTable[, paramName]==paramValues[v2]) # index of rows with their parameter value == paramValues[v2]
+                v2Rows <- which(runsInfoTable[, paramName]==paramValues[v2]) # index of rows with their parameter value == paramValues[v2]
               }
               mm <- distanceMatrix[v1Rows, v2Rows]
 
@@ -475,8 +498,8 @@ if(visr.param.recalc ||
                 v2MinDist <- apply(mm,2,min)
                 minDist <- mean(c(mean(v1MinDist), mean(v2MinDist)))
                 if (storeMinDistColumns) {
-                  indexTable[v1Rows, minDistColName] <- v1MinDist
-                  indexTable[v2Rows, minDistColName] <- v2MinDist
+                  runsInfoTable[v1Rows, minDistColName] <- v1MinDist
+                  runsInfoTable[v2Rows, minDistColName] <- v2MinDist
                 }
               } else {
                 minDist <- min(mm)
@@ -544,6 +567,6 @@ if (ENABLE_GENERATE_FREQUENCY_TABLE) {
 # Save the possibly changed files
 visr.print("Saving the (possibly) changed files ...")
 
-write.table(indexTable, file=pathIndex,     row.names = FALSE, col.names = TRUE, sep = "\t", quote=FALSE)
+write.table(runsInfoTable, file=pathRunsInfo,     row.names = FALSE, col.names = TRUE, sep = "\t", quote=FALSE)
 write.table(paramInfo,  file=pathParamInfo, row.names = FALSE, col.names = TRUE, sep = "\t", quote=TRUE)
 visr.print("[DONE] Saving the (possibly) changed files")

@@ -49,7 +49,7 @@
                     "default": "1,1,2,2"
                 }
             },
-            "active-condition": "input_advanced == true"
+            "active-condition": "input_advanced == TRUE"
         },
         {
             "label": "Parameters",
@@ -152,7 +152,7 @@
                     ]
                 }
             },
-            "active-condition": "input_method == exact test"
+            "active-condition": "input_method == 'exact test'"
         },
         {
             "label": "GLM test",
@@ -201,7 +201,7 @@
                     "type": "string"
                 }
             },
-            "active-condition": "input_method == glm likelihood ratio test"
+            "active-condition": "input_method == 'glm likelihood ratio test'"
         },
         {
             "label": "Output",

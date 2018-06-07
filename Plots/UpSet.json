@@ -146,7 +146,7 @@
         "info": "The angle of the numbers atop the intersection size bars",
         "type": "int",
         "default": 0,
-        "active-condition": "visr.param.show_numbers == true"
+        "active-condition": "visr.param.show_numbers"
       }
     }
   }]
