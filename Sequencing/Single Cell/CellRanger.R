@@ -1,4 +1,5 @@
 source("visrutils.R")
+source('Sequencing/Single Cell/Utils.R')
 
 visr.app.start("10X Cell Ranger",
                info = "Simple secondary analysis of the gene-barcode matrix output of 10X Cell Ranger pipeline",
@@ -14,7 +15,7 @@ visr.param("data_dir_10x",
            label="10X dataset directory",
            info="10X Cell Ranger dataset directory. It should contain a sub-directory named 'outs'",
            type="filename", filename.mode = "dir",
-           debugvalue= "~/Research/Data/SingleCell/pbmc3k/") # Peripheral Blood Mononuclear Cells (PBMCs) from a healthy donor
+           debugvalue= "~/SFU/Datasets/SingleCell/pbmc3k/") # Peripheral Blood Mononuclear Cells (PBMCs) from a healthy donor
 
 ################################ Output tables
 
@@ -25,7 +26,7 @@ visr.param("output_dir",
            label="Output Directory to save the results",
            info="Output directory where the analysis results will be saved to",
            type="filename", filename.mode = "dir",
-           debugvalue= "~/Research/Data/SingleCell/output/")
+           debugvalue= "~/SFU/Datasets/SingleCell/output/")
 
 visr.param("create_subdir", default = TRUE,
            label = "Create new sub-direcory",
@@ -79,7 +80,7 @@ visr.app.category(label="Differential expression analysis",
                   info="The analysis table of genes together with the differential expression analysis results")
 
 visr.param("de_cluster_k", label = "Use k-means clustering of k",
-           default = 5L, min = 2L, max = 10L,
+           default = 5L, min = 2L, max = 10L, debugvalue = 2L,
            active.condition = "visr.param.enable_de")
 
 visr.param('de_only_significant', label="Export significant genes only", default=TRUE,
@@ -140,7 +141,7 @@ visr.param("vis_colormap_tsne_markers", label = "Gene value color map", type = "
            active.condition = "visr.param.visualize_tsne_markers")
 
 visr.param("vis_show_de_heatmap", label = "Plot heatmap of significant genes",
-           default = FALSE, debugvalue = TRUE,
+           default = TRUE, debugvalue = TRUE,
            active.condition = "visr.param.enable_de")
 
 visr.param("cluster_heatmap_n_genes", label = "Number of genes to show per cluster", default = 3L, min = 1L, max = 100L,
@@ -173,36 +174,22 @@ visr.applyParameters()
 #  Validate directories
 ############################################################
 
-validateOutputDirectory <- function() {
-  visr.assert_that(!is.null(visr.param.output_dir) && visr.param.output_dir != "", msg = "Output directory not specified")
-  if (visr.param.create_subdir)
-    visr.param.output_dir <<- paste0(visr.param.output_dir, format(Sys.time(), "/%Y%m%d_%H%M%S"))
-  dir.create(visr.param.output_dir, recursive = T, showWarnings = F)
-  visr.assert_that(dir.exists(visr.param.output_dir), msg = sprintf("Output directory '%s' is not valid", visr.param.output_dir))
-}
-
 # validate input directory
 visr.assert_file_exists(visr.param.data_dir_10x, '10X data directory')
 visr.assert_that(file.exists(paste0(visr.param.data_dir_10x, '/outs')), msg = paste("Cannot find 'outs' sub-directory inside the specified 10x directory:\n", visr.param.data_dir_10x))
 
 # validate output directory
-validateOutputDirectory()
+visr.param.output_dir <- validateOutputDirectory(visr.param.output_dir, visr.param.create_subdir)
 
 ############################################################
 #  Prepare output
 ############################################################
 
 # output current parameters into a file
-write(capture.output(print(visr.getParams())), file = paste0(visr.param.output_dir, "/visr_params.txt"))
+writeParameters(visr.param.output_dir)
 
 # prepare the pdf to save the plots to
-visr.dev <- dev.cur()
-if (exists("visr_app_pdf_dev") && !is.null(visr_app_pdf_dev)) {
-  dev.off(which = visr_app_pdf_dev) # close the previous one
-}
-output_plot_file <- paste0(visr.param.output_dir, "/plots.pdf")
-pdf(file=output_plot_file)
-visr_app_pdf_dev <- dev.cur()
+output_plot_file <- startReport(visr.param.output_dir)
 
 ############################################################
 #  Load data
@@ -228,10 +215,8 @@ analysis_results <- cellrangerRkit::load_cellranger_analysis_results(visr.param.
 get_genes_from_string <- function(comma_string) {
     split_gene_list <- strsplit(comma_string, split = "[ ]*[,| ]+[ ]*")[[1]]
     if (length(which(split_gene_list != "")) == 0) {
-        visr.message("No genes are specified for parameter 'Gene list'")
-    }
-    else
-    {
+        print("No genes are specified for parameter 'Gene list'")
+    } else {
         genes <- split_gene_list[which(split_gene_list != "")]
         suppressWarnings(indices <- sapply(genes, function(x) {return (cellrangerRkit:::get_gene_index(gbm, x))}))
         if (length(which(is.na(indices))) > 0) {
@@ -239,7 +224,7 @@ get_genes_from_string <- function(comma_string) {
         }
         genes <- genes[which(!is.na(indices))]
         if (length(genes) == 0) {
-            visr.message("Could not find any of the specified gene names in the input data gene symbols")
+            visr.message("Could not find any of the specified gene names in the input data gene symbols", type = "warning")
         }
         return(genes)
     }
@@ -282,7 +267,7 @@ if (visr.param.enable_cells_table) {
   }
 
   ## gene counts
-  if (visr.param.include_genecounts) {
+  if (visr.param.include_genecounts && visr.param.gene_list != '') {
       genes <- get_genes_from_string(visr.param.gene_list)
       if (length(genes) > 0) {
           gbm_norm <- gbm
@@ -308,20 +293,7 @@ if (visr.param.enable_cells_table) {
 #  Visualization
 ############################################################
 
-plot_gbm_summary <- function(gbm) {
-  gbm_summary <- cbind(rownames(t(gbm@summary)), t(gbm@summary))
-  colnames(gbm_summary) <- c("name", "value")
-  rownames(gbm_summary) <- NULL
-
-  plot.new()
-  mtext(text="Input data summary", adj=0.5, side=3, line = 1)
-  mtext(text=gbm_summary[,1], adj=0, col=c("gray10","gray60"), side=3, line=c(1:nrow(gbm_summary))*-1)
-  mtext(text=gbm_summary[,2], adj=1, col=c("gray10","gray60"), side=3, line=c(1:nrow(gbm_summary))*-1)
-
-  return(gbm_summary)
-}
-
-gbm_summary <- plot_gbm_summary(gbm)
+gbm_summary <- plotGBMSummary(gbm)
 visr.writeDataTable(gbm_summary, file = paste0(visr.param.output_dir, "/data_summary.txt"))
 
 ## visualize umi counts
@@ -333,9 +305,9 @@ if (visr.param.visualize_tsne_umi) {
   print(p)
 
   #also display plot on screen
-  dev.set(which = visr.dev)
+  switchPlotToScreen()
   print(p)
-  dev.set(which = visr_app_pdf_dev)
+  switchPlotToReport()
 }
 
 ## visualize clusters
@@ -349,7 +321,7 @@ if (visr.param.visualize_tsne_kmeans) {
 }
 
 ## visualize gene markers
-if (visr.param.visualize_tsne_markers) {
+if (visr.param.visualize_tsne_markers && visr.param.include_genecounts && visr.param.gene_list != '') {
   genes <- get_genes_from_string(visr.param.gene_list)
   if (length(genes) > 0) {
     use_genes <- get_nonzero_genes(gbm)
@@ -405,12 +377,20 @@ if (visr.param.enable_de) {
     # visualize_clusters(cluster_result$Cluster, tsne_proj[c("TSNE.1","TSNE.2")], colour=example_col)
 
     # create values and axis annotations for pheatmap
+    pdf(file=NULL) # hack fix to make the next gbm_pheatmap output to pdf report
     cellrangerRkit::gbm_pheatmap(log_gene_bc_matrix(gbm),
                  prioritized_genes,
                  cells_to_plot,
                  n_genes=visr.param.cluster_heatmap_n_genes,
                  colour=example_col,
                  limits=c(visr.param.cluster_heatmap_min, visr.param.cluster_heatmap_max))
+    dev.off()
+    cellrangerRkit::gbm_pheatmap(log_gene_bc_matrix(gbm),
+                                 prioritized_genes,
+                                 cells_to_plot,
+                                 n_genes=visr.param.cluster_heatmap_n_genes,
+                                 colour=example_col,
+                                 limits=c(visr.param.cluster_heatmap_min, visr.param.cluster_heatmap_max))
   }
 
   visr.logProgress("Exporting DE table")
@@ -457,8 +437,7 @@ if (visr.param.enable_de) {
 #############################################
 # Output tables
 #############################################
-dev.off(which=visr_app_pdf_dev)
-rm(visr_app_pdf_dev)
+finishReport()
 browseURL(output_plot_file)
 
 cachedResults <- list(params = visr.getParams())

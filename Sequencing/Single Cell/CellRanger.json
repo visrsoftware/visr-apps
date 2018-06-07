@@ -265,7 +265,7 @@
       "visr.param.vis_show_de_heatmap": {
         "label": "Plot heatmap of significant genes",
         "type": "boolean",
-        "default": false,
+        "default": true,
         "active-condition": "visr.param.enable_de"
       },
       "visr.param.cluster_heatmap_n_genes": {
