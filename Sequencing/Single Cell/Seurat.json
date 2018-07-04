@@ -4,6 +4,19 @@
   "instructions": "",
   "input": "none",
   "categories":[  {
+    "label": "workflow",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.workflow": {
+        "label": "Choose Analysis Workflow",
+        "type": "string",
+        "items": ["single", "integrated"],
+        "item-labels": ["Analysis of one dataset", "Integrated Analysis"]
+      }
+    }
+  },
+  {
     "label": "Input",
     "info": "",
     "collapsed": false,
@@ -13,18 +26,61 @@
         "type": "string",
         "default": "load_raw",
         "items": ["load_raw", "load_seurat"],
-        "item-labels": ["Load CellRanger Output", "Load Seurat Object"]
+        "item-labels": ["Load CellRanger Output", "Load Seurat Object"],
+        "active-condition": "visr.param.workflow == 'single'"
       },
       "visr.param.Path_to_outs": {
         "info": "Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
         "type": "filename",
         "filename.mode": "dir",
-        "active-condition": "visr.param.Import_method == 'load_raw'"
+        "active-condition": "visr.param.Import_method == 'load_raw' && visr.param.workflow == 'single'"
       },
       "visr.param.Path_to_seurat_object": {
+        "info": "The object should have been",
         "type": "filename",
         "filename.mode": "load",
-        "active-condition": "visr.param.Import_method == 'load_seurat'"
+        "active-condition": "visr.param.Import_method == 'load_seurat' && visr.param.workflow == 'single'"
+      },
+      "visr.param.Import_method2": {
+        "label": "Choose Import Method",
+        "type": "string",
+        "default": "load_two",
+        "items": ["load_two", "load_one"],
+        "item-labels": ["Merge two seurat objects for integrated analysis", "Load merged seurat object"],
+        "active-condition": "visr.param.workflow == 'integrated'"
+      },
+      "visr.param.seurat_integrated": {
+        "label": "Merged Seurat Object",
+        "info": "Path to seurat object. It should be a merged object from 2 datasets with different labels (labels should be stored in \"object@meta.data$group\".",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.Import_method2 == 'load_one' && visr.param.workflow == 'integrated'"
+      },
+      "visr.param.seurat_obj_1": {
+        "label": "Seurat Object 1",
+        "info": "Path to seurat object. The object should have been filtered and contain variable gene information.",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'"
+      },
+      "visr.param.dataset1_name": {
+        "label": "Label of dataset 1",
+        "type": "string",
+        "default": "condition_A",
+        "active-condition": "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'"
+      },
+      "visr.param.seurat_obj_2": {
+        "label": "Seurat Object 2",
+        "info": "Path to seurat object. The object should have been filtered and contain variable gene information.",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'"
+      },
+      "visr.param.dataset2_name": {
+        "label": "Label of dataset 2",
+        "type": "string",
+        "default": "condition_B",
+        "active-condition": "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'"
       }
     }
   },
@@ -32,7 +88,7 @@
     "label": "Output",
     "info": "",
     "collapsed": false,
-    "active-condition": "((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))",
+    "active-condition": "(((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')) || ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))",
     "variables": {
       "visr.param.Output_directory": {
         "label": "Output directory to save the results",
@@ -52,7 +108,7 @@
     "label": "Create Seurat Object",
     "info": "",
     "collapsed": false,
-    "active-condition": "((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')&&(visr.param.Output_directory != ''))",
+    "active-condition": "visr.param.Output_directory != '' && (visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single')",
     "variables": {
       "visr.param.max_nGenes": {
         "label": "Maximum number of genes per cell",
@@ -65,7 +121,7 @@
       "visr.param.min_nGenes": {
         "label": "Minimum number of genes per cell",
         "info": "Low cutoff for the number of genes expressed in a cell",
-        "type": "double",
+        "type": "int",
         "default": 200,
         "min": 0
       },
@@ -91,11 +147,12 @@
     "label": "Analysis steps",
     "info": "Select the analysis steps to run",
     "collapsed": false,
-    "active-condition": "(((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))",
+    "active-condition": "(visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))||(visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))",
     "variables": {
       "visr.param.Find_Variable_Genes": {
         "type": "boolean",
-        "default": false
+        "default": false,
+        "active-condition": "(visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.Dim_Reduction": {
         "label": "Dimensionality Reduction",
@@ -117,7 +174,7 @@
     "label": "Find Variable Genes",
     "info": "",
     "collapsed": false,
-    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Find_Variable_Genes == T))",
+    "active-condition": "visr.param.Find_Variable_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))",
     "variables": {
       "visr.param.Normalization_scale_factor": {
         "info": "Sets the scale factor for cell-level normalization",
@@ -135,7 +192,7 @@
       "visr.param.Mean_exp_high": {
         "label": "Maximum Mean Expression",
         "info": "High cutoff on x-axis (mean expression) for identifying variable genes",
-        "type": "int",
+        "type": "double",
         "default": 3,
         "min": 0,
         "items": ["Inf"]
@@ -150,7 +207,7 @@
       "visr.param.Dispersion_high": {
         "label": "Maximum Dispersion",
         "info": "High cutoff on y-axis (standard deviation) for identifying variable genes",
-        "type": "int",
+        "type": "double",
         "default": "Inf",
         "min": 0,
         "items": ["Inf"]
@@ -161,94 +218,152 @@
     "label": "Dimensionality Reduction",
     "info": "",
     "collapsed": false,
-    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Dim_Reduction == T))",
+    "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))||visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))",
     "variables": {
       "visr.param.Run_PCA": {
         "info": "Run a PCA dimensionality reduction",
         "type": "boolean",
-        "default": false
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.nPC_compute": {
         "label": "Number of PCs to compute",
         "info": "Total Number of PCs to compute and store",
-        "type": "double",
+        "type": "int",
         "default": 20,
         "min": 2,
-        "active-condition": "visr.param.Run_PCA == T"
+        "active-condition": "visr.param.Run_PCA == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.jackstraw": {
         "label": "Run Jackstraw",
         "info": "Randomly permutes a subset of data, and calculates projected PCA scores for these 'random' genes. Then compares the PCA scores for the 'random' genes with the observed PCA scores to determine statistical signifance. End result is a p-value for each gene's association with each principal component.",
         "type": "boolean",
-        "default": false
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.jackstrawRep": {
         "label": "Number of replicates",
         "info": "Number of replicate samplings to perform",
-        "type": "double",
+        "type": "int",
         "default": 100,
         "min": 10,
-        "active-condition": "visr.param.jackstraw == T"
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))&&visr.param.jackstraw == T"
       },
       "visr.param.nPC_jackstraw": {
         "label": "Number of PCs to compute signigicance for",
         "info": "Number of PCs to include on jackstraw plot",
-        "type": "double",
+        "type": "int",
         "default": 12,
-        "active-condition": "visr.param.jackstraw == T"
+        "min": 1,
+        "active-condition": "visr.param.jackstraw == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.elbow": {
-        "label": "Draw Elbow Plot",
+        "label": "Plot Elbow Plot",
         "info": "Plots the standard deviation of each principle component",
         "type": "boolean",
-        "default": false
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.PC_heatmap": {
         "label": "Plot PC Heatmap",
         "info": "Draws a heatmap focusing on each principal component. Both cells and genes are sorted by their principal component scores. Allows for nice visualization of sources of heterogeneity in the dataset.",
         "type": "boolean",
-        "default": false
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.nPC_PCheatmap": {
         "label": "Number of PCs to plot",
         "info": "Number of PCs to include on PC heatmap",
-        "type": "double",
+        "type": "int",
         "default": 12,
-        "active-condition": "visr.param.PC_heatmap == T"
+        "min": 1,
+        "active-condition": "visr.param.PC_heatmap == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.nGene_PCHeatmap": {
         "label": "Number of Genes to plot",
         "info": "Number of top genes to plot for each PC",
-        "type": "double",
+        "type": "int",
         "default": 30,
-        "active-condition": "visr.param.PC_heatmap == T"
+        "min": 1,
+        "active-condition": "visr.param.PC_heatmap == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.nCell_PCHeatmap": {
         "label": "Number of Cells to plot",
         "info": "Number of top cells to plot for each PC",
-        "type": "double",
+        "type": "int",
         "default": 500,
-        "active-condition": "visr.param.PC_heatmap == T"
+        "min": 1,
+        "active-condition": "visr.param.PC_heatmap == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.Run_tSNE": {
         "info": "Run t-SNE dimensionality reduction on selected PCs",
         "type": "boolean",
         "default": false,
-        "active-condition": "visr.param.Dim_Reduction == T"
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.calculate_tsne_nPC": {
         "label": "Automatically calculate number of PCs",
         "info": "Automatically calculate number of PCs selected for tSNE. Uncheck to specify the number of PCs to use.",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.Run_tSNE == T"
+        "active-condition": "visr.param.Run_tSNE == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.tsne_nPC": {
         "label": "Number of PCs for calculating tSNE",
-        "type": "double",
+        "type": "int",
         "default": 10,
-        "min": 1,
-        "active-condition": "visr.param.calculate_tsne_nPC == F && visr.param.Run_tSNE == T"
+        "min": 2,
+        "active-condition": "visr.param.calculate_tsne_nPC == F && visr.param.Run_tSNE == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
+      },
+      "visr.param.Run_CCA": {
+        "info": "Runs a canonical correlation analysis using a diagonal implementation of CCA.",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.nCC_compute": {
+        "label": "Number of CCs to compute",
+        "info": "Number of canonical vectors to calculate",
+        "type": "int",
+        "default": 20,
+        "min": 2,
+        "active-condition": "visr.param.Run_CCA == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.bicor": {
+        "label": "Plot CC bicor saturation plot",
+        "info": "Plots biweight midcorrelation (bicor) of the Xth gene ranked by minimum bicor across the specified CCs for each group in the grouping.var",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.align_CCA": {
+        "label": "Align CCA subspaces",
+        "info": "Aligns subspaces across a given grouping variable",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.nCC_align": {
+        "label": "Number of CCs to align",
+        "info": "Number of CCs to align for downstream analysis",
+        "type": "int",
+        "default": 10,
+        "min": 2,
+        "active-condition": "visr.param.align_CCA == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.Run_tSNE2": {
+        "label": "Run tSNE",
+        "info": "Run t-SNE dimensionality reduction on selected CCs",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.tsne_nCC": {
+        "label": "Number of aligned CCs for calculating tSNE",
+        "type": "int",
+        "default": 10,
+        "min": 2,
+        "active-condition": "visr.param.Run_tSNE2 == T&&visr.param.Dim_Reduction == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
       }
     }
   },
@@ -256,20 +371,28 @@
     "label": "Cluster Cells",
     "info": "",
     "collapsed": false,
-    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Cluster_Cells == T))",
+    "active-condition": "(((visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single'))) || (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))) && visr.param.Cluster_Cells == T)",
     "variables": {
       "visr.param.calculate_cluster_nPC": {
         "label": "Automatically calculate number of PCs",
         "info": "Automatically calculate number of PCs selected for clustring cells. Uncheck to specify the number of PCs to use.",
         "type": "boolean",
-        "default": true
+        "default": true,
+        "active-condition": "((visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single'))) && visr.param.Cluster_Cells == T)"
       },
       "visr.param.cluster_nPC": {
         "label": "Number of PCs for clustering",
-        "type": "double",
+        "type": "int",
         "default": 10,
         "min": 1,
-        "active-condition": "visr.param.calculate_cluster_nPC == F"
+        "active-condition": "visr.param.calculate_cluster_nPC == F && ((visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single'))) && visr.param.Cluster_Cells == T)"
+      },
+      "visr.param.cluster_nCC": {
+        "label": "Number of aligned CCs for clustering",
+        "type": "int",
+        "default": 10,
+        "min": 1,
+        "active-condition": "((visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))) && visr.param.Cluster_Cells == T)"
       },
       "visr.param.cluster_resolution": {
         "label": "resolution",
@@ -284,73 +407,95 @@
     "label": "Differential Expression Anlysis",
     "info": "",
     "collapsed": false,
-    "active-condition": "((((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))&&(visr.param.Find_Marker_Genes == T))",
+    "active-condition": "((visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))))",
     "variables": {
+      "visr.param.choose_de": {
+        "label": "Choose DE analysis",
+        "type": "string",
+        "items": ["conserved", "diff"],
+        "item-labels": ["Find conserved markers", "Find DE genes across conditions"],
+        "active-condition": "(visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))"
+      },
       "visr.param.Choose_Clusters": {
+        "label": "Choose groups",
+        "info": "Choose the target group and the group for comparison",
         "type": "string",
         "default": "all",
         "items": ["all", "selected"],
-        "item-labels": ["Compare each cluster to the rest of the cells", "Select sepcific group of clusters"]
+        "item-labels": ["Compare each cluster to the rest of the cells", "Select sepcific group of clusters"],
+        "active-condition": "((visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.choose_de == 'conserved' && (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))))"
       },
       "visr.param.group_1": {
         "label": "Group 1 cluster ids (comma separated)",
         "info": "Group of clusters to define markers for",
         "type": "string",
         "default": "0,1",
-        "active-condition": "visr.param.Choose_Clusters == 'selected'"
+        "active-condition": "visr.param.Choose_Clusters == 'selected' && ((visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.choose_de == 'conserved' && (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))))"
       },
       "visr.param.group_2": {
         "label": "Group 2 cluster ids (comma separated)",
         "info": "Group of clusters for comparison. If empty, assume all clusters that are not in group 1.",
         "type": "string",
         "default": "2,3",
-        "active-condition": "visr.param.Choose_Clusters == 'selected'"
+        "active-condition": "visr.param.Choose_Clusters == 'selected' && ((visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.choose_de == 'conserved' && (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))))"
+      },
+      "visr.param.de_cluster": {
+        "label": "Cluster ID",
+        "info": "Enter the cluster of interes",
+        "type": "string",
+        "active-condition": "visr.param.choose_de == 'diff' && (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))"
       },
       "visr.param.DE_test_method": {
         "info": "Denotes which test to use",
         "type": "string",
         "default": "wilcox",
-        "items": ["wilcox", "bimod", "roc", "t", "tobit", "poisson", "negbinom"]
+        "items": ["wilcox", "bimod", "roc", "t", "tobit", "poisson", "negbinom"],
+        "active-condition": "(visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))"
       },
       "visr.param.min_pct": {
         "label": "Min percent of cells",
         "info": "Only test genes that are detected in more than the specified fraction of cells in either of the two populations",
         "type": "double",
-        "default": 0.1
+        "default": 0.1,
+        "min": 0,
+        "max": 1,
+        "active-condition": "(visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))"
       },
       "visr.param.min_logfc": {
         "label": "LogFC threshold",
         "info": "Limit testing to genes which show, on average, at least X-fold difference (log-scale) between the two groups of cells.",
         "type": "double",
-        "default": 0.25
-      },
-      "visr.param.Top_gene_n": {
-        "label": "Number of top genes to export",
-        "info": "Number of top genes for each target group in the output file",
-        "type": "double",
-        "default": 5,
-        "min": 1,
-        "items": ["Inf"],
-        "item-labels": ["All genes"]
-      },
-      "visr.param.top_gene_hm": {
-        "label": "Number of top genes to plot",
-        "info": "Number of top genes for each target group in the heatmap",
-        "type": "double",
-        "default": 5,
+        "default": 0.25,
         "min": 0,
-        "active-condition": "visr.param.Choose_Clusters == 'all'"
+        "active-condition": "(visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))) || (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))"
       }
     }
   },
   {
-    "label": "Additional Output",
+    "label": "Additional Options",
     "info": "",
     "collapsed": false,
-    "active-condition": "(((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '')||(visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''))&&(visr.param.Output_directory != ''))",
+    "active-condition": "(visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single'))) || (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))",
     "variables": {
+      "visr.param.rename_id": {
+        "label": "Rename Clusters",
+        "type": "boolean",
+        "default": false
+      },
+      "visr.param.curr_id": {
+        "label": "Current cluster ids (comma separated)",
+        "type": "string",
+        "default": "",
+        "active-condition": "visr.param.rename_id == T"
+      },
+      "visr.param.new_id": {
+        "label": "New cluster ids (comma separated)",
+        "type": "string",
+        "active-condition": "visr.param.rename_id == T"
+      },
       "visr.param.export_results": {
         "label": "Export analysis results",
+        "info": "Export analysis results related to each cell to \"Cells.tsv\"",
         "type": "boolean",
         "default": false
       },
@@ -370,14 +515,27 @@
         "label": "Include PCA projection",
         "type": "boolean",
         "default": false,
-        "active-condition": "visr.param.export_results == T"
+        "active-condition": "visr.param.export_results == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
       },
       "visr.param.nPC_export": {
         "label": "Number of PCs to export",
-        "type": "double",
+        "type": "int",
         "default": 2,
         "min": 1,
-        "active-condition": "visr.param.export_results == T && visr.param.include_pc"
+        "active-condition": "visr.param.export_results == T && visr.param.include_pc && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
+      },
+      "visr.param.include_cc": {
+        "label": "Include alinged CCA projection",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_results == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
+      },
+      "visr.param.nCC_export": {
+        "label": "Number of Aligned CCs to export",
+        "type": "int",
+        "default": 2,
+        "min": 1,
+        "active-condition": "visr.param.export_results == T && visr.param.include_cc && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
       },
       "visr.param.include_tsne": {
         "label": "Include t-SNE projection",
@@ -385,8 +543,19 @@
         "default": false,
         "active-condition": "visr.param.export_results == T"
       },
+      "visr.param.include_gene": {
+        "label": "Include gene expression",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_results == T"
+      },
+      "visr.param.gene_list": {
+        "label": "Gene list to export (comma separated)",
+        "type": "string",
+        "active-condition": "visr.param.export_results == T && visr.param.include_gene == T"
+      },
       "visr.param.plot_genes": {
-        "label": "Visualize selected genes (requires t-SNE)",
+        "label": "Visualize selected genes on t-SNE projections",
         "type": "boolean",
         "default": false
       },
