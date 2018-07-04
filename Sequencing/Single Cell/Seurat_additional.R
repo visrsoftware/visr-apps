@@ -47,8 +47,8 @@ rename_cluster <- function(gbmData,reduction){
     visr.message("Cells have not been clustered.",type = 'warning')
     return(gbmData)
   }
-  curr_id <- strsplit(gsub(visr.param.curr_id, pattern = ' ', replacement = ''),split = ',')[[1]]
-  new_id <- strsplit(gsub(visr.param.new_id, pattern = ' ', replacement = ''),split = ',')[[1]]
+  curr_id <- trimws(strsplit(visr.param.curr_id,split = ',')[[1]])
+  new_id <- trimws(strsplit(visr.param.new_id,split = ',')[[1]])
   if (length(curr_id) == 0  || length(new_id) == 0){return(gbmData)}
   if (length(curr_id) != length(new_id)){
     visr.message("The number of current ids and new ids must be equal.", type = 'warning')

@@ -29,12 +29,12 @@ visr.param("min_logfc", label = "LogFC threshold", default = 0.25, min = 0, acti
 get_groups <-  function(gbmData){
   #check and return the group of clusters for DE analysis
   curr_ids <- paste(levels(gbmData@ident),collapse = ",")
-  group_1 <- strsplit(gsub(visr.param.group_1, pattern = ' ', replacement = ''),split = ',')[[1]]
+  group_1 <- trimws(strsplit(visr.param.group_1,split = ',')[[1]])
   if (length(group_1) == 0){
     visr.message(sprintf("Enter clusters of interest.If ignore, DE analysis will be skipped. Current cluster ids are: %s", curr_ids),type = 'warning')
     return()
   }
-  group_2 <- strsplit(gsub(visr.param.group_2, pattern = ' ', replacement = ''),split = ',')[[1]]
+  group_2 <- trimws(strsplit(visr.param.group_2,split = ',')[[1]])
   for (cluster in c(group_1,group_2)){
     if (!(cluster %in% levels(gbmData@ident))){
       visr.message(sprintf("Cluster %s doesn't exist.If ignore, DE analysis will be skipped. Current cluster ids are: %s", cluster,curr_ids),type = 'warning')
@@ -96,7 +96,6 @@ diff_exp_conserved <- function(gbmData){
   if (visr.param.Choose_Clusters == "selected"){
     groups <- get_groups(gbmData)
     if (is.null(groups)){return()}
-    print(groups)
     group_1.markers <- FindConservedMarkers(object = gbmData, ident.1 = groups[[1]], ident.2 = groups[[2]],
                                             test.use = visr.param.DE_test_method,min.pct = visr.param.min_pct,
                                             logfc.threshold = visr.param.min_logfc, grouping.var = "group", only.pos = T)
@@ -118,9 +117,6 @@ diff_exp_conserved <- function(gbmData){
       markers <- FindConservedMarkers(object = gbmData, ident.1 = id, test.use = visr.param.DE_test_method,
                                       min.pct = visr.param.min_pct, logfc.threshold = visr.param.min_logfc,
                                       grouping.var = "group")
-      print(dim(markers))
-      print(colnames(markers))
-      print(dataset_labels)
       markers$max_pval_adj <- pmax(markers[,paste0(dataset_labels[1],"_p_val_adj")],markers[,paste0(dataset_labels[2],"_p_val_adj")])
       gene <- rownames(markers)
       gene <- data.frame(gene)
@@ -131,7 +127,6 @@ diff_exp_conserved <- function(gbmData){
   
   groups <- colnames(table)[c(3,8)]
   groups <- gsub(pattern = '.{6}$', replacement = '', x = groups) #remove last 6 chars "_p_val"
-  print(groups)
   for (group in groups){
     pct_diff <- data.frame(table[,paste0(group,"_pct.1")] - table[,paste0(group,"_pct.2")])
     colnames(pct_diff) <- paste0(group,"_pct_diff")
@@ -153,7 +148,6 @@ diff_exp_across <- function(gbmData){
   gbmData@meta.data$temp_id <- as.factor(paste0(gbmData@ident, "_", gbmData@meta.data$group))
   gbmData <- SetAllIdent(gbmData, id = "temp_id")
   
-  print(gbmData@ident[1:15])
   groups <- levels(as.factor(gbmData@meta.data$group))
   sub_cluster_1 <- paste0(visr.param.de_cluster, "_", groups[1])
   sub_cluster_2 <- paste0(visr.param.de_cluster, "_", groups[2])
