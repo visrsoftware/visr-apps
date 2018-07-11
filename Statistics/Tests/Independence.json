@@ -1,0 +1,32 @@
+{
+  "label": "Independence",
+  "info": "One-way ANOVA test: calculates in-group variance and intra-group variance and compares them.",
+  "instructions": "",
+  "input": "none",
+  "categories":[  {
+    "label": "Model",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.vars1": {
+        "label": "Variables1",
+        "type": "multi-column"
+      },
+      "visr.param.vars2": {
+        "label": "Variables2",
+        "type": "multi-column"
+      }
+    }
+  },
+  {
+    "label": "Output",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.output": {
+        "label": "P-Value table",
+        "type": "output-table"
+      }
+    }
+  }]
+}
