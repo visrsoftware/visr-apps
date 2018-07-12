@@ -8,22 +8,61 @@
     "info": "",
     "collapsed": false,
     "variables": {
+      "visr.param.input_type": {
+        "label": "Input Type",
+        "type": "string",
+        "items": ["binary", "id_set"],
+        "item-labels": ["binary encoding for sets", "(id, set) combination"]
+      },
       "visr.param.sets": {
         "label": "Sets to look at",
-        "type": "multi-column"
+        "info": "Select the columns representing the sets. All rows should either have a value of 1 or 0 for each selected columns \n indicating whether or not the row belongs to the corresponding set.",
+        "type": "multi-column",
+        "active-condition": "visr.param.input_type == 'binary'"
+      },
+      "visr.param.input_id_column": {
+        "label": "id column",
+        "info": "The column with the data item IDs",
+        "type": "column",
+        "active-condition": "visr.param.input_type == 'id_set'"
+      },
+      "visr.param.input_set_column": {
+        "label": "set column",
+        "info": "The column with the data item set names",
+        "type": "column",
+        "active-condition": "visr.param.input_type == 'id_set'"
+      },
+      "visr.param.output_binary": {
+        "label": "Also output the binary encoded table",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.input_type == 'id_set'"
+      },
+      "visr.param.output_binary_table": {
+        "label": "Name for output table",
+        "type": "output-table",
+        "active-condition": "visr.param.input_type == 'id_set' && visr.param.output_binary"
       }
     }
   },
   {
     "label": "Layout Options",
     "info": "",
-    "collapsed": true,
+    "collapsed": false,
     "variables": {
       "visr.param.nintersects": {
-        "label": "Number of intersections to plot",
+        "label": "Maximum number of intersections to show",
         "type": "int",
         "default": 40,
-        "min": 1
+        "min": 1,
+        "items": ["NA"],
+        "item-labels": ["All"]
+      },
+      "visr.param.empty.intersections": {
+        "label": "Display empty sets",
+        "info": "Additionally display empty sets up to specified maximum number of intersections",
+        "type": "boolean",
+        "default": false
       },
       "visr.param.order_sets": {
         "label": "Order sets by size",
@@ -35,14 +74,14 @@
         "label": "Group intersections by",
         "info": "How the intersections should be grouped",
         "type": "string",
-        "items": [ "degree","sets" ]
+        "items": ["degree", "sets"]
       },
       "visr.param.order_by": {
         "label": "Order intersections by",
         "info": "How the intersections in the matrix should be ordered by",
         "type": "string",
-        "items": [ "both","freq","degree" ],
-        "item-labels": [ "frequency & degree","frequency","degree" ]
+        "items": ["both", "freq", "degree"],
+        "item-labels": ["frequency & degree", "frequency", "degree"]
       },
       "visr.param.decreasing_freq": {
         "label": "Order intersection by decreasing frequency",
@@ -61,7 +100,46 @@
     }
   },
   {
-    "label": "Plot Options",
+    "label": "Axis Options",
+    "info": "",
+    "collapsed": true,
+    "variables": {
+      "visr.param.mainbar.y.max": {
+        "label": "Y-axis max for intersection sizes",
+        "info": "The maximum y value of the intersection size bar plot scale. May be useful when aligning multiple UpSet plots horizontally.",
+        "type": "double",
+        "default": "NULL",
+        "items": ["NULL"],
+        "item-labels": ["Auto"]
+      },
+      "visr.param.scale_intersections": {
+        "label": "Y-axis scaling for intersection sizes",
+        "info": "The scale to be used for the intersection sizes",
+        "type": "string",
+        "items": ["identity", "log10", "log2"]
+      },
+      "visr.param.main_bar_y_label": {
+        "label": "Y-axis label",
+        "info": "The y-axis label of the, intersection size bar plot",
+        "type": "string",
+        "default": "Intersection Size"
+      },
+      "visr.param.scale_sets": {
+        "label": "X-axis scaling for set sizes",
+        "info": "The scale to be used for the set sizes",
+        "type": "string",
+        "items": ["identity", "log10", "log2"]
+      },
+      "visr.param.sets_x_label": {
+        "label": "X-axis label",
+        "info": "The x-axis label of the set size bar plot",
+        "type": "string",
+        "default": "Set Size"
+      }
+    }
+  },
+  {
+    "label": "Size Options",
     "info": "",
     "collapsed": true,
     "variables": {
@@ -75,32 +153,13 @@
         "type": "double",
         "default": 2.2
       },
-      "visr.param.scale_intersections": {
-        "info": "The scale to be used for the intersection sizes",
-        "type": "string",
-        "items": [ "identity","log10","log2" ]
-      },
-      "visr.param.scale_sets": {
-        "info": "The scale to be used for the set sizes",
-        "type": "string",
-        "items": [ "identity","log10","log2" ]
-      }
-    }
-  },
-  {
-    "label": "Plot Labels",
-    "info": "",
-    "collapsed": true,
-    "variables": {
-      "visr.param.main_bar_y_label": {
-        "info": "The y-axis label of the, intersection size bar plot",
-        "type": "string",
-        "default": "Intersection Size"
-      },
-      "visr.param.sets_x_label": {
-        "info": "The x-axis label of the set size bar plot",
-        "type": "string",
-        "default": "Set Size"
+      "visr.param.matrix.ratio": {
+        "label": "matrix plot size ratio",
+        "info": "Ratio between matrix plot (intersections) and main bar plot",
+        "type": "double",
+        "default": 0.7,
+        "min": 0.01,
+        "max": 0.99
       },
       "visr.param.intersection_size_title": {
         "info": "Value to scale the text sizes",
@@ -147,6 +206,62 @@
         "type": "int",
         "default": 0,
         "active-condition": "visr.param.show_numbers"
+      }
+    }
+  },
+  {
+    "label": "Color Options",
+    "info": "",
+    "collapsed": true,
+    "variables": {
+      "visr.param.main.bar.color": {
+        "label": "Color of the main bar plot",
+        "type": "color",
+        "default": "#3b3b3b"
+      },
+      "visr.param.sets.bar.color": {
+        "label": "Color of set size bar plot",
+        "type": "color",
+        "default": "#3b3b3b"
+      },
+      "visr.param.matrix.color": {
+        "label": "Color of intersection points",
+        "type": "color",
+        "default": "#3b3b3b"
+      },
+      "visr.param.matrix.dot.alpha": {
+        "label": "Transparency of empty intersection points",
+        "type": "double",
+        "default": 0.5,
+        "min": 0,
+        "max": 1
+      },
+      "visr.param.shade.color": {
+        "label": "Color of row shading in matrix",
+        "type": "color",
+        "default": "#e0e0e0"
+      },
+      "visr.param.shade.alpha": {
+        "label": "Transparency of shading in matrix",
+        "type": "double",
+        "default": 0.25,
+        "min": 0,
+        "max": 1
+      }
+    }
+  },
+  {
+    "label": "Box plots",
+    "info": "Boxplots representing the distribution of a selected attribute for each intersection.",
+    "collapsed": true,
+    "variables": {
+      "visr.param.boxplot1": {
+        "info": "Column used for boxplots representing the distribution of the selected column for each intersection.",
+        "type": "column-numerical"
+      },
+      "visr.param.boxplot2": {
+        "info": "Column used for boxplots representing the distribution of the selected column for each intersection.",
+        "type": "column-numerical"
       }
     }
   }]

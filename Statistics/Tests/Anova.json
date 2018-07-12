@@ -1,0 +1,33 @@
+{
+  "label": "ANOVA",
+  "info": "One-way ANOVA test: calculates in-group variance and intra-group variance and compares them.",
+  "instructions": "",
+  "input": "none",
+  "categories":[  {
+    "label": "Model",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.val": {
+        "label": "response (value)",
+        "type": "column-numerical"
+      },
+      "visr.param.fac": {
+        "label": "explanatory variable (factor)",
+        "type": "column"
+      }
+    }
+  },
+  {
+    "label": "Plot",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.plot": {
+        "type": "string",
+        "items": ["anova", "tukey"],
+        "item-labels": ["ANOVA-BoxPlot", "Tukey Honest Significant Differences"]
+      }
+    }
+  }]
+}

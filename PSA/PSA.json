@@ -24,12 +24,12 @@
       "visr.param.derivationMethod": {
         "label": "Derivation Method",
         "type": "string",
-        "items": [ "No derived output","Take first row","Aggregate: Number of class labels","Aggregate: Mode of class labels","Aggregate: Count per class label","Aggregate: Average","Aggregate: Sum","Aggregate: Median","Aggregate: Min","Aggregate: Max","Dimensionality Reduction: PCA","Dimensionality Reduction: MDS","Dimensionality Reduction: tSNE" ]
+        "items": ["No derived output", "Take first row", "Aggregate: Number of class labels", "Aggregate: Mode of class labels", "Aggregate: Count per class label", "Aggregate: Average", "Aggregate: Sum", "Aggregate: Median", "Aggregate: Min", "Aggregate: Max", "Dimensionality Reduction: PCA", "Dimensionality Reduction: MDS", "Dimensionality Reduction: tSNE"]
       },
       "visr.param.tableForDerivatives": {
         "label": "Table to Use for Derivatives",
         "type": "string",
-        "items": [ "","quality_criteria" ],
+        "items": ["", "quality_criteria"],
         "active-condition": "visr.param.derivationMethod != 'No derived output'"
       },
       "visr.param.columnsForDerivatives": {

@@ -3,7 +3,8 @@ source("visrutils.R")
 visr.app.start("ModEx", info = "A general purpose system for exploration of computational models")
 visr.category("Input")
 visr.param("directory", label = "Runs directory", type = "filename", filename.mode = "dir",
-           debugvalue = "~/SFU/Datasets/TestData/ModEx_edgeR/")
+           debugvalue = "~/SFU/TFPlaygroundPSA/output/gauss_25_1")
+
 
 DERIVATION_NONE <- "No derived output"
 DERIVATION_FIRST_ROW <- "Take first row"
@@ -26,7 +27,7 @@ visr.param("derivationMethod", label =  "Derivation Method",
              "Dimensionality Reduction: MDS",#TODO
              "Dimensionality Reduction: tSNE"#TODO
            ),
-           debugvalue = DERIVATION_COUNT_PER_CLASS)
+           debugvalue = DERIVATION_NONE)
 visr.param("tableForDerivatives", label = "Table to Use for Derivatives",
            items = c("", "quality_criteria"), #TODO: these items should be populated with proper table names in PSA java code
            active.condition = sprintf("visr.param.derivationMethod != '%s'", DERIVATION_NONE))
@@ -233,12 +234,19 @@ visr.print("[DONE] loading the runs files")
 if (!file.exists(pathParamViewInfo)) {
   visr.print("creating paramViewInfo")
   viewParams <- c()
+  viewTypes <- c()
   for (i in 1: nrow(paramInfo)) {
-    if( !grepl("output", paramInfo$type[i]) ) { # skip the output parameters
-      viewParams <- c(viewParams, paramInfo$label[i])
+    #if( !grepl("output", paramInfo$type[i]) )
+    { # skip the output parameters
+      if (!paramInfo$label[i] %in% c("ID", "imagePath")) {
+        viewParams <- c(viewParams, paramInfo$label[i])
+        viewTypes <- c(viewTypes, if (grepl("output", paramInfo$type[i])) "Output" else "Parameter")
+      }
     }
   }
-  paramViewInfo = data.frame(c1 = c(0:(length(viewParams)-1)), c2=viewParams, c3="Parameter", c4=-1)
+
+  paramViewInfo = data.frame(c1 = c(0:(length(viewParams)-1)), c2=viewParams, c3=viewTypes, c4=-1)
+
   write.table(paramViewInfo, file=pathParamViewInfo, row.names = FALSE, col.names = FALSE, sep = "\t", quote=FALSE)
 }
 
@@ -413,11 +421,13 @@ if(visr.param.recalc ||
 
   coolParameters <- match(names(which(lapply(runsInfoTable, numlevels) > 1)), paramInfo$label)
   coolParameters <- coolParameters[!is.na(coolParameters)]
+  coolParameters <- coolParameters[order(coolParameters)]
   inputParams <- c()
   # visr.print( coolParameters)
   # TODO make this more R-like
   for (i in 1: length(coolParameters)) {
-    if( !grepl("output", paramInfo$type[coolParameters[i]]) ) { # skip the output parameters
+    #if( !grepl("output", paramInfo$type[coolParameters[i]]) )
+    { # skip the output parameters
       inputParams <- c(inputParams, coolParameters[i])
     }
   }
@@ -453,7 +463,9 @@ if(visr.param.recalc ||
         numParamValues <- length(paramValues)
       }
 
-      if (visr.param.derivationMethod != DERIVATION_NONE) {
+      isOutputParam = grepl("output", paramInfo$type[inputParams[vp]])
+
+      if (!isOutputParam && visr.param.derivationMethod != DERIVATION_NONE) {
         sigV <- c()
         if (FALSE && numParamValues > 1) {
           breakdown <- data.frame(row.names = paramValues)
