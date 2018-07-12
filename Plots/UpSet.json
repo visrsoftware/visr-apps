@@ -8,10 +8,40 @@
     "info": "",
     "collapsed": false,
     "variables": {
+      "visr.param.input_type": {
+        "label": "Input Type",
+        "type": "string",
+        "items": ["binary", "id_set"],
+        "item-labels": ["binary encoding for sets", "(id, set) combination"]
+      },
       "visr.param.sets": {
         "label": "Sets to look at",
         "info": "Select the columns representing the sets. All rows should either have a value of 1 or 0 for each selected columns \n indicating whether or not the row belongs to the corresponding set.",
-        "type": "multi-column"
+        "type": "multi-column",
+        "active-condition": "visr.param.input_type == 'binary'"
+      },
+      "visr.param.input_id_column": {
+        "label": "id column",
+        "info": "The column with the data item IDs",
+        "type": "column",
+        "active-condition": "visr.param.input_type == 'id_set'"
+      },
+      "visr.param.input_set_column": {
+        "label": "set column",
+        "info": "The column with the data item set names",
+        "type": "column",
+        "active-condition": "visr.param.input_type == 'id_set'"
+      },
+      "visr.param.output_binary": {
+        "label": "Also output the binary encoded table",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.input_type == 'id_set'"
+      },
+      "visr.param.output_binary_table": {
+        "label": "Name for output table",
+        "type": "output-table",
+        "active-condition": "visr.param.input_type == 'id_set' && visr.param.output_binary"
       }
     }
   },
@@ -124,8 +154,8 @@
         "default": 2.2
       },
       "visr.param.matrix.ratio": {
-        "label": "matrix plot ratio",
-        "info": "Ratio between matrix plot and main bar plot",
+        "label": "matrix plot size ratio",
+        "info": "Ratio between matrix plot (intersections) and main bar plot",
         "type": "double",
         "default": 0.7,
         "min": 0.01,

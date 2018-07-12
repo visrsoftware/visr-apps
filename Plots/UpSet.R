@@ -13,10 +13,27 @@ visr.app.start("UpSet",
 ############################################################
 visr.category("Input sets")
 ############################################################
+visr.param("input_type", "Input Type", items = c("binary", "id_set"), item.labels = c("binary encoding for sets", "(id, set) combination"))
+
 visr.param("sets", "Sets to look at",
            info = "Select the columns representing the sets. All rows should either have a value of 1 or 0 for each selected columns \n indicating whether or not the row belongs to the corresponding set.",
            type = "multi-column",
+           active.condition = "visr.param.input_type == 'binary'",
            debugvalue = c("Drama", "Comedy", "Action", "Thriller", "Western"))
+
+visr.param("input_id_column", "id column",
+           info = "The column with the data item IDs",
+           type = "column", active.condition = "visr.param.input_type == 'id_set'")
+
+visr.param("input_set_column", "set column",
+           info = "The column with the data item set names",
+           type = "column", active.condition = "visr.param.input_type == 'id_set'")
+
+visr.param("output_binary", "Also output the binary encoded table", default = FALSE,
+           active.condition = "visr.param.input_type == 'id_set'")
+
+visr.param("output_binary_table", "Name for output table", type = "output-table",
+           active.condition = "visr.param.input_type == 'id_set' && visr.param.output_binary")
 
 
 ############################################################
