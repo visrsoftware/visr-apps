@@ -2,7 +2,7 @@ source("visrutils.R")
 
 if (!visr.isGUI()) {# debug only
   visr.input <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"),
-           header = T, sep = ";")
+                         header = T, sep = ";")
 }
 
 visr.app.start("UpSet",
@@ -36,14 +36,11 @@ visr.param("output_binary_table", "Name for output table", type = "output-table"
            active.condition = "visr.param.input_type == 'id_set' && visr.param.output_binary")
 
 
+
 ############################################################
-visr.category("Layout Options", collapsed = F)
+visr.category("Layout Options", collapsed = TRUE)
 ############################################################
-visr.param("nintersects", "Maximum number of intersections to show", type = 'integer',
-           default = 40L, min = 1L, items = c('NA'), item.labels = c('All'))
-visr.param("empty.intersections", "Display empty sets",
-           info = "Additionally display empty sets up to specified maximum number of intersections",
-           default = F, debugvalue = T)
+visr.param("nintersects", "Number of intersections to plot", default = 40L, min = 1L)
 visr.param("order_sets", "Order sets by size", info = "Order sets by size or keep them in the order of input", default = T)
 visr.param("group_by", "Group intersections by", info = "How the intersections should be grouped", items = c("degree", "sets"))
 visr.param("order_by", "Order intersections by", info = "How the intersections in the matrix should be ordered by",
@@ -59,33 +56,24 @@ visr.param("decreasing_degree", "Order intersections by decreasing degree",
 
 
 ############################################################
-visr.category("Axis Options", collapsed = T)
-############################################################
-
-visr.param("mainbar.y.max", "Y-axis max for intersection sizes", info = "The maximum y value of the intersection size bar plot scale. May be useful when aligning multiple UpSet plots horizontally.",
-           type = "double", default = "NULL", items = c('NULL'), item.labels = c('Auto'), debugvalue = NULL)
-
-visr.param("scale_intersections", "Y-axis scaling for intersection sizes", info = "The scale to be used for the intersection sizes",
-           items = c("identity", "log10", "log2"))
-
-visr.param("main_bar_y_label", 'Y-axis label', info = "The y-axis label of the, intersection size bar plot",
-           default = "Intersection Size")
-
-visr.param("scale_sets", "X-axis scaling for set sizes", info = "The scale to be used for the set sizes",
-           items = c("identity", "log10", "log2"))
-
-visr.param("sets_x_label", 'X-axis label', info = "The x-axis label of the set size bar plot",
-           default = "Set Size")
-
-############################################################
-visr.category("Size Options", collapsed = T)
+visr.category("Plot Options", collapsed = TRUE)
 ############################################################
 visr.param("line_size", info = "Width of lines in matrix plot", default = 0.7)
-
 visr.param("point_size", info = "Size of points in matrix plot", default = 2.2)
 
-visr.param("matrix.ratio", "matrix plot size ratio", info = 'Ratio between matrix plot (intersections) and main bar plot', default = 0.7, min = 0.01, max = 0.99)
+visr.param("scale_intersections", info = "The scale to be used for the intersection sizes",
+           items = c("identity", "log10", "log2"))
+visr.param("scale_sets", info = "The scale to be used for the set sizes",
+           items = c("identity", "log10", "log2"))
 
+
+############################################################
+visr.category("Plot Labels", collapsed = TRUE)
+############################################################
+visr.param("main_bar_y_label", info = "The y-axis label of the, intersection size bar plot",
+           default = "Intersection Size")
+visr.param("sets_x_label", info = "The x-axis label of the set size bar plot",
+           default = "Set Size")
 visr.param("intersection_size_title", info = "Value to scale the text sizes" ,default = 1)
 visr.param("intersection_size_tick_labels", info = "Value to scale the text sizes", default = 1)
 visr.param("set_size_title", info = "Value to scale the text sizes", default = 1)
@@ -98,29 +86,6 @@ visr.param("show_numbers", info = "Show numbers of intersection sizes above bars
 visr.param("number_angles", info = "The angle of the numbers atop the intersection size bars", default = 0L,
            active.condition = "visr.param.show_numbers")
 
-############################################################
-visr.category("Color Options", collapsed = TRUE)
-############################################################
-visr.param("main.bar.color", "Color of the main bar plot", type="color", default = "gray23")
-visr.param("sets.bar.color", "Color of set size bar plot", type="color", default = "gray23")
-
-visr.param("matrix.color", "Color of intersection points", type="color", default = "gray23")
-visr.param("matrix.dot.alpha", "Transparency of empty intersection points", default = 0.5, min = 0, max = 1)
-
-visr.param("shade.color", "Color of row shading in matrix", type="color", default = "gray88")
-visr.param("shade.alpha", "Transparency of shading in matrix", default = 0.25, min = 0, max = 1)
-
-############################################################
-visr.category("Box plots", info = "Boxplots representing the distribution of a selected attribute for each intersection.", collapsed = TRUE)
-############################################################
-visr.param("boxplot1", type = "column-numerical",
-           info = "Column used for boxplots representing the distribution of the selected column for each intersection.",
-           debugvalue = "AvgRating")
-
-visr.param("boxplot2", type = "column-numerical",
-           info = "Column used for boxplots representing the distribution of the selected column for each intersection.",
-           debugvalue = "ReleaseDate")
-
 visr.app.end()
 
 visr.applyParameters()
@@ -128,30 +93,51 @@ visr.applyParameters()
 
 visr.library("UpSetR")
 
-if (!visr.param.order_sets) {
-  visr.param.sets = rev(visr.param.sets) # because plotting order is from bottom to top
+get_upset_input <- function(table,item_col,set_col){
+  items <- as.character(table[[item_col]])
+  sets <- as.character(table[[set_col]])
+  
+  all.items <- levels(as.factor(items))
+  all.sets <- levels(as.factor(sets)) 
+  
+  upset_input <- data.frame(matrix(0,length(all.items),length(all.sets)))
+  rownames(upset_input) <- all.items
+  colnames(upset_input) <- all.sets
+  
+  for (i in 1:nrow(table)){
+    item <- items[i]
+    set <- sets[i]
+    upset_input[item,set] <- 1
+  }
+  return(upset_input)
 }
 
-boxplot.summary = c (if (visr.param.boxplot1 != '') visr.param.boxplot1 else NULL,
-                     if (visr.param.boxplot2 != '') visr.param.boxplot2 else NULL)
+if (visr.param.input_type == "binary"){
+  input_table <- visr.input
+  input_set_columns <- visr.param.sets
+}else{
+  input_table <- get_upset_input(table = visr.input, item_col = visr.param.input_id_column,
+                                 set_col = visr.param.input_set_column)
+  input_set_columns <- colnames(input_table)
+  visr.param.output_binary_table <- input_table
+}
 
-if (!is.null(boxplot.summary))
-  visr.param.empty.intersections = F # currently there is a bug when both are specified
+if (!visr.param.order_sets) {
+  input_set_columns <- rev(input_set_columns) # because plotting order is from bottom to top
+}
 
-p <- upset(visr.input,
-           sets = visr.param.sets,
+p <- upset(input_table,
+           sets = input_set_columns,
            nintersects = visr.param.nintersects,
-           empty.intersections = if (visr.param.empty.intersections) 'on' else NULL,
            keep.order = !visr.param.order_sets,
            group.by = visr.param.group_by,
-           order.by = if (visr.param.order_by == "both") c("freq", "degree") else visr.param.order_by,
+           order.by = ifelse(visr.param.order_by == "both", c("freq", "degree"), visr.param.order_by),
            decreasing = c(visr.param.decreasing_freq, visr.param.decreasing_degree),
            point.size = visr.param.point_size,
            line.size = visr.param.line_size,
-           show.numbers = if (visr.param.show_numbers) "yes" else "no",
+           show.numbers = ifelse(visr.param.show_numbers, "yes", "no"),
            number.angles = visr.param.number_angles,
            set_size.angles = visr.param.set_size_angles,
-           mainbar.y.max = visr.param.mainbar.y.max,
            mainbar.y.label = visr.param.main_bar_y_label,
            sets.x.label = visr.param.sets_x_label,
            scale.intersections = visr.param.scale_intersections,
@@ -161,18 +147,7 @@ p <- upset(visr.input,
                           visr.param.set_size_title,
                           visr.param.set_size_tick_labels,
                           visr.param.set_names,
-                          visr.param.numbers_above_bars),
-           matrix.color = visr.param.matrix.color,
-           matrix.dot.alpha = visr.param.matrix.dot.alpha,
-           main.bar.color = visr.param.main.bar.color,
-           sets.bar.color = visr.param.sets.bar.color,
-           shade.color = visr.param.shade.color,
-           shade.alpha = visr.param.shade.alpha,
-           # queries = list(list(query = intersects, params = list("Action", "Drama"), active = T)),
-           # attribute.plots = list(gridrows = 50, plots = list(list(plot = histogram, x = "ReleaseDate", queries = F))),
-           boxplot.summary = boxplot.summary,
-           mb.ratio = c(visr.param.matrix.ratio, 1.0 - visr.param.matrix.ratio)
-)
+                          visr.param.numbers_above_bars))
 
 
 if (FALSE) {
@@ -190,5 +165,5 @@ if (FALSE) {
         shade.color = "gray88", shade.alpha = 0.25,
         matrix.dot.alpha = 0.5, empty.intersections = NULL, color.pal = 1,
         boxplot.summary = NULL, attribute.plots = NULL
-        )
+  )
 }
