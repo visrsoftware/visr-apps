@@ -26,6 +26,8 @@ visr.param("min_pct",label = "Min percent of cells", default = 0.1, min = 0, max
 visr.param("min_logfc", label = "LogFC threshold", default = 0.25, min = 0, active.condition = de_param_cond,
            info = "Limit testing to genes which show, on average, at least X-fold difference (log-scale) between the two groups of cells.")
 
+visr.param.only_pos = T
+
 get_groups <-  function(gbmData){
   #check and return the group of clusters for DE analysis
   curr_ids <- paste(levels(gbmData@ident),collapse = ",")
@@ -48,7 +50,7 @@ get_groups <-  function(gbmData){
 find_markers <- function(gbmData, target,comparison){
   group_1.markers <- FindMarkers(object = gbmData, ident.1 = target, ident.2 = comparison, 
                                  test.use = visr.param.DE_test_method,min.pct = visr.param.min_pct,
-                                 logfc.threshold = visr.param.min_logfc, only.pos = T)
+                                 logfc.threshold = visr.param.min_logfc, only.pos = visr.param.only_pos)
   group_1.markers <- group_1.markers[order(group_1.markers$p_val_adj,decreasing = F),]
   table <- data.frame(group_1.markers)
   gene <- rownames(table)
@@ -73,7 +75,7 @@ diff_exp <- function(gbmData){
     table <- find_markers(gbmData, target = groups[[1]], comparison = groups[[2]])
     
   }else{
-    DE.markers <- FindAllMarkers(object = gbmData, test.use = visr.param.DE_test_method,only.pos = T,
+    DE.markers <- FindAllMarkers(object = gbmData, test.use = visr.param.DE_test_method,only.pos = visr.param.only_pos,
                                  min.pct = visr.param.min_pct, logfc.threshold = visr.param.min_logfc)
     # table <- data.frame(DE.markers %>% group_by(cluster) %>% top_n(top_genes_n, avg_logFC))
     table <- data.frame(DE.markers)
@@ -98,7 +100,7 @@ diff_exp_conserved <- function(gbmData){
     if (is.null(groups)){return()}
     group_1.markers <- FindConservedMarkers(object = gbmData, ident.1 = groups[[1]], ident.2 = groups[[2]],
                                             test.use = visr.param.DE_test_method,min.pct = visr.param.min_pct,
-                                            logfc.threshold = visr.param.min_logfc, grouping.var = "group", only.pos = T)
+                                            logfc.threshold = visr.param.min_logfc, grouping.var = "group", only.pos = visr.param.only_pos)
     
     
     group_1.markers$max_pval_adj <- pmax(group_1.markers[,paste0(dataset_labels[1],"_p_val_adj")],
@@ -116,7 +118,7 @@ diff_exp_conserved <- function(gbmData){
     for (id in levels(gbmData@ident)){
       markers <- FindConservedMarkers(object = gbmData, ident.1 = id, test.use = visr.param.DE_test_method,
                                       min.pct = visr.param.min_pct, logfc.threshold = visr.param.min_logfc,
-                                      grouping.var = "group")
+                                      grouping.var = "group", only.pos = visr.param.only_pos)
       markers$max_pval_adj <- pmax(markers[,paste0(dataset_labels[1],"_p_val_adj")],markers[,paste0(dataset_labels[2],"_p_val_adj")])
       gene <- rownames(markers)
       gene <- data.frame(gene)

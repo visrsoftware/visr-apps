@@ -81,6 +81,14 @@ export_results <- function(gbmData){
     table <- cbind(table, Dataset = gbmData@meta.data$group)
   }
   
+  # check for library id
+  barcodes_w_lib_id <- grep("-",gbmData@cell.names,value = T)
+  if (length(barcodes_w_lib_id) == length(gbmData@cell.names)){
+    lib_id <- gsub(x = barcodes_w_lib_id, pattern = ".*-", replacement = "")
+    table <- cbind(table, Library_id = lib_id)
+  }
+  
+  # cluster id
   if (visr.param.include_id){
     if (length(levels(gbmData@ident)) > 1){
       clusterID <- data.frame(gbmData@ident)
@@ -104,7 +112,7 @@ export_results <- function(gbmData){
         colnames(PCs) <- colnames(gbmData@dr$pca@cell.embeddings)
         PCs <- PCs[,1:nPC]
         table <- cbind(table,PCs) 
-      }else{
+       }else{
         print("No PCA results found")
       }
     }
