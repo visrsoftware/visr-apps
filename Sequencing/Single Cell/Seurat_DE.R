@@ -16,7 +16,7 @@ visr.param("group_2", label ="Group 2 cluster ids (comma separated)", type = "ch
            info = "Group of clusters for comparison. If empty, assume all clusters that are not in group 1.")
 
 visr.param("de_cluster", "Cluster ID", type = "character", active.condition = sprintf("visr.param.choose_de == 'diff' && %s", DE_cond2),
-           info = "Enter the cluster of interes")
+           info = "Enter the cluster of interest")
 
 de_param_cond <- sprintf("%s || %s",DE_cond1,DE_cond2)
 visr.param("DE_test_method", items = c("wilcox","bimod","roc","t","tobit","poisson","negbinom"), default = "wilcox",info = "Denotes which test to use",
@@ -85,6 +85,7 @@ diff_exp <- function(gbmData){
   }
   # output table
   write.table(x = table, file = paste(output_folder, DE_output,sep = "/"), row.names = F, quote = F, sep = "\t")
+  return(table)
 }
 
 # integrated analysis find conserved genes
@@ -138,6 +139,7 @@ diff_exp_conserved <- function(gbmData){
   
   # output table
   write.table(x = table, file = paste(output_folder, DE_output,sep = "/"), row.names = F, quote = F, sep = "\t")
+  return(table)
 }
 
 # integrated analysis find DE genes across conditions
@@ -160,6 +162,21 @@ diff_exp_across <- function(gbmData){
   
   # output table
   write.table(x = table, file = paste(output_folder, DE_output,sep = "/"), row.names = F, quote = F, sep = "\t")
+  return(table)
+}
+
+visr.param.top_n <- 10
+plot_DE <- function(gbmData, table){
+  if (is.null(table)) {return()}
+  top_n <- table %>% group_by(cluster) %>% filter(row_number() <= visr.param.top_n)
+  p <- DoHeatmap(object = gbmData, genes.use = top_n$gene, slim.col.label = TRUE, remove.key = TRUE, do.plot = F, group.label.rot = T)
+  p <- p + ggtitle("Top DE genes") + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
+  
+  print(p)
+  switchPlotToScreen()
+  print(p)
+  switchPlotToReport()
+  
 }
 
 

@@ -2,7 +2,6 @@ source("visrutils.R")
 curr_dir <- "Sequencing/Single Cell"
 
 visr.app.start("Seurat", debugdata=mtcars, input.type = "none")
-
 source(sprintf("%s/Utils.R",curr_dir))
 source(sprintf("%s/Seurat_IO.R",curr_dir))
 source(sprintf("%s/Seurat_filter.R",curr_dir))
@@ -12,7 +11,6 @@ source(sprintf("%s/Seurat_dim_reduction.R",curr_dir))
 source(sprintf("%s/Seurat_cluster_cells.R",curr_dir))
 source(sprintf("%s/Seurat_DE.R",curr_dir))
 source(sprintf("%s/Seurat_additional.R",curr_dir))
-
 visr.app.end(printjson=T, writefile=T)
 visr.applyParameters()
 
@@ -133,6 +131,10 @@ if (visr.param.workflow == "single"){
     if (visr.param.elbow){
       gbmData <- draw_elbow(gbmData)
     }
+    
+    if (visr.param.Run_tSNE){
+      gbmData <- run_tSNE(gbmData)
+    }
   }
   
   # Cluster cells
@@ -140,15 +142,11 @@ if (visr.param.workflow == "single"){
     gbmData <- cluster_cells(gbmData, "pca")
   }
   
-  # tSNE
-  if (visr.param.Run_tSNE && visr.param.Dim_Reduction) {
-    gbmData <- run_tSNE(gbmData) 
-  }
-  
   # DE analysis
   if (visr.param.Find_Marker_Genes){
    # top_genes_n <- min(visr.param.Top_gene_n,nrow(gbmData@raw.data))
-   diff_exp(gbmData)
+   table <- diff_exp(gbmData)
+   plot_DE(gbmData, table)
   }
   
   # output
@@ -161,7 +159,7 @@ if (visr.param.workflow == "single"){
   }
   
   if (visr.param.plot_genes){
-    visulize_genes(gbmData)
+    visualize_gene(gbmData)
   }
   
 }else{
@@ -175,24 +173,24 @@ if (visr.param.workflow == "single"){
     if (visr.param.align_CCA){
       gbmData <- align_subspace(gbmData)
     }
+    if (visr.param.Run_tSNE2){
+      gbmData <- run_tSNE2(gbmData) 
+    }
   }
   
   if (visr.param.Cluster_Cells){
     gbmData <- cluster_cells(gbmData, "cca.aligned")
   }
   
-  if (visr.param.Run_tSNE2 && visr.param.Dim_Reduction){
-    gbmData <- run_tSNE2(gbmData) 
-  }
   
   if (visr.param.Find_Marker_Genes){
     
     if (visr.param.choose_de == "conserved"){
-      
-      diff_exp_conserved(gbmData)
+      table <- diff_exp_conserved(gbmData)
     }else{
-      diff_exp_across(gbmData)
+      table <- diff_exp_across(gbmData)
     }
+    plot_DE(gbmData, table)
   }
   
   # output
@@ -205,7 +203,7 @@ if (visr.param.workflow == "single"){
   }
   
   if (visr.param.plot_genes){
-    visulize_genes(gbmData)
+    visualize_gene(gbmData)
   }
 }
 

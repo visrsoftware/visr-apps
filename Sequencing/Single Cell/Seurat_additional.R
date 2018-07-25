@@ -22,7 +22,18 @@ visr.param("include_gene",label="Include gene expression", default = F, active.c
 visr.param("gene_list", label = "Gene list to export (comma separated)", 
            active.condition =  "visr.param.export_results == T && visr.param.include_gene == T")
 
-visr.param("plot_genes",label = "Visualize selected genes on t-SNE projections", default = F)
+visr.param("plot_genes",label = "Visualize gene expressions", default = F)
+visr.param("plot_genes_scatter", label = "Scatter plot on t-SNE projections", default = F,
+           active.condition = "visr.param.plot_genes == T")
+visr.param("plot_genes_vln", label = "Violin plot of expression distribution in each cluster", default = F,
+           active.condition = "visr.param.plot_genes == T")
+visr.param("plot_genes_dot", label = "Dot plot of average expression in each cluster", default = F,
+           active.condition = "visr.param.plot_genes == T")
+visr.param("plot_genes_ridge", label = "Ridge plot of expression distribution in each clusters", default = F,
+           active.condition = "visr.param.plot_genes == T")
+visr.param("plot_genes_hm", label = "Expression heatmap grouped by clusters", default = F,
+           active.condition = "visr.param.plot_genes == T")
+
 visr.param("gene_name", label = "Gene list ot visualize (comma separated)",
            debugvalue = "MS4A1", active.condition = "visr.param.plot_genes == T")
 visr.param("gene_plot_color", label = "Color map of gene expression", type = "multi-color", default="BuPu 7", debugvalue = "gray, red",
@@ -49,7 +60,10 @@ rename_cluster <- function(gbmData,reduction){
   }
   curr_id <- trimws(strsplit(visr.param.curr_id,split = ',')[[1]])
   new_id <- trimws(strsplit(visr.param.new_id,split = ',')[[1]])
-  if (length(curr_id) == 0  || length(new_id) == 0){return(gbmData)}
+  if (length(curr_id) == 0  || length(new_id) == 0){
+    visr.message(sprintf("Enter cluster IDs. Current cluster ids are: %s", paste(levels(gbmData@ident),collapse = ",")),type = 'warning')
+    return(gbmData)
+  }
   if (length(curr_id) != length(new_id)){
     visr.message("The number of current ids and new ids must be equal.", type = 'warning')
     return(gbmData)
@@ -62,7 +76,9 @@ rename_cluster <- function(gbmData,reduction){
   }
     
   for (i in 1:length(curr_id)){
-    gbmData <- RenameIdent(object = gbmData, old.ident.name = curr_id[i], new.ident.name = new_id[i])
+    if (curr_id[i] != new_id[i]){
+      gbmData <- RenameIdent(object = gbmData, old.ident.name = curr_id[i], new.ident.name = new_id[i])
+    }
   }
   p <- plot_clusters(gbmData,reduction)
   print(p)
@@ -81,12 +97,9 @@ export_results <- function(gbmData){
     table <- cbind(table, Dataset = gbmData@meta.data$group)
   }
   
-  # check for library id
-  barcodes_w_lib_id <- grep("-",gbmData@cell.names,value = T)
-  if (length(barcodes_w_lib_id) == length(gbmData@cell.names)){
-    lib_id <- gsub(x = barcodes_w_lib_id, pattern = ".*-", replacement = "")
-    table <- cbind(table, Library_id = lib_id)
-  }
+  # get library id
+  lib_id <- get_lib_id(gbmData@cell.names)
+  table <- cbind(table, Library_id = lib_id)
   
   # cluster id
   if (visr.param.include_id){
@@ -100,10 +113,11 @@ export_results <- function(gbmData){
   }
   
   if (visr.param.include_umi){
-    umi_counts <- data.frame(colSums(gbmData@data))
+    umi_counts <- data.frame(colSums(gbmData@raw.data[rownames(gbmData@data),colnames(gbmData@data)]))
     colnames(umi_counts) <- "Total UMI"
     table <- cbind(table,umi_counts)
   }
+  
   if (visr.param.workflow == "single"){
     if (visr.param.include_pc){
       if (!is.null(gbmData@dr$pca)){
@@ -163,8 +177,7 @@ plot_genes <- function (gbm, gene_probes, projection, limits = c(0, 10), marker_
   projection_names <- colnames(projection)
   colnames(projection) <- c("Component.1", "Component.2")
   proj_gene <- data.frame(cbind(projection, gene_values))
-  proj_gene_melt <- melt(proj_gene, id.vars = c("Component.1", 
-                                                "Component.2"))
+  proj_gene_melt <- melt(proj_gene, id.vars = c("Component.1","Component.2"))
   p <- ggplot(proj_gene_melt, aes(Component.1, Component.2)) +
     geom_point(aes(colour = value), size = marker_size) +
     facet_wrap(~variable) + scale_colour_gradient(low = "grey", high = "red", name = "val") + labs(x = projection_names[1], y = projection_names[2])
@@ -183,7 +196,11 @@ plot_genes2 <- function(gbmData){
   return(p)
 }
 
-visulize_genes <- function(gbmData){
+visualize_gene_scatter <- function(gbmData){
+  if (is.null(gbmData@dr$tsne)){
+    visr.message("No t-SNE information",type = "warning")
+    return()
+  }
   if (length(valid_gene_probes) > 0 && !is.null(gbmData@dr$tsne)){
     # plot expression
     if (visr.param.workflow == "single"){
@@ -192,10 +209,96 @@ visulize_genes <- function(gbmData){
       p <- plot_genes2(gbmData)
     }
     p <- p + visr.util.scale_color_gradient(visr.param.gene_plot_color, label = "Expression")
-    p <- p + ggtitle("Expression of selected genes") + theme(plot.title = element_text(lineheight=2,size = 20, hjust = 0.5), plot.margin = margin(20, 10, 10, 10),legend.title = element_text(size = 8)) 
+    p <- p + ggtitle("Expression of Selected Genes") + theme(plot.title = element_text(lineheight=2,size = 20, hjust = 0.5), plot.margin = margin(20, 10, 10, 10),legend.title = element_text(size = 8)) 
     print(p)
     switchPlotToScreen()
     print(p)
     switchPlotToReport()
+  }
+}
+
+visualize_gene_vln <- function(gbmData){
+  if (length(levels(gbmData@ident)) == 1){
+    visr.message("No clustering information",type = 'warning')
+    return()
+  }
+  
+  p <- VlnPlot(object = gbmData, features.plot = valid_gene_probes, x.lab.rot = TRUE)
+  p <- p + ggtitle("Expression of Selected Genes") + theme(plot.title = element_text(lineheight=2,size = 20, hjust = 0.5), plot.margin = margin(20, 10, 10, 10),legend.title = element_text(size = 8)) 
+  print(p)
+  switchPlotToScreen()
+  print(p)
+  switchPlotToReport()
+}
+
+visualize_gene_dot <- function(gbmData){
+  if (length(levels(gbmData@ident)) == 1){
+    visr.message("No clustering information",type = 'warning')
+    return()
+  }
+  
+  switchPlotToScreen() # dot plot automatically print plot when called
+  if (is.null(gbmData@meta.data$group)){
+    p <- DotPlot(object = gbmData, genes.plot = valid_gene_probes, plot.legend = T, x.lab.rot = T,do.return = T)
+  }else{
+    p <- SplitDotPlotGG(object = gbmData, genes.plot = rev(markers.to.plot), cols.use = c("blue","red"), x.lab.rot = T, plot.legend = T, do.return = T, grouping.var = "group")
+  }
+  switchPlotToReport()
+  
+  p <- p + ggtitle("Expression of Selected Genes") + theme(plot.title = element_text(lineheight=2,size = 20, hjust = 0.5), plot.margin = margin(20, 10, 10, 10),legend.title = element_text(size = 8)) 
+  print(p)
+  switchPlotToScreen()
+  print(p)
+  switchPlotToReport()
+}
+
+visualize_gene_ridge <- function(gbmData){
+  if (length(levels(gbmData@ident)) == 1){
+    visr.message("No clustering information",type = 'warning')
+    return()
+  }
+  p <- RidgePlot(object = gbmData, features.plot = valid_gene_probes, nCol = 2)
+  p <- p + ggtitle("Expression of Selected Genes") + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
+  
+  print(p)
+  switchPlotToScreen()
+  print(p)
+  switchPlotToReport()
+}
+
+visualize_gene_hm <- function(gbmData){
+  if (length(levels(gbmData@ident)) == 1){
+    visr.message("No clustering information",type = 'warning')
+    return()
+  }
+  p <- DoHeatmap(object = gbmData, genes.use = valid_gene_probes, slim.col.label = TRUE, remove.key = TRUE, do.plot = F, group.label.rot = T)
+  p <- p + ggtitle("Expression of Selected Genes") + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
+  
+  print(p)
+  switchPlotToScreen()
+  print(p)
+  switchPlotToReport()
+}
+
+visualize_gene <- function(gbmData){
+  if (length(valid_gene_probes) == 0){
+    visr.message("No valid genes specified",type = "warning")
+    return()
+  }
+  
+  if (visr.param.plot_genes_scatter){
+    visualize_gene_scatter(gbmData)  
+  }
+  if (visr.param.plot_genes_vln){
+    visualize_gene_vln(gbmData)
+  }
+  if (visr.param.plot_genes_dot){
+    visualize_gene_dot(gbmData)
+  }
+  if(visr.param.plot_genes_ridge){
+    visualize_gene_ridge(gbmData)
+  }
+  if(visr.param.plot_genes_hm){
+    visualize_gene_hm(gbmData)
   }
 }

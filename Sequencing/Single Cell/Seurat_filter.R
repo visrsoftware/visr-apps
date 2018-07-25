@@ -1,7 +1,7 @@
 create_seurat_cond <- sprintf("visr.param.Output_directory != '' && %s", load_raw_valid)
 
 visr.app.category("Create Seurat Object", active.condition = create_seurat_cond)
-visr.param("max_nGenes", label = "Maximum number of genes per cell", type = "int", min = 0, debugvalue = 2500,items = c("Inf"), default = "Inf",
+visr.param("max_nGenes", label = "Maximum number of genes per cell", type = "int", min = 0, debugvalue = "Inf",items = c("Inf"), default = "Inf",
            info = "High cutoff for the number of genes expressed in a cell")
 visr.param("min_nGenes", label = "Minimum number of genes per cell", type = "int", min=0,default = 200, debugvalue = 200,
            info = "Low cutoff for the number of genes expressed in a cell")
@@ -77,6 +77,12 @@ filter_Cells <- function(gbmData){
   return(gbmData)
 }
 
+load_object <- function(path_to_obj){
+  gbmData <- tryCatch(readRDS(path_to_obj), 
+                      error = function(e){visr.message(sprintf("Cannot read the input object format '%s'.\nMake sure the object is saved using the 'saveRDS()' function.",path_to_obj))})
+  return(gbmData)
+}
+
 load_data <- function(){
   print(paste("Loading data"))
   if (visr.param.workflow == "single"){
@@ -100,7 +106,7 @@ load_data <- function(){
       
     }else{
       # load Seurat object directly
-      gbmData <- readRDS(visr.param.Path_to_seurat_object)
+      gbmData <- load_object(visr.param.Path_to_seurat_object)
       if (is.null(gbmData@meta.data$percent.mito)){
         # mito.genes <- grep(pattern = "^MT-", x = rownames(x = gbmData@data), value = T, ignore.case = T)
         # percent.mito <- Matrix::colSums(gbmData@raw.data[mito.genes, ])/Matrix::colSums(gbmData@raw.data)
@@ -110,11 +116,11 @@ load_data <- function(){
     }
   }else{
     if (visr.param.Import_method2 == "load_one"){
-      gbmData <- readRDS(visr.param.seurat_integrated)
+      gbmData <- load_object(visr.param.seurat_integrated)
       visr.assert_that((length(gbmData@var.genes) > 0), msg = "Run find variable genes on original datasets")
     }else{
-      gbmData1 <- readRDS(visr.param.seurat_obj_1)
-      gbmData2 <- readRDS(visr.param.seurat_obj_2)
+      gbmData1 <- load_object(visr.param.seurat_obj_1)
+      gbmData2 <- load_object(visr.param.seurat_obj_2)
       gbmData <- merge_obj(gbmData1,gbmData2)
       rm(gbmData1,gbmData2)
     }

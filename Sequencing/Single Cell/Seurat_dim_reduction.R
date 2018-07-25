@@ -30,9 +30,9 @@ visr.param("nCell_PCHeatmap", label = "Number of Cells to plot", default = 500, 
            active.condition = paste("visr.param.PC_heatmap == T",dim_red_cond, sep = "&&"),
            info = "Number of top cells to plot for each PC")
 
-visr.param("Run_tSNE", default = F, debug = F, active.condition = dim_red_cond,
+visr.param("Run_tSNE", default = F, active.condition = dim_red_cond,
            info = "Run t-SNE dimensionality reduction on selected PCs")
-visr.param("calculate_tsne_nPC", label = "Automatically calculate number of PCs", default = T, debug = F,
+visr.param("calculate_tsne_nPC", label = "Automatically calculate number of PCs", default = T,
            active.condition = paste("visr.param.Run_tSNE == T",dim_red_cond, sep = "&&"),
            info = "Automatically calculate number of PCs selected for tSNE. Uncheck to specify the number of PCs to use.")
 visr.param("tsne_nPC", label = "Number of PCs for calculating tSNE", min = 2, default = 10, type = "int",
@@ -50,7 +50,7 @@ visr.param("align_CCA", default = F, debugvalue = F, active.condition = dim_red_
 visr.param("nCC_align", min = 2, default = 10, type = "int", label = "Number of CCs to align",
            active.condition = paste("visr.param.align_CCA == T",dim_red_cond2, sep = "&&"),
            info = "Number of CCs to align for downstream analysis")
-visr.param("Run_tSNE2", label = "Run tSNE", default = F, debug = T, active.condition = dim_red_cond2,
+visr.param("Run_tSNE2", label = "Run tSNE", default = F, active.condition = dim_red_cond2,
            info = "Run t-SNE dimensionality reduction on selected CCs")
 visr.param("tsne_nCC", label = "Number of aligned CCs for calculating tSNE", min = 2, default = 10, type = "int",
            active.condition = paste("visr.param.Run_tSNE2 == T",dim_red_cond2,sep = "&&"))
@@ -145,9 +145,9 @@ run_tSNE <- function(gbmData){
   if (visr.param.calculate_tsne_nPC){
     num_pc_to_use <- calculate_nPC(gbmData)
   }else{
-    num_pc_to_use <- min(visr.param.nPC_jackstraw,length(gbmData@dr$pca@sdev))
+    num_pc_to_use <- min(visr.param.tsne_nPC,length(gbmData@dr$pca@sdev))
   }
-  print(num_pc_to_use)
+  print(sprintf("Number of PCs: %s",num_pc_to_use))
   print(paste("Running tSNE"))
   gbmData <- RunTSNE(object = gbmData, dims.use = 1:num_pc_to_use, do.fast = T)
   p <- plot_tsne(gbmData)

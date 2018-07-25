@@ -36,7 +36,7 @@
         "active-condition": "visr.param.Import_method == 'load_raw' && visr.param.workflow == 'single'"
       },
       "visr.param.Path_to_seurat_object": {
-        "info": "The object should have been",
+        "info": "Path to Seurat object. It should be in rds format.",
         "type": "filename",
         "filename.mode": "load",
         "active-condition": "visr.param.Import_method == 'load_seurat' && visr.param.workflow == 'single'"
@@ -51,7 +51,7 @@
       },
       "visr.param.seurat_integrated": {
         "label": "Merged Seurat Object",
-        "info": "Path to seurat object. It should be a merged object from 2 datasets with different labels (labels should be stored in \"object@meta.data$group\".",
+        "info": "Path to seurat object (rds format). It should be a merged object from 2 datasets with different labels (labels should be stored in \"object@meta.data$group\".",
         "type": "filename",
         "filename.mode": "load",
         "active-condition": "visr.param.Import_method2 == 'load_one' && visr.param.workflow == 'integrated'"
@@ -71,7 +71,7 @@
       },
       "visr.param.seurat_obj_2": {
         "label": "Seurat Object 2",
-        "info": "Path to seurat object. The object should have been filtered and contain variable gene information.",
+        "info": "Path to seurat object (rds format). The object should have been filtered and contain variable gene information.",
         "type": "filename",
         "filename.mode": "load",
         "active-condition": "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'"
@@ -441,7 +441,7 @@
       },
       "visr.param.de_cluster": {
         "label": "Cluster ID",
-        "info": "Enter the cluster of interes",
+        "info": "Enter the cluster of interest",
         "type": "string",
         "active-condition": "visr.param.choose_de == 'diff' && (visr.param.Find_Marker_Genes == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != ''))))"
       },
@@ -555,9 +555,39 @@
         "active-condition": "visr.param.export_results == T && visr.param.include_gene == T"
       },
       "visr.param.plot_genes": {
-        "label": "Visualize selected genes on t-SNE projections",
+        "label": "Visualize gene expressions",
         "type": "boolean",
         "default": false
+      },
+      "visr.param.plot_genes_scatter": {
+        "label": "Scatter plot on t-SNE projections",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.plot_genes == T"
+      },
+      "visr.param.plot_genes_vln": {
+        "label": "Violin plot of expression distribution in each cluster",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.plot_genes == T"
+      },
+      "visr.param.plot_genes_dot": {
+        "label": "Dot plot of average expression in each cluster",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.plot_genes == T"
+      },
+      "visr.param.plot_genes_ridge": {
+        "label": "Ridge plot of expression distribution in each clusters",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.plot_genes == T"
+      },
+      "visr.param.plot_genes_hm": {
+        "label": "Expression heatmap grouped by clusters",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.plot_genes == T"
       },
       "visr.param.gene_name": {
         "label": "Gene list ot visualize (comma separated)",

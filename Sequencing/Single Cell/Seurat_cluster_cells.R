@@ -3,7 +3,7 @@ cluster_cond1 <- sprintf("(%s && visr.param.Cluster_Cells == T)",analysis_cond)
 cluster_cond2 <- sprintf("(%s && visr.param.Cluster_Cells == T)",analysis_cond2)
 
 visr.app.category("Cluster Cells", active.condition = cluster_cond)
-visr.param("calculate_cluster_nPC", label = "Automatically calculate number of PCs", default = T, debug = F,
+visr.param("calculate_cluster_nPC", label = "Automatically calculate number of PCs", default = T,
            active.condition = cluster_cond1,
            info = "Automatically calculate number of PCs selected for clustring cells. Uncheck to specify the number of PCs to use.")
 visr.param("cluster_nPC", label = "Number of PCs for clustering", min = 1, default = 10, type = "int",
@@ -35,7 +35,7 @@ cluster_cells <- function(gbmData, reduction){
     }else{
       num_dim_to_use <- min(visr.param.cluster_nPC,length(gbmData@dr$pca@sdev))
     }
-    print(num_dim_to_use)
+    print(sprintf("Number of PCs: %s",num_dim_to_use))
   }else{
     if (is.null(gbmData@dr$cca.aligned)){
       gbmData <- align_subspace(gbmData)
@@ -49,7 +49,7 @@ cluster_cells <- function(gbmData, reduction){
                           temp.file.location = output_folder)
   # PrintFindClustersParams(object = gbmData)
   if (length(levels(gbmData@ident)) == 1){
-    visr.message("Cells cannot be clustered",type = 'warning')
+    visr.message("Cells cannot be clustered. Try adjusting the parameters.",type = 'warning')
   }
   
   p <- plot_clusters(gbmData,reduction)
