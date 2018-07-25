@@ -47,16 +47,15 @@ visr.param("empty.intersections", "Display empty sets",
 visr.param("order_sets", "Order sets by size", info = "Order sets by size or keep them in the order of input", default = T)
 visr.param("group_by", "Group intersections by", info = "How the intersections should be grouped", items = c("degree", "sets"))
 visr.param("order_by", "Order intersections by", info = "How the intersections in the matrix should be ordered by",
-           items = c("both", "freq", "degree"), item.labels = c("frequency & degree", "frequency", "degree"))
-visr.param("decreasing_freq", "Order intersection by decreasing frequency",
+           items = c("both", "freq", "degree"), item.labels = c("degree, then frequency", "frequency", "degree"))
+visr.param("decreasing_degree", "Order intersections by decreasing degree",
+           info = "How the intersections should be ordered. If not selected, the intersections will be ordered from lowest to highest degree.",
+           default = F,
+           active.condition = "visr.param.order_by != 'freq'")
+visr.param("decreasing_freq", "Order intersection by decreasing frequency.  If not selected, the intersections will be ordered from low to high frequency.",
            info = "How the intersections should be ordered.",
            default = T,
            active.condition = "visr.param.order_by != 'degree'")
-visr.param("decreasing_degree", "Order intersections by decreasing degree",
-           info = "How the intersections should be ordered.",
-           default = F,
-           active.condition = "visr.param.order_by != 'freq'")
-
 
 ############################################################
 visr.category("Axis Options", collapsed = T)
@@ -111,7 +110,8 @@ visr.param("shade.color", "Color of row shading in matrix", type="color", defaul
 visr.param("shade.alpha", "Transparency of shading in matrix", default = 0.25, min = 0, max = 1)
 
 ############################################################
-visr.category("Box plots", info = "Boxplots representing the distribution of a selected attribute for each intersection.", collapsed = TRUE)
+visr.category("Box plots", info = "Boxplots representing the distribution of a selected attribute for each intersection.", collapsed = TRUE, 
+              active.condition = "visr.param.input_type == 'binary'")
 ############################################################
 visr.param("boxplot1", type = "column-numerical",
            info = "Column used for boxplots representing the distribution of the selected column for each intersection.",
