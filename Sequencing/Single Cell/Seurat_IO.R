@@ -11,7 +11,7 @@ visr.param("Import_method", label = "Choose Import Method",
            items = c("load_raw","load_seurat"),
            item.labels = c("Load CellRanger Output","Load Seurat Object"),default = "load_raw", 
            debugvalue = "load_seurat", active.condition = "visr.param.workflow == 'single'")
-visr.param("Path_to_outs", type="filename",filename.mode = "dir", 
+visr.param("Path_to_outs", label = "10x dataset directory", type="filename", filename.mode = "dir", 
            info="Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/meta/single/",
            active.condition = "visr.param.Import_method == 'load_raw' && visr.param.workflow == 'single'")
@@ -30,7 +30,7 @@ visr.param("seurat_integrated", label = "Merged Seurat Object", type="filename",
 
 visr.param("seurat_obj_1", label = "Seurat Object 1", type="filename",filename.mode = "load",
            debugvalue = "C:/Users/Yiwei Zhao/Desktop/BRC/tools/SeuratR/stim_2000.Robj",
-           info = "Path to seurat object. The object should have been filtered and contain variable gene information.",
+           info = "Path to seurat object (rds format). The object should have been filtered and contain variable gene information.",
            active.condition = "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'")
 visr.param("dataset1_name", label = "Label of dataset 1", default = "condition_A",
            active.condition = "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'")
@@ -60,5 +60,7 @@ visr.param("Output_directory", type = "filename", filename.mode="dir",
 visr.param("create_subdir", default = T,
            label = "Create new sub-direcory",
            info = "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)")
+visr.param("save_obj",label = "Save seurat object", default = T,
+           info = "Save the seurat object as 'Seurat.rds' in the output directory")
 
 

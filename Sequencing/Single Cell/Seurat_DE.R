@@ -83,7 +83,9 @@ diff_exp <- function(gbmData){
     table <- cbind(table,pct_diff)
     table <- table[,c("gene","cluster","avg_logFC","pct.1","pct.2","pct_diff","p_val","p_val_adj")]
   }
+  
   # output table
+  plot_DE(gbmData, table)
   write.table(x = table, file = paste(output_folder, DE_output,sep = "/"), row.names = F, quote = F, sep = "\t")
   return(table)
 }
@@ -138,6 +140,7 @@ diff_exp_conserved <- function(gbmData){
   table <- table[,c(1,2,3,4,5,6,16,7,8,9,10,11,17,12,13,14,15)]
   
   # output table
+  plot_DE(gbmData, table)
   write.table(x = table, file = paste(output_folder, DE_output,sep = "/"), row.names = F, quote = F, sep = "\t")
   return(table)
 }
@@ -161,16 +164,17 @@ diff_exp_across <- function(gbmData){
   table <- rbind(table1,table2)
   
   # output table
+  plot_DE(gbmData, table)
   write.table(x = table, file = paste(output_folder, DE_output,sep = "/"), row.names = F, quote = F, sep = "\t")
   return(table)
 }
 
-visr.param.top_n <- 10
+visr.param.top_n <- 2
 plot_DE <- function(gbmData, table){
   if (is.null(table)) {return()}
   top_n <- table %>% group_by(cluster) %>% filter(row_number() <= visr.param.top_n)
   p <- DoHeatmap(object = gbmData, genes.use = top_n$gene, slim.col.label = TRUE, remove.key = TRUE, do.plot = F, group.label.rot = T)
-  p <- p + ggtitle("Top DE genes") + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
+  p <- p + ggtitle(sprintf("Top %d DE genes", visr.param.top_n)) + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
   
   print(p)
   switchPlotToScreen()

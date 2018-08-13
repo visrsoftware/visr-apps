@@ -30,6 +30,7 @@
         "active-condition": "visr.param.workflow == 'single'"
       },
       "visr.param.Path_to_outs": {
+        "label": "10x dataset directory",
         "info": "Cell Ranger pipeline output directory. It should contain another directory named \"outs\"",
         "type": "filename",
         "filename.mode": "dir",
@@ -58,7 +59,7 @@
       },
       "visr.param.seurat_obj_1": {
         "label": "Seurat Object 1",
-        "info": "Path to seurat object. The object should have been filtered and contain variable gene information.",
+        "info": "Path to seurat object (rds format). The object should have been filtered and contain variable gene information.",
         "type": "filename",
         "filename.mode": "load",
         "active-condition": "visr.param.Import_method2 == 'load_two' && visr.param.workflow == 'integrated'"
@@ -101,6 +102,12 @@
         "info": "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)",
         "type": "boolean",
         "default": true
+      },
+      "visr.param.save_obj": {
+        "label": "Save seurat object",
+        "info": "Save the seurat object as 'Seurat.rds' in the output directory",
+        "type": "boolean",
+        "default": true
       }
     }
   },
@@ -116,7 +123,8 @@
         "type": "int",
         "default": "Inf",
         "min": 0,
-        "items": ["Inf"]
+        "items": ["Inf"],
+        "item-labels": ["No Upper Limit"]
       },
       "visr.param.min_nGenes": {
         "label": "Minimum number of genes per cell",
@@ -195,10 +203,11 @@
         "type": "double",
         "default": 3,
         "min": 0,
-        "items": ["Inf"]
+        "items": ["Inf"],
+        "item-labels": ["No Upper Limit"]
       },
       "visr.param.Dispersion_low": {
-        "label": "Minimum Dispersin",
+        "label": "Minimum Dispersion",
         "info": "Low cutoff on y-axis (standard deviation) for identifying variable genes",
         "type": "double",
         "default": 0.5,
@@ -210,7 +219,8 @@
         "type": "double",
         "default": "Inf",
         "min": 0,
-        "items": ["Inf"]
+        "items": ["Inf"],
+        "item-labels": ["No Upper Limit"]
       }
     }
   },
@@ -396,7 +406,7 @@
       },
       "visr.param.cluster_resolution": {
         "label": "resolution",
-        "info": "Value of the resolution parameter, use a value above (below) 1.0 if you want to obtain a larger (smaller) number of communities.",
+        "info": "Sets the granularity of the downstream clustering, with increased values leading to a greater number of clusters. Setting this parameter between 0.6-1.2 typically returns good results for single cell datasets of around 3K cells. Optimal resolution often increases for larger datasets.",
         "type": "double",
         "default": 0.6,
         "min": 0.1
@@ -493,112 +503,46 @@
         "type": "string",
         "active-condition": "visr.param.rename_id == T"
       },
-      "visr.param.export_results": {
-        "label": "Export analysis results",
-        "info": "Export analysis results related to each cell to \"Cells.tsv\"",
-        "type": "boolean",
-        "default": false
-      },
-      "visr.param.include_id": {
-        "label": "Include cluster id",
-        "type": "boolean",
-        "default": true,
-        "active-condition": "visr.param.export_results == T"
-      },
-      "visr.param.include_umi": {
-        "label": "Include total UMI",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.export_results == T"
-      },
-      "visr.param.include_pc": {
-        "label": "Include PCA projection",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.export_results == T && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
-      },
-      "visr.param.nPC_export": {
-        "label": "Number of PCs to export",
-        "type": "int",
-        "default": 2,
-        "min": 1,
-        "active-condition": "visr.param.export_results == T && visr.param.include_pc && (visr.param.Output_directory != '' && ((visr.param.Import_method == 'load_raw' && visr.param.Path_to_outs != '' && visr.param.workflow == 'single') || (visr.param.Import_method == 'load_seurat' && visr.param.Path_to_seurat_object != ''&& visr.param.workflow == 'single')))"
-      },
-      "visr.param.include_cc": {
-        "label": "Include alinged CCA projection",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.export_results == T && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
-      },
-      "visr.param.nCC_export": {
-        "label": "Number of Aligned CCs to export",
-        "type": "int",
-        "default": 2,
-        "min": 1,
-        "active-condition": "visr.param.export_results == T && visr.param.include_cc && (visr.param.Output_directory != '' && ((visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_one' && visr.param.seurat_integrated != '') || (visr.param.workflow == 'integrated' && visr.param.Import_method2 == 'load_two' && visr.param.seurat_obj_1 != ''&& visr.param.seurat_obj_2 != '' && visr.param.dataset1_name != ''&& visr.param.dataset2_name != '')))"
-      },
-      "visr.param.include_tsne": {
-        "label": "Include t-SNE projection",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.export_results == T"
-      },
-      "visr.param.include_gene": {
-        "label": "Include gene expression",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.export_results == T"
-      },
-      "visr.param.gene_list": {
-        "label": "Gene list to export (comma separated)",
+      "visr.param.export_gene_list": {
+        "label": "List of genes to export/visualize",
         "type": "string",
-        "active-condition": "visr.param.export_results == T && visr.param.include_gene == T"
-      },
-      "visr.param.plot_genes": {
-        "label": "Visualize gene expressions",
-        "type": "boolean",
-        "default": false
+        "default": ""
       },
       "visr.param.plot_genes_scatter": {
         "label": "Scatter plot on t-SNE projections",
         "type": "boolean",
         "default": false,
-        "active-condition": "visr.param.plot_genes == T"
-      },
-      "visr.param.plot_genes_vln": {
-        "label": "Violin plot of expression distribution in each cluster",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.plot_genes == T"
-      },
-      "visr.param.plot_genes_dot": {
-        "label": "Dot plot of average expression in each cluster",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.plot_genes == T"
-      },
-      "visr.param.plot_genes_ridge": {
-        "label": "Ridge plot of expression distribution in each clusters",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.plot_genes == T"
-      },
-      "visr.param.plot_genes_hm": {
-        "label": "Expression heatmap grouped by clusters",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.plot_genes == T"
-      },
-      "visr.param.gene_name": {
-        "label": "Gene list ot visualize (comma separated)",
-        "type": "string",
-        "active-condition": "visr.param.plot_genes == T"
+        "active-condition": "visr.param.export_gene_list  != ''"
       },
       "visr.param.gene_plot_color": {
         "label": "Color map of gene expression",
         "type": "multi-color",
         "default": "BuPu 7",
-        "active-condition": "visr.param.plot_genes == T"
+        "active-condition": "visr.param.export_gene_list  != '' && visr.param.plot_genes_scatter == T"
+      },
+      "visr.param.plot_genes_vln": {
+        "label": "Violin plot of expression distribution in each cluster",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_gene_list  != ''"
+      },
+      "visr.param.plot_genes_dot": {
+        "label": "Dot plot of average expression in each cluster",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_gene_list  != ''"
+      },
+      "visr.param.plot_genes_ridge": {
+        "label": "Ridge plot of expression distribution in each clusters",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_gene_list  != ''"
+      },
+      "visr.param.plot_genes_hm": {
+        "label": "Expression heatmap grouped by clusters",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.export_gene_list  != ''"
       }
     }
   }]

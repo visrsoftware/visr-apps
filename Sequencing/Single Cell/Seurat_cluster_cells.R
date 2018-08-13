@@ -12,7 +12,7 @@ visr.param("cluster_nPC", label = "Number of PCs for clustering", min = 1, defau
 visr.param("cluster_nCC", label = "Number of aligned CCs for clustering", min = 1, default = 10, type = "int",
            active.condition = cluster_cond2)
 visr.param("cluster_resolution", label = "resolution", min = 0.1, default = 0.6, debugvalue = 0.6,
-           info = "Value of the resolution parameter, use a value above (below) 1.0 if you want to obtain a larger (smaller) number of communities.") #increase for large dataset
+           info = "Sets the granularity of the downstream clustering, with increased values leading to a greater number of clusters. Setting this parameter between 0.6-1.2 typically returns good results for single cell datasets of around 3K cells. Optimal resolution often increases for larger datasets.")
 
 plot_clusters <- function(gbmData,reduction){
   if (!is.null(gbmData@dr$tsne)){

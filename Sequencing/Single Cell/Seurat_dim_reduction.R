@@ -55,6 +55,13 @@ visr.param("Run_tSNE2", label = "Run tSNE", default = F, active.condition = dim_
 visr.param("tsne_nCC", label = "Number of aligned CCs for calculating tSNE", min = 2, default = 10, type = "int",
            active.condition = paste("visr.param.Run_tSNE2 == T",dim_red_cond2,sep = "&&"))
 
+plot_PC <- function(gbmData){
+  title <- "PCA"
+  reduction <- "pca"
+  p <- DimPlot(object = gbmData, reduction.use = reduction, pt.size = 0.5, do.return = TRUE)
+  p <- p + ggtitle(sprintf("%s Plot", title)) + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
+  return(p)
+}
 
 run_PCA <- function(gbmData){
   if (length(gbmData@var.genes) == 0){
@@ -68,6 +75,13 @@ run_PCA <- function(gbmData){
   print(paste("Running PCA"))
   gbmData <- RunPCA(object = gbmData, pc.genes = gbmData@var.genes, do.print=F, 
                     pcs.compute = visr.param.nPC_compute)
+  
+  p <- plot_PC(gbmData)
+  print(p)
+  switchPlotToScreen()
+  print(p)
+  switchPlotToReport()
+  
   return(gbmData)
 }
 
@@ -159,7 +173,7 @@ run_tSNE <- function(gbmData){
   return(gbmData)
 }
 
-plot_dim <- function(gbmData, reduction){
+plot_CC <- function(gbmData, reduction){
   title <- if (reduction == "cca"){"CCA"}else{"Aligned CCA"}
   dim <- if (reduction == "cca"){"CC1"}else{"ACC1"}
   p1 <- DimPlot(object = gbmData, reduction.use = reduction, group.by = "group", 
@@ -184,7 +198,7 @@ run_CCA <- function(gbmData){
   gbmData2 <- ScaleData(gbmData2)
   
   gbmData <- RunCCA(object = gbmData1, object2 = gbmData2, genes.use = genes.use, num.cc = visr.param.nCC_compute)
-  p <- plot_dim(gbmData, "cca")
+  p <- plot_CC(gbmData, "cca")
   print(p)
   switchPlotToScreen()
   print(p)
@@ -211,7 +225,7 @@ align_subspace <- function(gbmData){
   }
   nCC_align <- min(visr.param.nCC_align,ncol(gbmData@dr$cca@cell.embeddings))
   gbmData <- AlignSubspace(gbmData, reduction.type = "cca", grouping.var = "group", dims.align = 1:nCC_align)
-  p <- plot_dim(gbmData, "cca.aligned")
+  p <- plot_CC(gbmData, "cca.aligned")
   print(p)
   switchPlotToScreen()
   print(p)
@@ -237,8 +251,8 @@ run_tSNE2 <- function(gbmData){
 
 plot_tsne <- function(gbmData){
   group <- if (is.null(gbmData@meta.data$group) || (length(levels(gbmData@ident)))>1){"ident"}else{"group"}
-  
+  title <- if (length(levels(gbmData@ident))>1) {'Clusters on t-SNE projections'}else{"t-SNE plot"}
   p <- TSNEPlot(object = gbmData,do.return = T,group.by = group)
-  p <- p + ggtitle("t-SNE Plot") + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
+  p <- p + ggtitle(title) + theme(plot.title = element_text(lineheight=2,size = 20,face = "plain",hjust = 0.5), plot.margin = margin(20, 10, 10, 10))
   return(p)
 }
