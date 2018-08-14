@@ -81,21 +81,21 @@
         "info": "How the intersections in the matrix should be ordered by",
         "type": "string",
         "items": ["both", "freq", "degree"],
-        "item-labels": ["frequency & degree", "frequency", "degree"]
+        "item-labels": ["degree, then frequency", "frequency", "degree"]
+      },
+      "visr.param.decreasing_degree": {
+        "label": "Order intersections by decreasing degree",
+        "info": "How the intersections should be ordered. If not selected, the intersections will be ordered from lowest to highest degree.",
+        "type": "boolean",
+        "default": false,
+        "active-condition": "visr.param.order_by != 'freq'"
       },
       "visr.param.decreasing_freq": {
-        "label": "Order intersection by decreasing frequency",
+        "label": "Order intersection by decreasing frequency.  If not selected, the intersections will be ordered from low to high frequency.",
         "info": "How the intersections should be ordered.",
         "type": "boolean",
         "default": true,
         "active-condition": "visr.param.order_by != 'degree'"
-      },
-      "visr.param.decreasing_degree": {
-        "label": "Order intersections by decreasing degree",
-        "info": "How the intersections should be ordered.",
-        "type": "boolean",
-        "default": false,
-        "active-condition": "visr.param.order_by != 'freq'"
       }
     }
   },
@@ -254,6 +254,7 @@
     "label": "Box plots",
     "info": "Boxplots representing the distribution of a selected attribute for each intersection.",
     "collapsed": true,
+    "active-condition": "visr.param.input_type == 'binary'",
     "variables": {
       "visr.param.boxplot1": {
         "info": "Column used for boxplots representing the distribution of the selected column for each intersection.",

@@ -2,7 +2,6 @@ source("visrutils.R")
 curr_dir <- "Sequencing/Single Cell"
 
 visr.app.start("Seurat", debugdata=mtcars, input.type = "none")
-
 source(sprintf("%s/Utils.R",curr_dir))
 source(sprintf("%s/Seurat_IO.R",curr_dir))
 source(sprintf("%s/Seurat_filter.R",curr_dir))
@@ -12,14 +11,13 @@ source(sprintf("%s/Seurat_dim_reduction.R",curr_dir))
 source(sprintf("%s/Seurat_cluster_cells.R",curr_dir))
 source(sprintf("%s/Seurat_DE.R",curr_dir))
 source(sprintf("%s/Seurat_additional.R",curr_dir))
-
 visr.app.end(printjson=T, writefile=T)
 visr.applyParameters()
 
 # Check Input -------------------------------------------------------------
 if (visr.param.workflow == "single"){
   if (visr.param.Import_method == "load_raw"){
-    if (!dir.exists(visr.param.Path_to_outs)){
+    if (!dir.exists(sprintf("%s/outs",visr.param.Path_to_outs))){
       visr.message(paste("'",visr.param.Path_to_outs,"'"," is not a valid path to Cell Ranger pipeline output directory. It should contain another directory named \"outs\""))
     }
   } else {
@@ -50,6 +48,7 @@ visr.library("reshape2")
 plot_output <- "plots.pdf"
 cell_info_output <- "Cells.tsv"
 DE_output <- "Differential_Expression_Analysis_result.tsv"
+var_gene_output <- "Variable_Genes.tsv"
 selected_gene_output <- "Selected_Marker_Genes.tsv"
 
 # Create PDF --------------------------------------------------------------
@@ -88,6 +87,9 @@ if (visr.param.workflow == "integrated"){
   groups <- levels(as.factor(gbmData@meta.data$group))
 }
 
+# data summary
+# plotSeuratSummary(gbmData)
+
 # Additional checkpoint ---------------------------------------------------
 
 if (visr.param.workflow == "integrated" && visr.param.Import_method2 == "load_one"){
@@ -98,12 +100,8 @@ if (visr.param.workflow == "integrated" && visr.param.Import_method2 == "load_tw
   assert_that(visr.param.dataset1_name != visr.param.dataset2_name, msg = "Label of the two datasets must be different.")
 }
 
-if (visr.param.export_results && visr.param.include_gene){
-  valid_gene_list <- check_gene_list(gbmData,visr.param.gene_list)
-}
-
-if (visr.param.plot_genes){
-  valid_gene_probes <- check_gene_list(gbmData,visr.param.gene_name)
+if (length(visr.param.export_gene_list) > 0){
+  valid_gene_probes <- check_gene_list(gbmData,visr.param.export_gene_list)
 }
 
 # Analysis ----------------------------------------------------------------
@@ -133,6 +131,10 @@ if (visr.param.workflow == "single"){
     if (visr.param.elbow){
       gbmData <- draw_elbow(gbmData)
     }
+    
+    if (visr.param.Run_tSNE){
+      gbmData <- run_tSNE(gbmData)
+    }
   }
   
   # Cluster cells
@@ -140,15 +142,11 @@ if (visr.param.workflow == "single"){
     gbmData <- cluster_cells(gbmData, "pca")
   }
   
-  # tSNE
-  if (visr.param.Run_tSNE && visr.param.Dim_Reduction) {
-    gbmData <- run_tSNE(gbmData) 
-  }
-  
   # DE analysis
   if (visr.param.Find_Marker_Genes){
    # top_genes_n <- min(visr.param.Top_gene_n,nrow(gbmData@raw.data))
-   diff_exp(gbmData)
+   table <- diff_exp(gbmData)
+   #plot_DE(gbmData, table)
   }
   
   # output
@@ -156,12 +154,8 @@ if (visr.param.workflow == "single"){
     gbmData <- rename_cluster(gbmData, "pca")
   }
   
-  if (visr.param.export_results){
-    export_results(gbmData)
-  }
-  
-  if (visr.param.plot_genes){
-    visulize_genes(gbmData)
+  if (nchar(visr.param.export_gene_list) > 0){
+    visualize_gene(gbmData)
   }
   
 }else{
@@ -175,24 +169,24 @@ if (visr.param.workflow == "single"){
     if (visr.param.align_CCA){
       gbmData <- align_subspace(gbmData)
     }
+    if (visr.param.Run_tSNE2){
+      gbmData <- run_tSNE2(gbmData) 
+    }
   }
   
   if (visr.param.Cluster_Cells){
     gbmData <- cluster_cells(gbmData, "cca.aligned")
   }
   
-  if (visr.param.Run_tSNE2 && visr.param.Dim_Reduction){
-    gbmData <- run_tSNE2(gbmData) 
-  }
   
   if (visr.param.Find_Marker_Genes){
     
     if (visr.param.choose_de == "conserved"){
-      
-      diff_exp_conserved(gbmData)
+      table <- diff_exp_conserved(gbmData)
     }else{
-      diff_exp_across(gbmData)
+      table <- diff_exp_across(gbmData)
     }
+    # plot_DE(gbmData, table)
   }
   
   # output
@@ -200,16 +194,16 @@ if (visr.param.workflow == "single"){
     gbmData <- rename_cluster(gbmData, "cca.aligned")
   }
   
-  if (visr.param.export_results){
-    export_results(gbmData)
-  }
-  
-  if (visr.param.plot_genes){
-    visulize_genes(gbmData)
+  if (nchar(visr.param.export_gene_list) > 0){
+    visualize_gene(gbmData)
   }
 }
 
 # Save Object -------------------------------------------------------------
+export_var_genes(gbmData)
+export_cells(gbmData)
+
+plotSeuratSummary(gbmData)
 
 output_parameters <- visr.getParams()
 sink(file = paste(output_folder,"parameters.txt",sep = "/"))
@@ -224,15 +218,15 @@ finishReport()
 
 browseURL(paste(output_folder,plot_output,sep = "/"))
 
-# save object
-print(paste("Saving object"))
-
 # Reduce file size of saved object
 if (!is.null(gbmData@calc.params$RunTSNE)){
   gbmData@calc.params$RunTSNE$... <- NULL
 }
 
-
-saveRDS(gbmData, file = paste(output_folder,"Seurat.rds",sep = "/"))
+if (visr.param.save_obj){
+  # save object
+  print(paste("Saving object"))
+  saveRDS(gbmData, file = paste(output_folder,"Seurat.rds",sep = "/"))
+}
 
 rm(gbmData)

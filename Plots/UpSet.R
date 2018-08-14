@@ -2,7 +2,7 @@ source("visrutils.R")
 
 if (!visr.isGUI()) {# debug only
   visr.input <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"),
-           header = T, sep = ";")
+                         header = T, sep = ";")
 }
 
 visr.app.start("UpSet",
@@ -47,16 +47,15 @@ visr.param("empty.intersections", "Display empty sets",
 visr.param("order_sets", "Order sets by size", info = "Order sets by size or keep them in the order of input", default = T)
 visr.param("group_by", "Group intersections by", info = "How the intersections should be grouped", items = c("degree", "sets"))
 visr.param("order_by", "Order intersections by", info = "How the intersections in the matrix should be ordered by",
-           items = c("both", "freq", "degree"), item.labels = c("frequency & degree", "frequency", "degree"))
-visr.param("decreasing_freq", "Order intersection by decreasing frequency",
+           items = c("both", "freq", "degree"), item.labels = c("degree, then frequency", "frequency", "degree"))
+visr.param("decreasing_degree", "Order intersections by decreasing degree",
+           info = "How the intersections should be ordered. If not selected, the intersections will be ordered from lowest to highest degree.",
+           default = F,
+           active.condition = "visr.param.order_by != 'freq'")
+visr.param("decreasing_freq", "Order intersection by decreasing frequency.  If not selected, the intersections will be ordered from low to high frequency.",
            info = "How the intersections should be ordered.",
            default = T,
            active.condition = "visr.param.order_by != 'degree'")
-visr.param("decreasing_degree", "Order intersections by decreasing degree",
-           info = "How the intersections should be ordered.",
-           default = F,
-           active.condition = "visr.param.order_by != 'freq'")
-
 
 ############################################################
 visr.category("Axis Options", collapsed = T)
@@ -111,7 +110,8 @@ visr.param("shade.color", "Color of row shading in matrix", type="color", defaul
 visr.param("shade.alpha", "Transparency of shading in matrix", default = 0.25, min = 0, max = 1)
 
 ############################################################
-visr.category("Box plots", info = "Boxplots representing the distribution of a selected attribute for each intersection.", collapsed = TRUE)
+visr.category("Box plots", info = "Boxplots representing the distribution of a selected attribute for each intersection.", collapsed = TRUE, 
+              active.condition = "visr.param.input_type == 'binary'")
 ############################################################
 visr.param("boxplot1", type = "column-numerical",
            info = "Column used for boxplots representing the distribution of the selected column for each intersection.",
@@ -128,8 +128,40 @@ visr.applyParameters()
 
 visr.library("UpSetR")
 
+# (id,set) to binary encoding
+get_upset_input <- function(table,item_col,set_col){
+  items <- as.character(table[[item_col]])
+  sets <- as.character(table[[set_col]])
+  
+  all.items <- levels(as.factor(items))
+  all.sets <- levels(as.factor(sets)) 
+  
+  upset_input <- data.frame(matrix(0L,length(all.items),length(all.sets)))
+  rownames(upset_input) <- all.items
+  colnames(upset_input) <- all.sets
+  
+  for (i in 1:nrow(table)){
+    item <- items[i]
+    set <- sets[i]
+    upset_input[item,set] <- 1L
+  }
+  return(upset_input)
+}
+
+# Include 
+if (visr.param.input_type == "binary"){
+  input_table <- visr.input
+  input_set_columns <- visr.param.sets
+}else{
+  input_table <- get_upset_input(table = visr.input, item_col = visr.param.input_id_column,
+                                 set_col = visr.param.input_set_column)
+  input_set_columns <- colnames(input_table)
+  visr.param.output_binary_table <- input_table
+}
+
+# UpSet Plot
 if (!visr.param.order_sets) {
-  visr.param.sets = rev(visr.param.sets) # because plotting order is from bottom to top
+  input_set_columns <- rev(input_set_columns) # because plotting order is from bottom to top
 }
 
 boxplot.summary = c (if (visr.param.boxplot1 != '') visr.param.boxplot1 else NULL,
@@ -138,8 +170,8 @@ boxplot.summary = c (if (visr.param.boxplot1 != '') visr.param.boxplot1 else NUL
 if (!is.null(boxplot.summary))
   visr.param.empty.intersections = F # currently there is a bug when both are specified
 
-p <- upset(visr.input,
-           sets = visr.param.sets,
+p <- upset(input_table,
+           sets = input_set_columns,
            nintersects = visr.param.nintersects,
            empty.intersections = if (visr.param.empty.intersections) 'on' else NULL,
            keep.order = !visr.param.order_sets,
@@ -190,5 +222,5 @@ if (FALSE) {
         shade.color = "gray88", shade.alpha = 0.25,
         matrix.dot.alpha = 0.5, empty.intersections = NULL, color.pal = 1,
         boxplot.summary = NULL, attribute.plots = NULL
-        )
+  )
 }

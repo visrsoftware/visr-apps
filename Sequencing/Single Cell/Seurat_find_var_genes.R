@@ -5,11 +5,11 @@ visr.param("Normalization_scale_factor", min = 1, default = 10000, debugvalue = 
            info = "Sets the scale factor for cell-level normalization")
 visr.param("Mean_exp_low",label = "Minimum Mean Expression", min = 0, default = 0.0125,debugvalue = 0.0125,
            info = "Low cutoff on x-axis (mean expression) for identifying variable genes")
-visr.param("Mean_exp_high", label = "Maximum Mean Expression", type = "double", min = 0, default = 3.0, debugvalue = 3.0, items = c("Inf"),
+visr.param("Mean_exp_high", label = "Maximum Mean Expression", type = "double", min = 0, default = 3.0, debugvalue = 3.0, items = c("Inf"),item.labels = "No Upper Limit",
            info = "High cutoff on x-axis (mean expression) for identifying variable genes")
-visr.param("Dispersion_low", label = "Minimum Dispersin", min = 0, default = 0.5, debugvalue = 0.5,
+visr.param("Dispersion_low", label = "Minimum Dispersion", min = 0, default = 0.5, debugvalue = 0.5,
            info = "Low cutoff on y-axis (standard deviation) for identifying variable genes")
-visr.param("Dispersion_high", label = "Maximum Dispersion", type = "double", min = 0, debugvalue = Inf, items = c("Inf"), default="Inf",
+visr.param("Dispersion_high", label = "Maximum Dispersion", type = "double", min = 0, debugvalue = Inf, items = c("Inf"), item.labels = "No Upper Limit", default="Inf",
            info = "High cutoff on y-axis (standard deviation) for identifying variable genes")
 
 plot_var_genes <- function(gbmData){
@@ -26,7 +26,10 @@ find_variable_genes <- function(gbmData){
   # Normalization
   print(paste("Performing normalization"))
   normalization_scale_factor <- visr.param.Normalization_scale_factor
+  raw_data <- gbmData@raw.data
+  gbmData@raw.data <- gbmData@raw.data[rownames(gbmData@data),]
   gbmData <- NormalizeData(object = gbmData, normalization.method = "LogNormalize", scale.factor = normalization_scale_factor)
+  gbmData@raw.data <- raw_data
   
   # Find variable genes
   print(paste("Finding variable genes"))
@@ -48,4 +51,13 @@ find_variable_genes <- function(gbmData){
     visr.message("No variable genes found")
   }
   return(gbmData)
+}
+
+export_var_genes <- function(gbmData){
+  if (length(gbmData@var.genes) == 0 || nrow(gbmData@hvg.info) == 0){return()}
+  table <- gbmData@hvg.info
+  table <- cbind(gene = rownames(table), table, is.variable=F)
+  table[gbmData@var.genes,"is.variable"] <- T
+  write.table(x = table, file = paste(output_folder,var_gene_output,sep = "/"), quote = F, 
+              row.names = F, sep = "\t")
 }

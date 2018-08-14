@@ -135,4 +135,13 @@ extract_param <- function(path){
   return(params)
 }
 
-
+#get library ids from barcodes
+get_lib_id <- function(barcodes){
+  get_id <- function(barcode){
+    id <- strsplit(x = barcode,split = "-")[[1]][2]
+    if (is.na(id)) {id <- "1"}
+    return(id)
+  }
+  lib_ids <- sapply(X = barcodes, FUN = get_id, USE.NAMES = F)
+  return(lib_ids)
+}

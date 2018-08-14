@@ -1,8 +1,8 @@
 create_seurat_cond <- sprintf("visr.param.Output_directory != '' && %s", load_raw_valid)
 
 visr.app.category("Create Seurat Object", active.condition = create_seurat_cond)
-visr.param("max_nGenes", label = "Maximum number of genes per cell", type = "int", min = 0, debugvalue = 2500,items = c("Inf"), default = "Inf",
-           info = "High cutoff for the number of genes expressed in a cell")
+visr.param("max_nGenes", label = "Maximum number of genes per cell", type = "int", min = 0, debugvalue = "Inf",items = c("Inf"), item.labels = c("No Upper Limit"),
+           default = "Inf", info = "High cutoff for the number of genes expressed in a cell")
 visr.param("min_nGenes", label = "Minimum number of genes per cell", type = "int", min=0,default = 200, debugvalue = 200,
            info = "Low cutoff for the number of genes expressed in a cell")
 visr.param("max_percent_mito", label = "Maximum fraction of mitocondrial genes", min = 0, max = 1,default = 0.05,debugvalue = 0.05,
@@ -56,6 +56,14 @@ plot_meta_data <- function(gbmData, filtered){
 }
 
 filter_Cells <- function(gbmData){
+  print("Filtering Genes")
+  num_cells <- ncol(gbmData@raw.data)
+  min_fraction_of_cells <- visr.param.min_fraction_cells
+  min.cells <- max(1,ceiling(num_cells*min_fraction_of_cells))
+  num.cells <- rowSums(gbmData@data > 0)
+  genes.use <- names(x = num.cells[which(x = num.cells >= min.cells)])
+  gbmData@data <- gbmData@data[genes.use, ]                
+  
   print(paste("Filtering cells"))
   max_number_of_genes <- visr.param.max_nGenes
   max_fraction_of_mito <- visr.param.max_percent_mito
@@ -65,7 +73,7 @@ filter_Cells <- function(gbmData){
   gbmData <- AddMetaData(object = gbmData, metadata = percent.mito, col.name = "percent.mito")
   
   
-  plot_meta_data(gbmData,filtered = F)
+  plot_meta_data(gbmData, filtered = F)
   
   gbmData <- FilterCells(object = gbmData, subset.names = c("nGene", "percent.mito"), low.thresholds = c(min_number_of_genes, -Inf), high.thresholds = c(max_number_of_genes, max_fraction_of_mito))
   
@@ -74,6 +82,12 @@ filter_Cells <- function(gbmData){
   plot_meta_data(gbmData, filtered = T)
   switchPlotToReport()
   
+  return(gbmData)
+}
+
+load_object <- function(path_to_obj){
+  gbmData <- tryCatch(readRDS(path_to_obj), 
+                      error = function(e){visr.message(sprintf("Cannot read the input object format '%s'.\nMake sure the object is saved using the 'saveRDS()' function.",path_to_obj))})
   return(gbmData)
 }
 
@@ -93,31 +107,43 @@ load_data <- function(){
       # load from outs folder
       gbmData <- Read10X(path)
       print(paste("Creating Seurat Object"))
-      num_cells <- dim(gbmData)[2]
-      gbmData <- CreateSeuratObject(raw.data = gbmData, min.cells = max(1,ceiling(num_cells*min_fraction_of_cells)), min.genes = visr.param.min_nGenes, 
-                                    project = project_name)
+      gbmData <- CreateSeuratObject(raw.data = gbmData, project = project_name)
       gbmData <- filter_Cells(gbmData)
       
     }else{
       # load Seurat object directly
-      gbmData <- readRDS(visr.param.Path_to_seurat_object)
+      gbmData <- load_object(visr.param.Path_to_seurat_object)
       if (is.null(gbmData@meta.data$percent.mito)){
-        # mito.genes <- grep(pattern = "^MT-", x = rownames(x = gbmData@data), value = T, ignore.case = T)
-        # percent.mito <- Matrix::colSums(gbmData@raw.data[mito.genes, ])/Matrix::colSums(gbmData@raw.data)
-        # gbmData <- AddMetaData(object = gbmData, metadata = percent.mito, col.name = "percent.mito")
-        gbmData <- filter_Cells(gbmData)
+          gbmData <- filter_Cells(gbmData)
       }
     }
   }else{
     if (visr.param.Import_method2 == "load_one"){
-      gbmData <- readRDS(visr.param.seurat_integrated)
-      visr.assert_that((length(gbmData@var.genes) > 0), msg = "Run find variable genes on original datasets")
+      gbmData <- load_object(visr.param.seurat_integrated)
+      visr.assert_that((length(gbmData@var.genes) > 0), msg = "Run find variable genes on input datasets")
     }else{
-      gbmData1 <- readRDS(visr.param.seurat_obj_1)
-      gbmData2 <- readRDS(visr.param.seurat_obj_2)
+      gbmData1 <- load_object(visr.param.seurat_obj_1)
+      gbmData2 <- load_object(visr.param.seurat_obj_2)
       gbmData <- merge_obj(gbmData1,gbmData2)
       rm(gbmData1,gbmData2)
     }
   }
   return(gbmData)
 }
+
+#summary table
+plotSeuratSummary <- function(gbmData){
+  par(mfrow=c(1,1))
+  items <- c("Number.Of.Cells.(raw.data)",
+             "Number.Of.Genes.(raw.data)",
+             "Number.Of.Cells.(filtered)",
+             "Number.Of.Genes.(filtered)")
+  values <- c(ncol(gbmData@raw.data),
+              nrow(gbmData@raw.data),
+              ncol(gbmData@data),
+              nrow(gbmData@data))
+  table <- data.frame(items,values)
+  title <- "Seurat Data Summary"
+  plotTableSummary(dataTable = table, title = title)
+}
+

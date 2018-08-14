@@ -7,4 +7,4 @@ visr.app.category("Analysis steps",info = "Select the analysis steps to run",
 visr.param("Find_Variable_Genes", default = F, debugvalue = F, active.condition = analysis_cond)
 visr.param("Dim_Reduction", label = "Dimensionality Reduction", default = F, debugvalue = F)
 visr.param("Cluster_Cells", default = F, debugvalue = F)
-visr.param("Find_Marker_Genes",label = "Differential Expression Analysis", default = F, debug = F)
+visr.param("Find_Marker_Genes",label = "Differential Expression Analysis", default = F, debugvalue = F)
