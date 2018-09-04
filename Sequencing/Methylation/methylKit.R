@@ -3,60 +3,59 @@ source("visrutils.R")
 visr.biocLite("methylKit")
 visr.biocLite("genomation")
 
+####################################################################################################
+####################################################################################################
 visr.app.start("Methyl Kit")
+####################################################################################################
+####################################################################################################
 
+####################################################################################################
+visr.category("Input Options")
+####################################################################################################
+visr.param("methcallorbismark", label = "Input Type", items = c("Methylation Call", "Bismark"))
+
+param.max_input = 10L
+visr.param("input_count", label = "Number of input files", default = 4L, min = 1L, max = param.max_input)
+
+####################################################################################################
 visr.category("Data Files")
+####################################################################################################
 
-visr.param(
-  "methcallorbismark",
-  type = "char",
-  label = "File Type",
-  items = c("Methylation Call", "Bismark")
-)
-visr.param(
-  "onefileormulti",
-  type = "char",
-  label = "Number of Files",
-  items = c("Multiple Files", "One File")
-)
-visr.param("file1",
-           type = "filename",
-           filename.mode = "load",
-           label = "File 1")
-visr.param("file2",
-           type = "filename",
-           filename.mode = "load",
-           label = "File 2")
-visr.param("file3",
-           type = "filename",
-           filename.mode = "load",
-           label = "File 3")
-visr.param("file4",
-           type = "filename",
-           filename.mode = "load",
-           label = "File 4")
-visr.param("filename1",
-           type = "char",
-           label = "File 1 Title",
-           default = "Test 1")
-visr.param("filename2",
-           type = "char",
-           label = "File 2 Title",
-           default = "Test 2")
-visr.param("filename3",
-           type = "char",
-           label = "File 3 Title",
-           default = "Ctrl 1")
-visr.param("filename4",
-           type = "char",
-           label = "File 4 Title",
-           default = "Ctrl 2")
+for (input_index in seq(param.max_input)) {
+  visr.param(paste0("file", input_index), label=paste0("File ", input_index), type = "filename", filename.mode = "load",
+             info = "location of input file",
+             active.condition = paste0("visr.param.input_count >= ", input_index))
 
-visr.category("Output Type")
+  visr.param(paste0("sample.id", input_index), label = paste0("Title for Sample ", input_index),
+             info = "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+             default = paste0("Sample ", input_index),
+             active.condition = paste0("visr.param.input_count >= ", input_index))
+}
+
+####################################################################################################
+visr.category("Sample Options")
+####################################################################################################
+
+visr.param("treatment", info = "list of 0 and 1 denoting which samples are control which samples are test",
+           default = "1, 1, 0, 0")
+
+visr.param("assembly", info = "a string that defines the genome assembly such as hg18, mm9. this is just a string for book keeping. It can be any string. Although, when using multiple files from the same assembly, this string should be consistent in each object.",
+           default = "hg18")
+
+visr.param("context", label="methylation context string", info = "Determines what type of methylation context will be read-in to the memory which can be immediately used for analysis.",
+           items = c('CpG','CHG','CHH','none'))
+
+####################################################################################################
+visr.category("Output Options")
+####################################################################################################
+
+visr.param("save.folder", label = "Save Folder",
+           type="filename", filename.mode = "dir",
+           info = "The folder which will be used to save methylation call files. if not specified no methylation call file will be saved as a text file. The files saved can be read in less time using 'Methylation Call' input type option",
+           active.condition = "visr.param.methcallorbismark == 'Bismark'")
 
 visr.param(
   "outputtype",
-  type = "char",
   label = "Output Plot Type",
   items = c(
     "Methylation",
@@ -76,7 +75,9 @@ visr.param(
   )
 )
 
-visr.category("Methylation/Coverage Options")
+####################################################################################################
+visr.category("Methylation: Coverage Options")
+####################################################################################################
 
 visr.param(
   "filechoose",
@@ -134,7 +135,9 @@ visr.param(
   items = c("PCA Scree Plot", "PCA Axis Plot")
 )
 
+####################################################################################################
 visr.category("Differential Methylation Annotation Options")
+####################################################################################################
 
 visr.param(
   "overlap",
@@ -160,7 +163,9 @@ visr.param(
   label = "q-value"
 )
 
+####################################################################################################
 visr.category("Filter By Coverage")
+####################################################################################################
 
 visr.param("filter",
            type = "logical",
@@ -191,73 +196,60 @@ visr.param(
   label = "Coverage upper limit in percentile"
 )
 
+####################################################################################################
+####################################################################################################
 visr.app.end(printjson = TRUE, writefile = TRUE)
 visr.applyParameters()
+####################################################################################################
+####################################################################################################
+
+param.treatment = eval(parse(text=paste0("c(", visr.param.treatment, ")")))
+param.location = visr.param.file1
+param.sample.id = visr.param.sample.id1
+
+param.save.folder = NULL
+if (visr.param.save.folder != '')
+  param.save.folder = visr.param.save.folder
+
+if (visr.param.input_count > 1) {
+  for (input_index in seq(2, visr.param.input_count)) {
+    param.location = c(param.location, eval(parse(text=paste0("visr.param.file",input_index))))
+    param.sample.id = c(param.sample.id, eval(parse(text=paste0("visr.param.sample.id",input_index))))
+  }
+  param.location = as.list(param.location)
+  param.sample.id = as.list(param.sample.id)
+}
 
 # Reading files into list
-if (visr.param.methcallorbismark == "Methylation Call" &&
-    visr.param.onefileormulti == "Multiple Files") {
-  file.list = list(visr.param.file1,
-                   visr.param.file2,
-                   visr.param.file3,
-                   visr.param.file4)
-  
+if (visr.param.methcallorbismark == "Methylation Call") {
   # Read the files to a methylRawList object: myobj
   myobj = methRead(
-    file.list,
-    sample.id = list(
-      visr.param.filename1,
-      visr.param.filename2,
-      visr.param.filename3,
-      visr.param.filename4
-    ),
-    assembly = "hg18",
-    treatment = c(1, 1, 0, 0),
-    context = "CpG"
+    param.location,
+    param.sample.id,
+    assembly = visr.param.assembly,
+    treatment = param.treatment,
+    context = visr.param.context
   )
-  
-} else if (visr.param.methcallorbismark == "Methylation Call" &&
-           visr.param.onefileormulti == "One File") {
-  # Read the files to a methylRaw object: myobj
-  myobj = methRead(
-    visr.param.file1,
-    sample.id = visr.param.filename1,
-    assembly = "hg18",
-    treatment = c(1, 1, 0, 0),
-    context = "CpG"
-  )
-  
 } else if (visr.param.methcallorbismark == "Bismark" &&
-           visr.param.onefileormulti == "One File") {
+           visr.param.input_count == 1) {
   # Read the files to a methylRaw object: myobj
   myobj = processBismarkAln(
-    location = visr.param.file1,
-    sample.id = visr.param.filename1,
-    assembly = "hg18",
-    read.context = "CpG",
-    save.folder = getwd()
+    location = param.location,
+    sample.id = param.sample.id,
+    assembly = visr.param.assembly,
+    read.context = visr.param.context,
+    save.folder = param.save.folder
   )
-  
 } else if (visr.param.methcallorbismark == "Bismark" &&
-           visr.param.onefileormulti == "Multiple Files") {
-  file.list = list(visr.param.file1,
-                   visr.param.file2,
-                   visr.param.file3,
-                   visr.param.file4)
-  
+           visr.param.input_count > 1) {
   # Read the files to a methylRawList object: myobj
   myobj = processBismarkAln(
-    location = file.list,
-    sample.id = list(
-      visr.param.filename1,
-      visr.param.filename2,
-      visr.param.filename3,
-      visr.param.filename4
-    ),
-    assembly = "hg18",
-    read.context = "CpG",
-    save.folder = getwd(),
-    treatment = c(1, 1, 0, 0)
+    location = param.location,
+    sample.id = param.sample.id,
+    assembly = visr.param.assembly,
+    read.context = visr.param.context,
+    save.folder = param.save.folder,
+    treatment = param.treatment
   )
 }
 
@@ -271,7 +263,7 @@ if (visr.param.filter == TRUE) {
   )
 }
 
-if (visr.param.onefileormulti == "Multiple Files") {
+if (visr.param.input_count > 1) {
   meth = unite(myobj, destrand = FALSE)
   if (visr.param.methmin == TRUE) {
     meth = unite(myobj, min.per.group = 1L)
@@ -286,7 +278,7 @@ if (visr.param.screeoraxis == "PCA Scree Plot") {
   scree = FALSE
 }
 
-if (visr.param.onefileormulti == "Multiple Files") {
+if (visr.param.input_count > 1) {
   if (visr.param.outputtype == "Methylation") {
     getMethylationStats(myobj[[visr.param.filechoose]], plot = TRUE, both.strands =
                           visr.param.bothstrands)
@@ -320,18 +312,18 @@ if (visr.param.onefileormulti == "Multiple Files") {
     # get all differentially methylated bases
     myDiff25p = getMethylDiff(myDiff, difference = visr.param.difference, qvalue =
                                 visr.param.qvalue)
-    
+
     if (visr.param.overlap == "Exons/Introns/Promoters") {
       # read the gene BED file
       gene.obj = readTranscriptFeatures(system.file("extdata", "refseq.hg18.bed.txt",
                                                     package = "methylKit"))
       # annotate differentially methylated CpGs with promoter/exon/intron using annotation data
       annotateWithGeneParts(as(myDiff25p, "GRanges"), gene.obj)
-      
+
       diffAnn = annotateWithGeneParts(as(myDiff25p, "GRanges"), gene.obj)
       # target.row is the row number in myDiff25p
       head(getAssociationWithTSS(diffAnn))
-      
+
       plotTargetAnnotation(diffAnn, precedence = TRUE,
                            main = "differential methylation annotation")
     } else {
@@ -341,7 +333,7 @@ if (visr.param.onefileormulti == "Multiple Files") {
                     package = "methylKit"),
         feature.flank.name = c("CpGi", "shores")
       )
-      
+
       # convert methylDiff object to GRanges and annotate
       diffCpGann = annotateWithFeatureFlank(
         as(myDiff25p, "GRanges"),
@@ -350,13 +342,13 @@ if (visr.param.onefileormulti == "Multiple Files") {
         feature.name = "CpGi",
         flank.name = "shores"
       )
-      
+
       plotTargetAnnotation(diffCpGann,
                            col = c("green", "gray", "white"),
                            main = "differential methylation annotation")
     }
   }
-} else if (visr.param.onefileormulti == "One File") {
+} else if (visr.param.input_count == 1) {
   if (visr.param.outputtype == "Methylation") {
     getMethylationStats(myobj, plot = TRUE, both.strands = visr.param.bothstrands)
   } else if (visr.param.outputtype == "Coverage") {

@@ -1,77 +1,221 @@
 {
   "label": "Methyl Kit",
   "info": "",
+  "instructions": "",
+  "input": "none",
   "categories":[  {
-    "label": "Data Files",
+    "label": "Input Options",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.methcallorbismark": {
-        "label": "File Type",
+        "label": "Input Type",
         "type": "string",
-        "items": [ "Methylation Call","Bismark" ]
+        "items": ["Methylation Call", "Bismark"]
       },
-      "visr.param.onefileormulti": {
-        "label": "Number of Files",
-        "type": "string",
-        "items": [ "Multiple Files","One File" ]
-      },
+      "visr.param.input_count": {
+        "label": "Number of input files",
+        "type": "int",
+        "default": 4,
+        "min": 1,
+        "max": 10
+      }
+    }
+  },
+  {
+    "label": "Data Files",
+    "info": "",
+    "collapsed": false,
+    "variables": {
       "visr.param.file1": {
         "label": "File 1",
+        "info": "location of input file",
         "type": "filename",
-        "filename.mode": "load"
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 1"
+      },
+      "visr.param.sample.id1": {
+        "label": "Title for Sample 1",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 1",
+        "active-condition": "visr.param.input_count >= 1"
       },
       "visr.param.file2": {
         "label": "File 2",
+        "info": "location of input file",
         "type": "filename",
-        "filename.mode": "load"
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 2"
+      },
+      "visr.param.sample.id2": {
+        "label": "Title for Sample 2",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 2",
+        "active-condition": "visr.param.input_count >= 2"
       },
       "visr.param.file3": {
         "label": "File 3",
+        "info": "location of input file",
         "type": "filename",
-        "filename.mode": "load"
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 3"
+      },
+      "visr.param.sample.id3": {
+        "label": "Title for Sample 3",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 3",
+        "active-condition": "visr.param.input_count >= 3"
       },
       "visr.param.file4": {
         "label": "File 4",
+        "info": "location of input file",
         "type": "filename",
-        "filename.mode": "load"
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 4"
       },
-      "visr.param.filename1": {
-        "label": "File 1 Title",
+      "visr.param.sample.id4": {
+        "label": "Title for Sample 4",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
         "type": "string",
-        "default": "Test 1"
+        "default": "Sample 4",
+        "active-condition": "visr.param.input_count >= 4"
       },
-      "visr.param.filename2": {
-        "label": "File 2 Title",
-        "type": "string",
-        "default": "Test 2"
+      "visr.param.file5": {
+        "label": "File 5",
+        "info": "location of input file",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 5"
       },
-      "visr.param.filename3": {
-        "label": "File 3 Title",
+      "visr.param.sample.id5": {
+        "label": "Title for Sample 5",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
         "type": "string",
-        "default": "Ctrl 1"
+        "default": "Sample 5",
+        "active-condition": "visr.param.input_count >= 5"
       },
-      "visr.param.filename4": {
-        "label": "File 4 Title",
+      "visr.param.file6": {
+        "label": "File 6",
+        "info": "location of input file",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 6"
+      },
+      "visr.param.sample.id6": {
+        "label": "Title for Sample 6",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
         "type": "string",
-        "default": "Ctrl 2"
+        "default": "Sample 6",
+        "active-condition": "visr.param.input_count >= 6"
+      },
+      "visr.param.file7": {
+        "label": "File 7",
+        "info": "location of input file",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 7"
+      },
+      "visr.param.sample.id7": {
+        "label": "Title for Sample 7",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 7",
+        "active-condition": "visr.param.input_count >= 7"
+      },
+      "visr.param.file8": {
+        "label": "File 8",
+        "info": "location of input file",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 8"
+      },
+      "visr.param.sample.id8": {
+        "label": "Title for Sample 8",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 8",
+        "active-condition": "visr.param.input_count >= 8"
+      },
+      "visr.param.file9": {
+        "label": "File 9",
+        "info": "location of input file",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 9"
+      },
+      "visr.param.sample.id9": {
+        "label": "Title for Sample 9",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 9",
+        "active-condition": "visr.param.input_count >= 9"
+      },
+      "visr.param.file10": {
+        "label": "File 10",
+        "info": "location of input file",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_count >= 10"
+      },
+      "visr.param.sample.id10": {
+        "label": "Title for Sample 10",
+        "info": "The id of the sample for the specified input file. e.g. test1 or ctrl1",
+        "type": "string",
+        "default": "Sample 10",
+        "active-condition": "visr.param.input_count >= 10"
       }
     }
   },
   {
-    "label": "Output Type",
+    "label": "Sample Options",
     "info": "",
+    "collapsed": false,
     "variables": {
+      "visr.param.treatment": {
+        "info": "list of 0 and 1 denoting which samples are control which samples are test",
+        "type": "string",
+        "default": "1, 1, 0, 0"
+      },
+      "visr.param.assembly": {
+        "info": "a string that defines the genome assembly such as hg18, mm9. this is just a string for book keeping. It can be any string. Although, when using multiple files from the same assembly, this string should be consistent in each object.",
+        "type": "string",
+        "default": "hg18"
+      },
+      "visr.param.context": {
+        "label": "methylation context string",
+        "info": "Determines what type of methylation context will be read-in to the memory which can be immediately used for analysis.",
+        "type": "string",
+        "items": ["CpG", "CHG", "CHH", "none"]
+      }
+    }
+  },
+  {
+    "label": "Output Options",
+    "info": "",
+    "collapsed": false,
+    "variables": {
+      "visr.param.save.folder": {
+        "label": "Save Folder",
+        "info": "The folder which will be used to save methylation call files. if not specified no methylation call file will be saved as a text file. The files saved can be read in less time using 'Methylation Call' input type option",
+        "type": "filename",
+        "filename.mode": "dir",
+        "active-condition": "visr.param.methcallorbismark == 'Bismark'"
+      },
       "visr.param.outputtype": {
         "label": "Output Plot Type",
         "type": "string",
-        "items": [ "Methylation","Coverage","Correlation","Clustering","PCA","Differential Methylation Annotation" ],
-        "item-labels": [ "Methylation","Coverage","Correlation (MultiFile Only)","Clustering (MultiFile MethCall Only)","PCA (MultiFile MethCall Only)","Differential Methylation Annotation (MultiFile MethCall Only)" ]
+        "items": ["Methylation", "Coverage", "Correlation", "Clustering", "PCA", "Differential Methylation Annotation"],
+        "item-labels": ["Methylation", "Coverage", "Correlation (MultiFile Only)", "Clustering (MultiFile MethCall Only)", "PCA (MultiFile MethCall Only)", "Differential Methylation Annotation (MultiFile MethCall Only)"]
       }
     }
   },
   {
-    "label": "Methylation/Coverage Options",
+    "label": "Methylation: Coverage Options",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.filechoose": {
         "label": "Choose file number for plots",
@@ -90,6 +234,7 @@
   {
     "label": "Correlation/Clustering/PCA Options",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.methmin": {
         "label": "CpGs with >=1 sample per group only",
@@ -100,31 +245,32 @@
         "label": "Clustering Distance Measure",
         "type": "string",
         "default": "correlation",
-        "items": [ "correlation","euclidean","maximum","manhattan","binary","minkowski" ]
+        "items": ["correlation", "euclidean", "maximum", "manhattan", "binary", "minkowski"]
       },
       "visr.param.clusteringmethod": {
         "label": "Clustering Method",
         "type": "string",
         "default": "ward",
-        "items": [ "ward","single","complete","average","mcquitty","median","centroid" ]
+        "items": ["ward", "single", "complete", "average", "mcquitty", "median", "centroid"]
       },
       "visr.param.screeoraxis": {
         "label": "PCA Plot Type",
         "type": "string",
         "default": "PCA Scree Plot",
-        "items": [ "PCA Scree Plot","PCA Axis Plot" ]
+        "items": ["PCA Scree Plot", "PCA Axis Plot"]
       }
     }
   },
   {
     "label": "Differential Methylation Annotation Options",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.overlap": {
         "label": "Overlap With",
         "type": "string",
         "default": "Exons/Introns/Promoters",
-        "items": [ "Exons/Introns/Promoters","CpG Islands" ]
+        "items": ["Exons/Introns/Promoters", "CpG Islands"]
       },
       "visr.param.difference": {
         "label": "Percent Methylation Difference",
@@ -145,6 +291,7 @@
   {
     "label": "Filter By Coverage",
     "info": "",
+    "collapsed": false,
     "variables": {
       "visr.param.filter": {
         "label": "Filter samples based on read coverage",
