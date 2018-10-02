@@ -9,11 +9,11 @@ visr.app.start("10X Cell Ranger",
 ################################ Input
 # pipeline output directory (pipestance path)
 visr.app.category(label="Input",
-                  info="10X Cell Ranger pipeline dataset directory. It should contain a sub-directory named 'outs'")
+                  info="The 10X pipeline output directory (or pipestance path). It should contain a sub-directory named 'outs'")
 
 visr.param("data_dir_10x",
            label="10X dataset directory",
-           info="10X Cell Ranger dataset directory. It should contain a sub-directory named 'outs'",
+           info="The 10X pipeline output directory (or pipestance path). It should contain a sub-directory named 'outs'",
            type="filename", filename.mode = "dir",
            debugvalue= "~/SFU/Datasets/SingleCell/pbmc3k/") # Peripheral Blood Mononuclear Cells (PBMCs) from a healthy donor
 
@@ -23,7 +23,7 @@ visr.category("Output",
               active.condition = "visr.param.data_dir_10x != ''")
 
 visr.param("output_dir",
-           label="Output Directory to save the results",
+           label="Output directory to save the results",
            info="Output directory where the analysis results will be saved to",
            type="filename", filename.mode = "dir",
            debugvalue= "~/SFU/Datasets/SingleCell/output/")

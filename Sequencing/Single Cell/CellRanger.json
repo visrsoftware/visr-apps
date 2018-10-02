@@ -5,12 +5,12 @@
   "input": "none",
   "categories":[  {
     "label": "Input",
-    "info": "10X Cell Ranger pipeline dataset directory. It should contain a sub-directory named 'outs'",
+    "info": "The 10X pipeline output directory (or pipestance path). It should contain a sub-directory named 'outs'",
     "collapsed": false,
     "variables": {
       "visr.param.data_dir_10x": {
         "label": "10X dataset directory",
-        "info": "10X Cell Ranger dataset directory. It should contain a sub-directory named 'outs'",
+        "info": "The 10X pipeline output directory (or pipestance path). It should contain a sub-directory named 'outs'",
         "type": "filename",
         "filename.mode": "dir"
       }
@@ -23,7 +23,7 @@
     "active-condition": "visr.param.data_dir_10x != ''",
     "variables": {
       "visr.param.output_dir": {
-        "label": "Output Directory to save the results",
+        "label": "Output directory to save the results",
         "info": "Output directory where the analysis results will be saved to",
         "type": "filename",
         "filename.mode": "dir"
