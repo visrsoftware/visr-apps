@@ -52,11 +52,25 @@ finishReport <- function() {
   }
 }
 
+#' Writes the first two columns of a table as a new plot page
+#' @param dataTable input data table
+#' @param title     title to be shown at the top of the page
 plotTableSummary <- function(dataTable, title) {
   plot.new()
   mtext(text = title, adj=0.5, side=3, line = 1)
   mtext(text=dataTable[,1], adj=0, col=c("gray10","gray60"), side=3, line=c(1:nrow(dataTable))*-1)
   mtext(text=dataTable[,2], adj=1, col=c("gray10","gray60"), side=3, line=c(1:nrow(dataTable))*-1)
+}
+
+#' Writes a title into a new plot page
+#' @param title   title of the page
+#' @param size    font size
+plotTitlePage <- function(title, text_size = 3, text_color = "black") {
+  plot.new()
+  # mtext(text = title, padj = 0.5, adj=0.5, side=3, line = -10, cex = size)
+  par(mar = c(0,0,0,0))
+  plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')
+  text(x = 0.5, y = 0.5, title, cex = text_size, col = text_color)
 }
 
 plotGBMSummary <- function(gbm) {
@@ -71,13 +85,13 @@ extract_param <- function(path){
   con <- file(path, open = "r")
   lines <- readLines(con = con)
   close(con = con)
-  
+
   n <- length(lines)
   i <- 1
   op <- "\\("
   cp <- ")"
   params <- list()
-  
+
   read_complete_line <- function(line,i,start){
     while(!endsWith(line,cp)){
       i <- i+1
@@ -127,7 +141,7 @@ extract_param <- function(path){
     }
     i <- i+1
   }
-  
+
   # output <- rbind(c("Name","Label","Value","Used"))
   # for (i in 1:length(params)){
   #   output <- rbind(output, params[[i]], rep("",ncol(output)))
@@ -135,7 +149,7 @@ extract_param <- function(path){
   return(params)
 }
 
-#get library ids from barcodes
+#' get library ids from barcodes
 get_lib_id <- function(barcodes){
   get_id <- function(barcode){
     id <- strsplit(x = barcode,split = "-")[[1]][2]
@@ -144,4 +158,11 @@ get_lib_id <- function(barcodes){
   }
   lib_ids <- sapply(X = barcodes, FUN = get_id, USE.NAMES = F)
   return(lib_ids)
+}
+
+#' Plain format (no scientific) to be used for plot axis scales
+#' example ggplot(...) + scale_x_log10(labels = axis_plain_format) + ...
+axis_plain_format <- function(x,...)
+{
+  format(x, ..., scientific = FALSE, trim = TRUE)
 }
