@@ -24,18 +24,31 @@
       "visr.param.derivationMethod": {
         "label": "Derivation Method",
         "type": "string",
-        "items": ["No derived output", "Take first row", "Aggregate: Number of class labels", "Aggregate: Mode of class labels", "Aggregate: Count per class label", "Aggregate: Average", "Aggregate: Sum", "Aggregate: Median", "Aggregate: Min", "Aggregate: Max", "Dimensionality Reduction: PCA", "Dimensionality Reduction: MDS", "Dimensionality Reduction: tSNE"]
+        "items": ["No derived output", "Take first row", "Aggregate: Count per class label", "Comparison: with ground truth", "Aggregate: Number of class labels", "Aggregate: Mode of class labels", "Aggregate: Average", "Aggregate: Sum", "Aggregate: Median", "Aggregate: Min", "Aggregate: Max", "Dimensionality Reduction: PCA", "Dimensionality Reduction: MDS", "Dimensionality Reduction: tSNE"]
       },
       "visr.param.tableForDerivatives": {
-        "label": "Table to Use for Derivatives",
+        "label": "Table to use for derivation",
         "type": "string",
-        "items": ["", "quality_criteria"],
+        "items": ["table1", "table2"],
         "active-condition": "visr.param.derivationMethod != 'No derived output'"
       },
       "visr.param.columnsForDerivatives": {
-        "label": "Column to Use for Derivatives",
+        "label": "Column to use for derivation",
         "type": "string",
         "active-condition": "visr.param.derivationMethod != 'No derived output' && visr.param.derivationMethod != 'Take first row'"
+      },
+      "visr.param.tableToCompare": {
+        "label": "GT Table to compare to",
+        "info": "Table containing ground truth values",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.derivationMethod == 'Comparison: with ground truth'"
+      },
+      "visr.param.columnToCompare": {
+        "label": "GT Column to compare to",
+        "info": "column name with ground truth values",
+        "type": "string",
+        "active-condition": "visr.param.derivationMethod == 'Comparison: with ground truth'"
       }
     }
   },

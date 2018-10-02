@@ -3,21 +3,22 @@ source("visrutils.R")
 visr.app.start("ModEx", info = "A general purpose system for exploration of computational models")
 visr.category("Input")
 visr.param("directory", label = "Runs directory", type = "filename", filename.mode = "dir",
-           debugvalue = "~/SFU/TFPlaygroundPSA/output/gauss_25_1")
+           debugvalue = "~/SFU/TFPlaygroundPSA/output/10k")
 
 
 DERIVATION_NONE <- "No derived output"
 DERIVATION_FIRST_ROW <- "Take first row"
 DERIVATION_COUNT_PER_CLASS <- "Aggregate: Count per class label"
-
+DERIVATION_COMPARE_GT <- "Comparison: with ground truth"
 visr.category("Derived output", active.condition = "visr.param.directory != ''")
 visr.param("derivationMethod", label =  "Derivation Method",
            items = c(
              DERIVATION_NONE,
              DERIVATION_FIRST_ROW,
+             DERIVATION_COUNT_PER_CLASS,
+             DERIVATION_COMPARE_GT, # TODO
              "Aggregate: Number of class labels", # TODO
              "Aggregate: Mode of class labels", #TODO
-             DERIVATION_COUNT_PER_CLASS,
              "Aggregate: Average", #TODO
              "Aggregate: Sum",#TODO
              "Aggregate: Median",#TODO
@@ -28,13 +29,24 @@ visr.param("derivationMethod", label =  "Derivation Method",
              "Dimensionality Reduction: tSNE"#TODO
            ),
            debugvalue = DERIVATION_NONE)
-visr.param("tableForDerivatives", label = "Table to Use for Derivatives",
-           items = c("", "quality_criteria"), #TODO: these items should be populated with proper table names in PSA java code
+
+visr.param("tableForDerivatives", label = "Table to use for derivation",
+           # items = c("table1", "table2"), # items will be populated with table names in runs\ directory in PSA java code
            active.condition = sprintf("visr.param.derivationMethod != '%s'", DERIVATION_NONE))
 
-visr.param("columnsForDerivatives", label = "Column to Use for Derivatives",
+visr.param("columnsForDerivatives", label = "Column to use for derivation",
            active.condition = sprintf("visr.param.derivationMethod != '%s' && visr.param.derivationMethod != '%s'", DERIVATION_NONE, DERIVATION_FIRST_ROW),
-           debugvalue = "edgeR_is.de")
+           debugvalue = "edgeR_is.de") # this will be populated with column names of the table selected for tableForDerivatives in PSA java code
+
+visr.param("tableToCompare", label = "GT Table to compare to",
+           info = "Table containing ground truth values",
+           type = "filename",
+           active.condition = sprintf("visr.param.derivationMethod == '%s'", DERIVATION_COMPARE_GT))
+
+visr.param("columnToCompare", label = "GT Column to compare to",
+           info = "column name with ground truth values",
+           active.condition = sprintf("visr.param.derivationMethod == '%s'", DERIVATION_COMPARE_GT),
+           debugvalue = "columnname")
 
 # visr.param("derivativePCA", label = "Calculate PCA on Derivatives", default = FALSE, # TODO
 #           active.condition = paste0("visr.param.derivationMethod != '", DERIVATION_NONE, "'"))
@@ -200,13 +212,33 @@ storeMinDistColumns <- FALSE
 ###############################################################################
 
 visr.logProgress("Loading the runs files")
-visr.assert_file_exists(pathInput, "input")
-visr.assert_file_exists(pathParamInfo, "paramInfo")
 visr.assert_file_exists(pathRunsInfo, "runsInfo")
-
-inputTable <- read.table(pathInput, header=TRUE, sep="\t", check.names = F)
-paramInfo  <- read.table(pathParamInfo, header=TRUE, sep = "\t", stringsAsFactors = FALSE, check.names = F)
 runsInfoTable <- read.table(pathRunsInfo, header=TRUE, sep = "\t", check.names = F)
+
+if (!file.exists(pathInput)) {
+  # create a dummy input
+  write.table(data.frame("null"), pathInput, row.names = FALSE, sep="\t", quote=FALSE)
+}
+visr.assert_file_exists(pathInput, "input")
+inputTable <- read.table(pathInput, header=TRUE, sep="\t", check.names = F)
+
+if (!file.exists(pathParamInfo)) {
+  # create one from the runsInfo
+  paramInfo <- NULL
+  for (varName in colnames(runsInfoTable)) {
+    paramInfo <- rbind(paramInfo, c(
+      varName,
+      varName,
+      (if (is.integer(runsInfoTable[,varName])) "int" else if (is.numeric(runsInfoTable[,varName])) "double" else "string"),
+      varName
+    ))
+  }
+  colnames(paramInfo) <- c("label", "name", "type", "info")
+  write.table(paramInfo, pathParamInfo, row.names = FALSE, sep = "\t", quote=FALSE)
+}
+
+visr.assert_file_exists(pathParamInfo, "paramInfo")
+paramInfo  <- read.table(pathParamInfo, header=TRUE, sep = "\t", stringsAsFactors = FALSE, check.names = F)
 if ("succeded" %in% colnames(runsInfoTable)) {
   # only take the runs that succeeded.
   # TODO: better way of handling the failed runs. e.g. to show which parameter combinations were problematic.
@@ -254,6 +286,16 @@ if (!file.exists(pathParamViewInfo)) {
 # Calculate derived output for all Runs (dOutput)
 ###############################################################################
 
+if (visr.param.derivationMethod == DERIVATION_COMPARE_GT) {
+  visr.logProgress("loading table with ground truth values ")
+  if (!file.exists(visr.param.tableToCompare))
+    stop(sprintf("File not found: %s", visr.param.tableToCompare))
+  tableToCompare <- read.table(visr.param.tableToCompare, header=TRUE, sep="\t", check.names = F)
+  if (!visr.param.columnToCompare %in% colnames(tableToCompare))
+    stop(sprintf("No column %s found in %s", visr.param.columnToCompare, visr.param.tableToCompare))
+  columnToCompare <- tableToCompare[, visr.param.columnToCompare]
+}
+
 if (visr.param.derivationMethod != DERIVATION_NONE) {
   visr.print(paste("Calculating derivative results:", visr.param.derivationMethod))
 
@@ -262,7 +304,7 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
   if (numRuns > 0) {
     for (i in 1:numRuns) {
       visr.logProgress(paste("reading",fileNames[i]))
-      tt <- read.table(fileNames[i], header=TRUE,sep="\t", check.names = F)
+      tt <- read.table(fileNames[i], header=TRUE, sep="\t", check.names = F)
       if (visr.param.derivationMethod == DERIVATION_FIRST_ROW) {
         if (i == 1) {
           dOutput <- tt[1,] # take the first row
@@ -273,11 +315,13 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
         if (i == 1) {
           dOutput <- matrix(nrow=numRuns, ncol=0) # matrix of derivations
         }
-        for (derivCol in visr.param.columnsForDerivatives) {
+        #for (derivCol in visr.param.columnsForDerivatives)
+        derivCol = visr.param.columnsForDerivatives
+        {
           tt_col <- tt[,derivCol]
           tt_table <- table(tt_col)
           for (n1 in names(tt_table)) {
-            colName <- paste0(derivCol, "(", n1, ")") # e.g. "is.de(-1)"
+            colName <- paste0('n(', derivCol, "=", n1, ")") # e.g. "n(isDE=-1)"
             if (!colName %in% colnames(dOutput)) {
               # seeing the factor level for the first time
               newColnames <- c(colnames(dOutput), colName)
@@ -287,12 +331,24 @@ if (visr.param.derivationMethod != DERIVATION_NONE) {
             dOutput[i, colName] <- tt_table[n1]
           }
         }
-        '
+      } else if (visr.param.derivationMethod == DERIVATION_COMPARE_GT) {
         if (i == 1) {
-          allRunsMatrix <- matrix(nrow = numRuns, ncol=nrow(tt))
+          dOutput <- matrix(nrow=numRuns, ncol=0) # matrix of derivations
         }
-        allRunsMatrix[i,] <- tt[, visr.param.mdsColumnIndex]
-        '
+        derivCol = visr.param.columnsForDerivatives
+        # e.g. n(isDE=FALSE & GT_DE=FALSE)
+        tt_col <- paste0('n(', derivCol, '=', tt[,derivCol], ' & ',
+                               visr.param.columnToCompare, '=', columnToCompare, ')')
+        tt_table <- table(tt_col)
+        for (colName in names(tt_table)) {
+          if (!colName %in% colnames(dOutput)) {
+            # seeing the factor level for the first time, add the column
+            newColnames <- c(colnames(dOutput), colName)
+            dOutput <- cbind(dOutput, rep(0, numRuns))
+            colnames(dOutput) <- newColnames
+          }
+          dOutput[i, colName] <- tt_table[colName]
+        }
       } else {
         visr.message(msg = sprintf("The derivation method '%s' cannot be computed", visr.param.derivationMethod), type = "error")
       }
@@ -582,3 +638,4 @@ visr.print("Saving the (possibly) changed files ...")
 write.table(runsInfoTable, file=pathRunsInfo,     row.names = FALSE, col.names = TRUE, sep = "\t", quote=FALSE)
 write.table(paramInfo,  file=pathParamInfo, row.names = FALSE, col.names = TRUE, sep = "\t", quote=TRUE)
 visr.print("[DONE] Saving the (possibly) changed files")
+visr.print("Loading ModEx interface...")
