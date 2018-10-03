@@ -10,7 +10,7 @@ INPUT_TYPE_SPARSE_MATRIX = "Sparse matrix"
 visr.param("input_type", label = "Choose Import Method",
            info = "Specify the format of your input data. Whether it is a 10X cell ranger dataset or existing monocle object",
            items = c(INPUT_TYPE_10X, INPUT_TYPE_MONOCLE_OBJECT, INPUT_TYPE_COUNT_MATRIX_TXT, INPUT_TYPE_SPARSE_MATRIX),
-           debugvalue = INPUT_TYPE_10X)
+           debugvalue = INPUT_TYPE_MONOCLE_OBJECT)
 
 visr.param("data_dir_10x",
            label="10X dataset directory",
@@ -20,8 +20,9 @@ visr.param("data_dir_10x",
            debugvalue= "~/SFU/Datasets/SingleCell/pbmc3k/") # Peripheral Blood Mononuclear Cells (PBMCs) from a healthy donor
 
 visr.param("path_to_monocle_object", type="filename",filename.mode = "load",
-           info = "Path to the existing monocle object (monocle_app_object.RData)",
-           active.condition = sprintf("visr.param.input_type == '%s'", INPUT_TYPE_MONOCLE_OBJECT))
+           info = "Path to the existing monocle object (monocle_app_object.RDS)",
+           active.condition = sprintf("visr.param.input_type == '%s'", INPUT_TYPE_MONOCLE_OBJECT),
+           debugvalue= "~/SFU/Datasets/SingleCell/output_monocle/monocle_app_object.RDS")
 
 visr.param("expression_matrix", type = "filename",
            info = "Numeric matrix of expression values, where rows are genes, and columns are cells",
@@ -79,7 +80,7 @@ prepare_output <- function() {
 }
 
 #' loads an RDS object
-load_object <- function(path){
+load_rds_object <- function(path){
   object <- tryCatch(readRDS(path),
                       error = function(e) {
                         visr.message(sprintf("Cannot read the input object format '%s'.\nMake sure the object is saved using the 'saveRDS()' function.", path))
@@ -89,6 +90,7 @@ load_object <- function(path){
 
 #'
 #' Load input data
+#' @return monocle_app_object
 #'
 load_input <- function() {
   enable_estimations <- TRUE # estimate dispersions
@@ -139,7 +141,8 @@ load_input <- function() {
   else if (visr.param.input_type == INPUT_TYPE_MONOCLE_OBJECT) {
     if (!file.exists(visr.param.path_to_monocle_object))
       visr.message(sprintf("'%s' is not a valid path to a monocle object", visr.param.path_to_monocle_object))
-    my_cds <- load_object(visr.param.path_to_monocle_object)
+    visr.logProgress("Loading data from the moncle app object ...")
+    monocle_app_object <- load_rds_object(visr.param.path_to_monocle_object)
     return(monocle_app_object)
   }
   else if (visr.param.input_type == INPUT_TYPE_COUNT_MATRIX_TXT) {
