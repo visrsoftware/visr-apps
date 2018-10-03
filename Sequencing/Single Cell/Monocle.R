@@ -268,7 +268,8 @@ visr.param("num_branch_genes_to_plot", label = "Number of branch dependent genes
            "Number of branch dependent genes to plot per cluster")
 
 ################################################################
-visr.category("Additional parameters", collapsed = T)
+visr.category("Additional parameters", collapsed = T,
+              active.condition = "visr.param.output_dir != ''")
 ################################################################
 
 visr.param("num_cores", label = "Number of cores to use for DE", min = 1L, default = 4L,
@@ -550,7 +551,6 @@ Red line shows expectation of the dispersion.",
     length(which(fData(my_cds)$use_for_ordering)), visr.param.gene_subset_method, min_threshold_used)) +
     theme(plot.title = element_text(size = 8))
   print(p)
-
 }
 
 ################################################################
@@ -611,7 +611,8 @@ if (visr.param.enable_clustering) {
     k = visr.param.louvain_k,
     louvain_iter = visr.param.louvain_iter,
     weight = visr.param.louvain_weight,
-    method = visr.param.cluster_method)
+    method = visr.param.cluster_method,
+    verbose = T)
 
   head(pData(my_cds))
   print("Cluster sizes:")
@@ -648,7 +649,8 @@ perform_de <- function(cds, fullModelFormulaStr, de_genes_filename) {
                                             fullModelFormulaStr = fullModelFormulaStr,
                                             reducedModelFormulaStr = "~1", # default
                                             relative_expr = TRUE, # default
-                                            cores = visr.param.num_cores, verbose = TRUE)
+                                            cores = visr.param.num_cores,
+                                            verbose = TRUE)
   dim(de_genes)
   #de_genes_valid <- de_genes[which(de_genes$qval < visr.param.trajectory_max_qval),]
   #de_genes_valid <- de_genes_valid[order(de_genes_valid$qval),]
@@ -679,7 +681,7 @@ if (visr.param.enable_de_analysis) {
   }
 
   if (visr.param.de_formula == DE_FORMULA_ALL_CLUSTERS) {
-    visr.logProgress("Performing the differential expression analysis across all clusters ...")
+    visr.logProgress("Performing differential expression analysis across all clusters ...")
     de_genes_filename <- paste0(visr.param.output_dir, "/de_genes_all_clusters.txt")
     de_genes <<- perform_de(cds_de_subset, '~Cluster', de_genes_filename)
   }
@@ -821,7 +823,7 @@ if (visr.param.enable_trajectories) {
 
   # A table of genes is returned with significance values that indicate whether genes have expression patterns that are branch dependent.
   if (visr.param.analyze_trajectory_branches) {
-    plotTitlePage("Analyzing branches in single-cell trajectories", size = 1)
+    plotTitlePage("Analyzing branches in single-cell trajectories", 1)
 
     trajectory_branch_point <- visr.param.trajectory_branch_point
     BEAM_res <- monocle::BEAM(my_cds,

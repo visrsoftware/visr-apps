@@ -397,6 +397,7 @@
     "label": "Additional parameters",
     "info": "",
     "collapsed": true,
+    "active-condition": "visr.param.output_dir != ''",
     "variables": {
       "visr.param.num_cores": {
         "label": "Number of cores to use for DE",
