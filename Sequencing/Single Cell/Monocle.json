@@ -9,9 +9,10 @@
     "collapsed": false,
     "variables": {
       "visr.param.input_type": {
-        "info": "Specify the format of your input data. Whether it is a 10X cell ranger dataset or a normal or sparse an expression matrix",
+        "label": "Choose Import Method",
+        "info": "Specify the format of your input data. Whether it is a 10X cell ranger dataset or existing monocle object",
         "type": "string",
-        "items": ["10X single cell dataset", "Count matrix (.txt)", "Sparse matrix"]
+        "items": ["10X single cell dataset", "Load Monocle Object", "Count matrix (.txt)", "Sparse matrix"]
       },
       "visr.param.data_dir_10x": {
         "label": "10X dataset directory",
@@ -19,6 +20,12 @@
         "type": "filename",
         "filename.mode": "dir",
         "active-condition": "visr.param.input_type == '10X single cell dataset'"
+      },
+      "visr.param.path_to_monocle_object": {
+        "info": "Path to the existing monocle object (monocle_app_object.RData)",
+        "type": "filename",
+        "filename.mode": "load",
+        "active-condition": "visr.param.input_type == 'Load Monocle Object'"
       },
       "visr.param.expression_matrix": {
         "info": "Numeric matrix of expression values, where rows are genes, and columns are cells",
@@ -51,7 +58,7 @@
     "label": "Output",
     "info": "",
     "collapsed": false,
-    "active-condition": "(visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != '')",
+    "active-condition": "(visr.param.data_dir_10x != '') || (visr.param.path_to_monocle_object != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != '')",
     "variables": {
       "visr.param.output_dir": {
         "label": "Output Directory to save the results",
@@ -71,7 +78,7 @@
     "label": "Analysis steps",
     "info": "Different analysis steps",
     "collapsed": false,
-    "active-condition": "visr.param.output_dir != '' && ((visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != ''))",
+    "active-condition": "visr.param.output_dir != '' && ((visr.param.data_dir_10x != '') || (visr.param.path_to_monocle_object != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != ''))",
     "variables": {
       "visr.param.enable_filtering": {
         "label": "Filtering cells and subsetting genes",
@@ -90,35 +97,35 @@
         "info": "Identify subtypes of cells using unsupervised clustering.",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.enable_filtering && visr.param.enable_dim_red"
+        "active-condition": "((visr.param.input_type == 'Load Monocle Object') && (visr.param.path_to_monocle_object != '')) || (visr.param.enable_filtering && visr.param.enable_dim_red)"
       },
       "visr.param.enable_de_analysis": {
         "label": "Differential expression analysis",
         "info": "Characterize differentially expressed genes by comparing groups of cells.",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering"
+        "active-condition": "((visr.param.input_type == 'Load Monocle Object') && (visr.param.path_to_monocle_object != '')) || (visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering)"
       },
       "visr.param.enable_trajectories": {
         "label": "Single-cell trajectories",
         "info": "Discover cells transition from one state to another.",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis"
+        "active-condition": "((visr.param.input_type == 'Load Monocle Object') && (visr.param.path_to_monocle_object != '')) || (visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis)"
       },
       "visr.param.find_pseudotime_genes": {
         "label": "Find pseudotime changing genes",
         "info": "Find genes that change as a function of pseudotime",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis && visr.param.enable_trajectories"
+        "active-condition": "((visr.param.input_type == 'Load Monocle Object') && (visr.param.path_to_monocle_object != '')) || (visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis && visr.param.enable_trajectories)"
       },
       "visr.param.analyze_trajectory_branches": {
         "label": "Analyze branches in trajectories",
         "info": "Analyze branches in single-cell trajectories to identify the genes that differ at a particular branch point",
         "type": "boolean",
         "default": true,
-        "active-condition": "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis && visr.param.enable_trajectories"
+        "active-condition": "((visr.param.input_type == 'Load Monocle Object') && (visr.param.path_to_monocle_object != '')) || (visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis && visr.param.enable_trajectories)"
       }
     }
   },
@@ -340,7 +347,7 @@
     "label": "Find pseudotime changing genes",
     "info": "Find genes that change as a function of pseudotime.",
     "collapsed": false,
-    "active-condition": "visr.param.output_dir != '' && visr.param.enable_trajectories && visr.param.find_pseudotime_genes",
+    "active-condition": "visr.param.output_dir != '' && visr.param.find_pseudotime_genes",
     "variables": {
       "visr.param.cluster_genes_by_pseudo": {
         "label": "Cluster genes by pseudotime",
@@ -370,7 +377,7 @@
     "label": "Analyze branches in trajectories",
     "info": "Analyze branches in single-cell trajectories to identify the genes that differ at a particular branch point.",
     "collapsed": false,
-    "active-condition": "visr.param.output_dir != '' && visr.param.enable_trajectories && visr.param.analyze_trajectory_branches",
+    "active-condition": "visr.param.output_dir != '' && visr.param.analyze_trajectory_branches",
     "variables": {
       "visr.param.trajectory_branch_point": {
         "label": "Branch point number",

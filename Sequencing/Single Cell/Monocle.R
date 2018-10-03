@@ -4,7 +4,9 @@
 # - subset cells based on barcode
 # - add summaries to the report
 # - classify cells based on gene-markers: http://cole-trapnell-lab.github.io/monocle-release/docs/#classifying-cells-by-type-recommended
+# - cluster using marker genes: http://cole-trapnell-lab.github.io/monocle-release/docs/#clustering-cells-using-marker-genes-recommended
 #   Myoblast: [MYF5] >= 1, Fibroblast: [MYF5] < 1 & [ANPEP] > 1
+# - ordering genes using marker genes: http://cole-trapnell-lab.github.io/monocle-release/docs/#alternative-choices-for-ordering-genes
 # add filtering / tSNE / clustering results to the cells.txt
 
 source("visrutils.R")
@@ -90,10 +92,12 @@ if (visr.param.enable_trajectories) {
   monocle_app_object <- perform_construct_trajectories(monocle_app_object)
 }
 
+# Cluster genes along pseudotime
 if (visr.param.find_pseudotime_genes) {
   monocle_app_object <- perform_pseudotime_genes(monocle_app_object)
 }
 
+# Analyze trajectory branches
 if (visr.param.analyze_trajectory_branches) {
   monocle_app_object <- perform_analyze_branches(monocle_app_object)
 }

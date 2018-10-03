@@ -3,11 +3,14 @@ visr.category(label="Input")
 ################################################################
 
 INPUT_TYPE_10X = "10X single cell dataset"
+INPUT_TYPE_MONOCLE_OBJECT = "Load Monocle App Object (.RDS)"
 INPUT_TYPE_COUNT_MATRIX_TXT = "Count matrix (.txt)"
+#TODO:
 INPUT_TYPE_SPARSE_MATRIX = "Sparse matrix"
-visr.param("input_type",
-           info = "Specify the format of your input data. Whether it is a 10X cell ranger dataset or a normal or sparse an expression matrix",
-           items = c(INPUT_TYPE_10X, INPUT_TYPE_COUNT_MATRIX_TXT, INPUT_TYPE_SPARSE_MATRIX), debugvalue = INPUT_TYPE_10X)
+visr.param("input_type", label = "Choose Import Method",
+           info = "Specify the format of your input data. Whether it is a 10X cell ranger dataset or existing monocle object",
+           items = c(INPUT_TYPE_10X, INPUT_TYPE_MONOCLE_OBJECT, INPUT_TYPE_COUNT_MATRIX_TXT, INPUT_TYPE_SPARSE_MATRIX),
+           debugvalue = INPUT_TYPE_10X)
 
 visr.param("data_dir_10x",
            label="10X dataset directory",
@@ -15,6 +18,10 @@ visr.param("data_dir_10x",
            type="filename", filename.mode = "dir",
            active.condition = sprintf("visr.param.input_type == '%s'", INPUT_TYPE_10X),
            debugvalue= "~/SFU/Datasets/SingleCell/pbmc3k/") # Peripheral Blood Mononuclear Cells (PBMCs) from a healthy donor
+
+visr.param("path_to_monocle_object", type="filename",filename.mode = "load",
+           info = "Path to the existing monocle object (monocle_app_object.RData)",
+           active.condition = sprintf("visr.param.input_type == '%s'", INPUT_TYPE_MONOCLE_OBJECT))
 
 visr.param("expression_matrix", type = "filename",
            info = "Numeric matrix of expression values, where rows are genes, and columns are cells",
@@ -39,7 +46,7 @@ visr.param("data_type",
 
 ################################################################
 visr.category("Output",
-              active.condition = "(visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != '')")
+              active.condition = "(visr.param.data_dir_10x != '') || (visr.param.path_to_monocle_object != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != '')")
 ################################################################
 
 visr.param("output_dir",
@@ -52,6 +59,12 @@ visr.param("create_subdir", default = TRUE,
            label = "Create new sub-direcory",
            info = "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)")
 
+
+################################################################
+################################################################
+################################################################
+
+#' prepares the output directory and output report
 prepare_output <- function() {
   # validate or create output subdirectory as needed
   output_dir <- validateOutputDirectory(visr.param.output_dir, visr.param.create_subdir)
@@ -63,6 +76,15 @@ prepare_output <- function() {
   output_plot_file <- startReport(output_dir)
 
   return(output_dir)
+}
+
+#' loads an RDS object
+load_object <- function(path){
+  object <- tryCatch(readRDS(path),
+                      error = function(e) {
+                        visr.message(sprintf("Cannot read the input object format '%s'.\nMake sure the object is saved using the 'saveRDS()' function.", path))
+                      })
+  return(object)
 }
 
 #'
@@ -113,7 +135,14 @@ load_input <- function() {
                               expressionFamily = familyFunction)
     # my_cds
     # slotNames(my_cds)
-  } else if (visr.param.input_type == INPUT_TYPE_COUNT_MATRIX_TXT) {
+  }
+  else if (visr.param.input_type == INPUT_TYPE_MONOCLE_OBJECT) {
+    if (!file.exists(visr.param.path_to_monocle_object))
+      visr.message(sprintf("'%s' is not a valid path to a monocle object", visr.param.path_to_monocle_object))
+    my_cds <- load_object(visr.param.path_to_monocle_object)
+    return(monocle_app_object)
+  }
+  else if (visr.param.input_type == INPUT_TYPE_COUNT_MATRIX_TXT) {
     visr.assert_file_exists(visr.param.expression_matrix, 'expression matrix')
     visr.assert_file_exists(visr.param.sample_sheet, 'sample sheet')
     visr.assert_file_exists(visr.param.gene_annotation, 'gene annotation')
@@ -129,7 +158,6 @@ load_input <- function() {
     visr.assert_that(all(rownames(expr_matrix) == colnames(sample_sheet)), msg = "row names of the sample sheet (pheno data) does not match the column names of the expression matrix.")
     visr.assert_that(all(rownames(expr_matrix) == rownames(gene_annotation)), msg = "row names of the gene annotation (feature data) should match row names of the expression matrix.")
     visr.assert_that("gene_short_name" %in% rownames(gene_annotation), msg = "one of the columns of the gene annotation (feature data) should be named 'gene_short_name'")
-
 
     pd <- new("AnnotatedDataFrame", data = sample_sheet)
     fd <- new("AnnotatedDataFrame", data = gene_annotation)
@@ -170,5 +198,5 @@ finalize_output <- function(output_dir, monocle_app_object) {
   visr.writeDataTable(monocle_app_object$disp_table, paste0(output_dir, "/genes_dispersion.txt"))
 
   monocle_app_object$params <- visr.getParams()
-  save(monocle_app_object, file = paste0(output_dir, "/monocle_app_object.RData"))
+  saveRDS(monocle_app_object, file = paste0(output_dir, "/monocle_app_object.RDS"))
 }

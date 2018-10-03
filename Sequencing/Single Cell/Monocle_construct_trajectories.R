@@ -11,6 +11,9 @@ visr.param("trajectory_max_qval", "Max FDR threshold for selected DE genes", def
            items = "NULL", item.labels = "None",
            info = "Select differentially expressed genes that are significant at an FDR < specified threshold.")
 
+################################################################
+################################################################
+################################################################
 
 #'
 #' Construct single cell trajectories

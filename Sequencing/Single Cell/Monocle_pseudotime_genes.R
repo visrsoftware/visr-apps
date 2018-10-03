@@ -1,7 +1,7 @@
 ################################################################
 visr.category("Find pseudotime changing genes",
               info = "Find genes that change as a function of pseudotime.",
-              active.condition = "visr.param.output_dir != '' && visr.param.enable_trajectories && visr.param.find_pseudotime_genes")
+              active.condition = "visr.param.output_dir != '' && visr.param.find_pseudotime_genes")
 ################################################################
 
 visr.param("cluster_genes_by_pseudo", label = "Cluster genes by pseudotime", default = T,
@@ -16,6 +16,9 @@ visr.param("num_pseudo_gene_clusters", label = "Number of heatmap clusters", def
            info = "Number of clusters for the heatmap of branch genes",
            active.condition = "visr.param.cluster_genes_by_pseudo")
 
+################################################################
+################################################################
+################################################################
 
 #'
 #' Finding genes that change as a function of pseudotime
@@ -58,6 +61,8 @@ perform_pseudotime_genes <- function(monocle_app_object) {
       show_rownames = TRUE,
       return_heatmap = TRUE
     )
+    mtext(text = "Modules of genes that co-vary across pseudotime",
+          adj=0, side=1, line = 4, cex = 1)
 
     # todo: add the cluster ids to genes.txt
     visr.logProgress("Extracting the genes for each cluster ...")

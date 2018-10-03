@@ -27,6 +27,9 @@ visr.param("marker_genes_list", label = "Marker genes (comma separated)", info="
 visr.param("num_plot_genes_jitter", label = "Draw level of expression for how many top genes?", default = 9L,
            info = "Plots the level of expression for each group of cells per gene,\nfor the specified number of most statistically significant genes.") # min = 0
 
+################################################################
+################################################################
+################################################################
 
 #'
 #' detects de genes given model formula

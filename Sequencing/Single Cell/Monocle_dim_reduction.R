@@ -12,7 +12,13 @@ visr.param("reduction_method", label = "Algorithm for dimensionality reduction",
            default = 'tSNE',
            info = "Algorithm to use for dimensionality reduction")
 
+################################################################
+################################################################
+################################################################
 
+#'
+#' Performs PCA and dimensionality reduction
+#'
 perform_dim_reduction <- function(monocle_app_object) {
   my_cds <- monocle_app_object$cds
   stopifnot(is(my_cds, "CellDataSet"))

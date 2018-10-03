@@ -47,6 +47,9 @@ visr.param("louvain_weight", default = F,
            info = "Use Jaccard coefficent for two nearest neighbors (based on the overlapping of their kNN) as the weight used for Louvain clustering.",
            active.condition = sprintf("visr.param.cluster_method == '%s'", CLUSTER_METHOD_LOUVAIN))
 
+################################################################
+################################################################
+################################################################
 
 #'
 #' performs cell clustering after dimensionality reduction

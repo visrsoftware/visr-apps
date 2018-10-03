@@ -156,7 +156,7 @@ perform_subsetting_genes <- function(monocle_app_object) {
     scale_x_log10(labels=axis_plain_format) +
     labs(x = "average expression per gene (log scale)", y = "number of genes") +
     geom_vline(xintercept = visr.param.min_mean_expression, linetype = "dotted", color = 'red') +
-    ggtitle(sprintf('Number of genes by average expression. %d out of %d have >= %4.1f average expression',
+    ggtitle(sprintf('Number of genes by average expression.\n%d out of %d have >= %4.1f average expression',
                     length(which(is_genes_gt_mean_expression)), length(is_genes_gt_mean_expression), visr.param.min_mean_expression))
   print(p)
 
@@ -188,9 +188,9 @@ perform_subsetting_genes <- function(monocle_app_object) {
     scale_y_log10(labels = axis_plain_format) +
     labs(x = "average gene expression (log scale)", y = "dispersion (log scale)") +
     ggtitle(sprintf(
-      "Variability in a gene's expression depends on the average expression across cells.
-      The %d genes in black are marked for use in clustering %s %4.2f.
-      Red line shows expectation of the dispersion.",
+"Variability in a gene's expression depends on the average expression across cells.
+The %d genes in black are marked for use in clustering %s %4.2f.
+Red line shows expectation of the dispersion.",
       length(which(fData(my_cds)$use_for_ordering)), visr.param.gene_subset_method, min_threshold_used)) +
     theme(plot.title = element_text(size = 8))
   print(p)
