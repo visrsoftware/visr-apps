@@ -84,7 +84,7 @@ if (visr.param.enable_clustering) {
 
 # Differential Expression Analysis
 if (visr.param.enable_de_analysis) {
-  monocle_app_object <- perform_de_analysis(monocle_app_object)
+  monocle_app_object <- perform_de_analysis(monocle_app_object, output_dir)
 }
 
 # Construct Single Cell Trajectories

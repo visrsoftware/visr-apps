@@ -68,7 +68,7 @@ detect_de_genes <- function(cds, fullModelFormulaStr, output_de_genes_filename =
 #'
 #' performs differential expression analysis
 #'
-perform_de_analysis <- function(monocle_app_object) {
+perform_de_analysis <- function(monocle_app_object, output_dir) {
   my_cds <- monocle_app_object$cds
   stopifnot(is(my_cds, "CellDataSet"))
 
@@ -84,7 +84,7 @@ perform_de_analysis <- function(monocle_app_object) {
 
   if (visr.param.de_formula == DE_FORMULA_ALL_CLUSTERS) {
     visr.logProgress("Performing differential expression analysis across all clusters ...")
-    de_genes_filename <- paste0(visr.param.output_dir, "/de_genes_all_clusters.txt")
+    de_genes_filename <- paste0(output_dir, "/de_genes_all_clusters.txt")
     de_genes <- detect_de_genes(cds_de_subset, '~Cluster', de_genes_filename)
   }
   else if (visr.param.de_formula == DE_FORMULA_ONE_CLUSTER) {
@@ -108,13 +108,13 @@ perform_de_analysis <- function(monocle_app_object) {
                              "Performing the differential expression analysis on cluster", de_cluster_id,
                              "\nfor the", nrow(unsup_clustering_genes)))
 
-      de_genes_filename <- paste0(visr.param.output_dir, "/de_genes_cluster", de_cluster_id, ".txt")
+      de_genes_filename <- paste0(output_dir, "/de_genes_cluster", de_cluster_id, ".txt")
 
       de_genes <- detect_de_genes(cds_de_subset, '~test', de_genes_filename)
     }
   }
   else if (visr.param.de_formula == DE_FORMULA_PHENOTYPE) {
-    de_genes_filename <- paste0(visr.param.output_dir, "/de_genes_", visr.param.de_phenotype_name, ".txt")
+    de_genes_filename <- paste0(output_dir, "/de_genes_", visr.param.de_phenotype_name, ".txt")
     de_genes <- detect_de_genes(cds_de_subset, paste0('~', visr.param.de_phenotype_name), de_genes_filename)
   }
 

@@ -68,7 +68,7 @@ visr.param("create_subdir", default = TRUE,
 #' prepares the output directory and output report
 prepare_output <- function() {
   # validate or create output subdirectory as needed
-  output_dir <- validateOutputDirectory(visr.param.output_dir, visr.param.create_subdir)
+  output_dir <<- validateOutputDirectory(visr.param.output_dir, visr.param.create_subdir)
 
   # output current parameters into a file
   writeParameters(output_dir)
