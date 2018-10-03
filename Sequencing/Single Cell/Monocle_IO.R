@@ -52,36 +52,123 @@ visr.param("create_subdir", default = TRUE,
            label = "Create new sub-direcory",
            info = "Create a new sub directory with the name DATE_TIME (YYYYMMDD_hhmmss)")
 
-################################################################
-visr.category("Analysis steps",
-              info = "Different analysis steps",
-              active.condition = "visr.param.output_dir != '' && ((visr.param.data_dir_10x != '') || (visr.param.expression_matrix != '' && visr.param.sample_sheet != '' && visr.param.gene_annotation != ''))")
-################################################################
+prepare_output <- function() {
+  # validate or create output subdirectory as needed
+  output_dir <- validateOutputDirectory(visr.param.output_dir, visr.param.create_subdir)
 
-visr.param("enable_filtering", label = "Filtering cells and subsetting genes", default = T,
-           info = "Remove outlier cells and genes before further processing.")
+  # output current parameters into a file
+  writeParameters(output_dir)
 
-visr.param("enable_dim_red", label = "Dimensionality reduction", default = T,
-           info = "Reduce dimensionality of data from many genes to fewer number of components.")
+  # prepare the pdf to save the plots to
+  output_plot_file <- startReport(output_dir)
 
-visr.param("enable_clustering", label = "Clustering", default = T,
-           active.condition = "visr.param.enable_filtering && visr.param.enable_dim_red",
-           info = "Identify subtypes of cells using unsupervised clustering.")
+  return(output_dir)
+}
 
-visr.param("enable_de_analysis", label = "Differential expression analysis", default = T,
-           active.condition = "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering",
-           info = "Characterize differentially expressed genes by comparing groups of cells.")
+#'
+#' Load input data
+#'
+load_input <- function() {
+  enable_estimations <- TRUE # estimate dispersions
+  if (visr.param.input_type == INPUT_TYPE_10X) { # if data is 10x data
+    visr.assert_file_exists(visr.param.data_dir_10x, '10X data directory')
+    visr.assert_that(file.exists(paste0(visr.param.data_dir_10x, '/outs')), msg = paste("Cannot find 'outs' sub-directory inside the specified 10x directory:\n", visr.param.data_dir_10x))
+    visr.librarySource("cellrangerRkit", "http://cf.10xgenomics.com/supp/cell-exp/rkit-install-2.0.0.R")
 
-visr.param("enable_trajectories", label = "Single-cell trajectories", default = T,
-           active.condition = "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis",
-           info = "Discover cells transition from one state to another.")
+    visr.logProgress("Loading data from the 10x pipeline")
+    gbm <- load_cellranger_matrix(visr.param.data_dir_10x)
+    # class(gbm)
+    # dim(Biobase::exprs(gbm))
+    Biobase::exprs(gbm)[1:10, 1:4] # the first 10 genes in the first 4 cells
 
-visr.param("find_pseudotime_genes", label = "Find pseudotime changing genes", default = T,
-           info = "Find genes that change as a function of pseudotime",
-           active.condition = "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis && visr.param.enable_trajectories")
+    # dim(pData(gbm)) # the phenotypic data
+    # head(pData(gbm))
 
-visr.param("analyze_trajectory_branches", label = "Analyze branches in trajectories", default = T,
-           info = "Analyze branches in single-cell trajectories to identify the genes that differ at a particular branch point",
-           active.condition = "visr.param.enable_filtering && visr.param.enable_dim_red && visr.param.enable_clustering && visr.param.enable_de_analysis && visr.param.enable_trajectories")
+    # dim(fData(gbm)) # the feature information
+    # head(fData(gbm)) # this table will be useful for matching gene IDs to symbols
+
+    # create a CellDataSet object
+    # note: Monocle expects that the gene symbol column in the feature data is called gene_short_name
+    my_feat <- fData(gbm)
+    names(my_feat) <- c('id', 'gene_short_name') # rename gene symbol column
+    familyFunction <- negbinomial.size() # appropriate expression family for UMI data
+    if (visr.param.data_type == DATA_TYPE_FPKM) {
+      #TODO: http://cole-trapnell-lab.github.io/monocle-release/docs/#converting-tpm-fpkm-values-into-mrna-counts-alternative
+      visr.message("DATA_TYPE_FPKM not implemented")
+      familyFunction <- tobit() #TODO: parameter for tobit()
+      enable_estimations <- FALSE
+    } else if (visr.param.data_type == DATA_TYPE_LOG_FPKM) {
+      # TODO
+      visr.message("DATA_TYPE_LOG_FPKM not implemented")
+      familyFunction <- gaussianff()
+      enable_estimations <- FALSE
+    }
+
+    #TODO:If your data contains relative counts (e.g. FPKM or TPM values), use relative2abs() to convert these measurements into absolute counts: http://cole-trapnell-lab.github.io/monocle-release/docs/#converting-tpm-fpkm-values-into-mrna-counts-alternative
+    visr.logProgress("Creating CellDateSet object")
+    my_cds <- newCellDataSet(Biobase::exprs(gbm),
+                              phenoData = new("AnnotatedDataFrame", data = pData(gbm)),
+                              featureData = new("AnnotatedDataFrame", data = my_feat),
+                              lowerDetectionLimit = 0.5,
+                              expressionFamily = familyFunction)
+    # my_cds
+    # slotNames(my_cds)
+  } else if (visr.param.input_type == INPUT_TYPE_COUNT_MATRIX_TXT) {
+    visr.assert_file_exists(visr.param.expression_matrix, 'expression matrix')
+    visr.assert_file_exists(visr.param.sample_sheet, 'sample sheet')
+    visr.assert_file_exists(visr.param.gene_annotation, 'gene annotation')
+
+    visr.logProgress("Loading data from the expression matrix")
+
+    expr_matrix <- read.table(visr.param.expression_matrix) # e.g. "fpkm_matrix.txt"
+    sample_sheet <- read.delim(visr.param.sample_sheet) # e.g. "cell_sample_sheet.txt"
+    gene_annotation <- read.delim(visr.param.gene_annotation) # e.g. "gene_annotations.txt"
+
+    visr.assert_that(nrow(expr_matrix) == ncol(sample_sheet), msg = "Expression value matrix does not have the same number of columns as the sample sheet (pheno data) has rows.")
+    visr.assert_that(nrow(expr_matrix) == nrow(gene_annotation), msg = "Expression value matrix does not have the same number of rows as the gene_annotation (feature data) data frame has rows.")
+    visr.assert_that(all(rownames(expr_matrix) == colnames(sample_sheet)), msg = "row names of the sample sheet (pheno data) does not match the column names of the expression matrix.")
+    visr.assert_that(all(rownames(expr_matrix) == rownames(gene_annotation)), msg = "row names of the gene annotation (feature data) should match row names of the expression matrix.")
+    visr.assert_that("gene_short_name" %in% rownames(gene_annotation), msg = "one of the columns of the gene annotation (feature data) should be named 'gene_short_name'")
 
 
+    pd <- new("AnnotatedDataFrame", data = sample_sheet)
+    fd <- new("AnnotatedDataFrame", data = gene_annotation)
+    my_cds <- newCellDataSet(as.matrix(expr_matrix), phenoData = pd, featureData = fd)
+
+  } else if (visr.param.input_type == INPUT_TYPE_SPARSE_MATRIX) {
+    visr.message("input_type INPUT_TYPE_SPARSE_MATRIX Not Implemented Yet")
+  }
+
+  ############################################################
+  #  perform normalization and variance estimation steps
+  ############################################################
+
+  if (enable_estimations) {
+    # perform normalization and variance estimation steps, which will be used in the differential expression analyses later on.
+    # estimateSizeFactors() and estimateDispersions() will only work, and are only needed, if you are working with a CellDataSet
+    # with a negbinomial() or negbinomial.size() expression family.
+    visr.logProgress("Performing normalization and variance estimation (takes a few minutes)")
+    my_cds <- estimateSizeFactors(my_cds)
+    my_cds <- estimateDispersions(my_cds)
+  }
+
+  monocle_app_object <- list(cds = my_cds)
+  return(monocle_app_object)
+}
+
+
+finalize_output <- function(output_dir, monocle_app_object) {
+  finishReport()
+
+  browseURL(getOutputPlotFile(output_dir))
+
+  cds_dims <- data.frame(t(monocle::reducedDimA(monocle_app_object$cds)))
+  colnames(cds_dims) <- c("Component1", "Component2")
+  cell_table <- cbind(pData(monocle_app_object$cds), cds_dims)
+  visr.writeDataTable(cell_table, paste0(output_dir, "/cells.txt"))
+
+  visr.writeDataTable(monocle_app_object$disp_table, paste0(output_dir, "/genes_dispersion.txt"))
+
+  monocle_app_object$params <- visr.getParams()
+  save(monocle_app_object, file = paste0(output_dir, "/monocle_app_object.RData"))
+}

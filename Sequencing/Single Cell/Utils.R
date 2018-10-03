@@ -18,6 +18,12 @@ writeParameters <- function(output_dir) {
   write(capture.output(print(visr.getParams())), file = paste0(output_dir, "/visr_params.txt"))
 }
 
+
+#' return name of the plot file
+getOutputPlotFile <- function(output_dir) {
+  return(paste0(output_dir, "/plots.pdf"))
+}
+
 # prepare the pdf to save the plots to
 startReport <- function(output_dir) {
   assign("visr.dev", dev.cur(), envir = .GlobalEnv)
@@ -26,7 +32,7 @@ startReport <- function(output_dir) {
   if (!is.null(pdf_dev)) {
     dev.off(which = pdf_dev) # close the previous one
   }
-  output_plot_file <- paste0(output_dir, "/plots.pdf")
+  output_plot_file <- getOutputPlotFile(output_dir)
   pdf(file=output_plot_file)
   assign("visr_app_pdf_dev", dev.cur(), envir = .GlobalEnv)
   return(output_plot_file)
@@ -66,7 +72,7 @@ plotTableSummary <- function(dataTable, title) {
 #' @param title   title of the page
 #' @param size    font size
 plotTitlePage <- function(title, text_size = 3, text_color = "black") {
-  plot.new()
+  # plot.new()
   # mtext(text = title, padj = 0.5, adj=0.5, side=3, line = -10, cex = size)
   par(mar = c(0,0,0,0))
   plot(c(0, 1), c(0, 1), ann = F, bty = 'n', type = 'n', xaxt = 'n', yaxt = 'n')

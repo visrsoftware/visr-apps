@@ -46,3 +46,71 @@ visr.param("louvain_iter", default = 1L,
 visr.param("louvain_weight", default = F,
            info = "Use Jaccard coefficent for two nearest neighbors (based on the overlapping of their kNN) as the weight used for Louvain clustering.",
            active.condition = sprintf("visr.param.cluster_method == '%s'", CLUSTER_METHOD_LOUVAIN))
+
+
+#'
+#' performs cell clustering after dimensionality reduction
+#'
+perform_clustering <- function(monocle_app_object) {
+  my_cds <- monocle_app_object$cds
+  stopifnot(is(my_cds, "CellDataSet"))
+
+  if (visr.var.add_title_pages)
+    plotTitlePage("Clustering")
+
+  num_clusters = NULL
+  if (visr.param.cluster_method == CLUSTER_METHOD_DENSITY_PEAK) {
+    # for some reason it alwasy produces one less cluster than specified value. so add 1 for now
+    num_clusters = if (!is.null(visr.param.num_clusters)) (visr.param.num_clusters + 1) else NULL
+  } else if (visr.param.cluster_method == CLUSTER_METHOD_DDRTREE) {
+    num_clusters = visr.param.num_centers
+  }
+
+  visr.logProgress(paste("Performing unsupervised clustering. method:", visr.param.cluster_method))
+  my_cds <- monocle::clusterCells(my_cds,
+                                  verbose = T,
+                                  skip_rho_sigma = F, #visr.param.skip_rho_sigma, # whether you want to skip the calculation of rho / sigma
+                                  num_clusters = num_clusters,
+                                  inspect_rho_sigma = F, # whether you want to interactively select the rho and sigma
+                                  rho_threshold = visr.param.rho_threshold,
+                                  delta_threshold = visr.param.delta_threshold,
+                                  gaussian = visr.param.gaussian, # whether use Gaussian kernel for calculating the local density
+                                  peaks = NULL, # numeric vector indicating the index of density peaks used for clustering.
+                                  cell_type_hierarchy = NULL,
+                                  frequency_thresh = NULL,
+                                  enrichment_thresh = NULL,
+                                  clustering_genes = NULL,
+                                  k = visr.param.louvain_k,
+                                  louvain_iter = visr.param.louvain_iter,
+                                  weight = visr.param.louvain_weight,
+                                  method = visr.param.cluster_method)
+
+  head(pData(my_cds))
+  print("Cluster sizes:")
+  print(table(pData(my_cds)$Cluster))
+  if (!is.null(visr.param.rho_threshold) & !is.null(visr.param.delta_threshold)) {
+    title_peak <- sprintf("Detected %d peaks using rho=%4.2f and delta = %4.2f ",
+                          length(which(pData(my_cds)$peaks)),
+                          visr.param.rho_threshold, visr.param.delta_threshold)
+  } else {
+    title_peak <- sprintf("Detected %d peaks using top 95%% delta and top 95%% rho for threshold.",
+                          length(which(pData(my_cds)$peaks)))
+  }
+
+  if (visr.param.cluster_method == CLUSTER_METHOD_DENSITY_PEAK) {
+    visr.logProgress("Plotting the decision map of density clusters (delta vs. rho)")
+    p <- monocle::plot_rho_delta(my_cds, rho_threshold = visr.param.rho_threshold, delta_threshold = visr.param.delta_threshold) +
+      ggtitle(paste0("Decision map of density clusters\nPeaks are cells with high local density that are far away from other cells with high local density\n", title_peak)) +
+      theme(plot.title = element_text(size = 12)) + # hjust = 0.5
+      labs(x = "rho: local density", y = "delta: local distance (to another cell with higher density)")
+    print(p)
+  }
+
+  p <- monocle::plot_cell_clusters(my_cds) +
+    xlab("tSNE1") + ylab("tSNE2") +
+    ggtitle(sprintf("Unsupervised clustering of cells\nusing %s method", visr.param.cluster_method))
+  print(p)
+
+  monocle_app_object$cds <- my_cds
+  return(monocle_app_object)
+}
