@@ -21,12 +21,13 @@ visr.param("min_mean_expression", default = 0.1, min = 0,
            label = "Subset genes: minimum average expression", info = "Select genes which have an average expression of specified value",
            active.condition = sprintf("visr.param.gene_subset_method == '%s'", GENE_SUBSET_METHOD_MEAN))
 
+visr.param("min_expr", label = "Minimum gene expression threshold", default = 1L,
+           info = "The minimum expression threshold to be used to tally the number of cells expressing a gene and the number of genes expressed among all cells. A gene is 'expressed' if there is at least the specified count",
+           active.condition = sprintf("visr.param.gene_subset_method == '%s'", GENE_SUBSET_METHOD_PERCENT))
+
 visr.param("min_expressed_cells", default = 0.05, min = 0, max = 1,
            label = "Subset genes: minimum % expressed cells", info = "Select genes which have a minimum percentage of expressed cells",
            active.condition = sprintf("visr.param.gene_subset_method == '%s'", GENE_SUBSET_METHOD_PERCENT))
-
-visr.param("min_expr", label = "Minimum gene expression", default = 1L,
-           info = "The minimum expression threshold to be used to tally the number of cells expressing a gene and the number of genes expressed among all cells. A gene is 'expressed' if there is at least the specified count")
 
 
 #'
@@ -48,7 +49,7 @@ perform_filter_by_distribution <- function(monocle_app_object) {
                        visr.param.filter_sd_cutoff * sd(log10(pData(my_cds)$TotalCount)))
 
   is_filtered <- pData(my_cds)$TotalCount > lower_bound &
-    pData(my_cds)$TotalCount < upper_bound
+                 pData(my_cds)$TotalCount < upper_bound
   plot_title_for_filter <- sprintf('Filtering %d cells based on distribution of total expression per cell.\nOutput: %d cells in (mean -/+ %4.1f*sd) range',
                                    length(is_filtered), length(which(is_filtered)), visr.param.filter_sd_cutoff)
 
@@ -173,6 +174,7 @@ perform_subsetting_genes <- function(monocle_app_object) {
   }
   else if (visr.param.gene_subset_method == GENE_SUBSET_METHOD_PERCENT) {
     # subset genes based on minimum number of expressed cells
+    # num_cells_expressed is previously calculated in detectGenes based on min_expr value
     fData(my_cds)$use_for_ordering <- fData(my_cds)$num_cells_expressed > visr.param.min_expressed_cells * ncol(my_cds)
     min_threshold_used <- visr.param.min_expressed_cells
     subset_gene_ids <- fData(my_cds)$id[fData(my_cds)$use_for_ordering]
